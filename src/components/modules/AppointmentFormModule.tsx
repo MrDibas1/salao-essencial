@@ -9,7 +9,7 @@ import type {
 } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
 import {
-  Sparkles,
+  FlaskConical,
   Plus,
   Trash2,
   ArrowLeft,
@@ -702,7 +702,7 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5E5E5] pb-4">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-[#111111] text-white flex items-center justify-center">
-                <Sparkles className="w-4 h-4" />
+                <FlaskConical className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-[#111111]">

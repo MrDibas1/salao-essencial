@@ -5,7 +5,7 @@ import {
   Users,
   CalendarCheck,
   Calendar,
-  Sparkles,
+  FlaskConical,
   ArrowRight,
   UserPlus,
   CalendarPlus,
@@ -187,7 +187,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
               Colorações & Fórmulas
             </span>
             <div className="w-9 h-9 rounded-lg bg-[#F3F3F3] flex items-center justify-center text-[#111111]">
-              <Sparkles className="w-4 h-4" />
+              <FlaskConical className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
@@ -403,7 +403,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
                       <td className="py-3.5 px-3 text-[#292929] max-w-xs truncate">
                         {apt.hasColorInfo ? (
                           <span className="inline-flex items-center gap-1 font-mono font-medium text-[#111111]">
-                            <Sparkles className="w-3 h-3 text-[#777777]" />
+                            <FlaskConical className="w-3 h-3 text-[#777777]" />
                             {productsSummary}
                           </span>
                         ) : (

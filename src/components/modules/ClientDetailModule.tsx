@@ -7,7 +7,7 @@ import {
   Phone,
   MessageSquare,
   Calendar,
-  Sparkles,
+  FlaskConical,
   Edit2,
   Clock,
   Layers,
@@ -363,7 +363,7 @@ export const ClientDetailModule: React.FC<ClientDetailModuleProps> = ({
                       <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] space-y-3">
                         <div className="flex items-center justify-between text-xs">
                           <span className="font-bold text-[#111111] uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
-                            <Sparkles className="w-3.5 h-3.5" />
+                            <FlaskConical className="w-3.5 h-3.5" />
                             Fórmula Utilizada
                           </span>
                           {apt.colorFormula.pauseTime && (

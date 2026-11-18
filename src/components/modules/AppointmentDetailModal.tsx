@@ -4,7 +4,7 @@ import type { Appointment } from '../../types';
 import {
   Calendar,
   User,
-  Sparkles,
+  FlaskConical,
   Clock,
   Layers,
   FileText,
@@ -110,7 +110,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
           <div className="p-5 rounded-xl border border-[#111111] bg-white space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#E5E5E5]">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#111111]" />
+                <FlaskConical className="w-4 h-4 text-[#111111]" />
                 <h4 className="text-sm font-bold text-[#111111] uppercase tracking-wide">
                   Fórmula de Coloração & Mistura Química
                 </h4>
