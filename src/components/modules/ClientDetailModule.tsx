@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import type { Client, Appointment } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
 import { ClientAvatar } from '../common/ClientAvatar';
+import { ProcedureBadge } from '../common/ProcedureBadge';
+import { getHairToneColor } from '../../utils/hairColor';
 import {
   ArrowLeft,
   CalendarPlus,
@@ -352,11 +354,11 @@ export const ClientDetailModule: React.FC<ClientDetailModuleProps> = ({
                             Mais recente
                           </span>
                         )}
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F3F3F3] text-[#111111] border border-[#E5E5E5]">
-                          {apt.procedureType === 'Outro' && apt.customProcedureName
-                            ? apt.customProcedureName
-                            : apt.procedureType}
-                        </span>
+                        <ProcedureBadge
+                          procedure={apt.procedureType}
+                          customName={apt.customProcedureName}
+                          size="md"
+                        />
                       </div>
 
                       <div className="flex items-center gap-3 text-xs text-[#777777]">
@@ -390,27 +392,37 @@ export const ClientDetailModule: React.FC<ClientDetailModuleProps> = ({
 
                         {/* Tintas */}
                         <div className="flex flex-wrap gap-2">
-                          {apt.colorFormula.products.map((prod, pIdx) => (
-                            <div
-                              key={pIdx}
-                              className="px-3 py-1.5 rounded-lg bg-white border border-[#E5E5E5] text-xs flex items-center gap-2 shadow-2xs"
-                            >
-                              <span className="font-mono font-bold text-[#111111]">
-                                {prod.shadeNumber}
-                              </span>
-                              {prod.shadeName && (
-                                <span className="text-[#777777]">{prod.shadeName}</span>
-                              )}
-                              <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-[#F3F3F3] text-[#292929]">
-                                {prod.quantity}
-                              </span>
-                              {prod.region && (
-                                <span className="text-[10px] text-[#777777] border-l border-[#E5E5E5] pl-1.5">
-                                  {prod.region}
+                          {apt.colorFormula.products.map((prod, pIdx) => {
+                            const tone = getHairToneColor(prod.shadeNumber);
+                            return (
+                              <div
+                                key={pIdx}
+                                className="px-3 py-1.5 rounded-lg bg-white border border-[#E5E5E5] text-xs flex items-center gap-2 shadow-2xs"
+                              >
+                                {tone && (
+                                  <span
+                                    className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                                    style={{ backgroundColor: tone.bg, border: `1px solid ${tone.border}` }}
+                                    title={`${tone.name} (${prod.shadeNumber})`}
+                                  />
+                                )}
+                                <span className="font-mono font-bold text-[#111111]">
+                                  {prod.shadeNumber}
                                 </span>
-                              )}
-                            </div>
-                          ))}
+                                {prod.shadeName && (
+                                  <span className="text-[#777777]">{prod.shadeName}</span>
+                                )}
+                                <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-[#F3F3F3] text-[#292929]">
+                                  {prod.quantity}
+                                </span>
+                                {prod.region && (
+                                  <span className="text-[10px] text-[#777777] border-l border-[#E5E5E5] pl-1.5">
+                                    {prod.region}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
 
                         {/* Oxidante */}

@@ -2,6 +2,7 @@ import React from 'react';
 import type { Client, Appointment } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
 import { ClientAvatar } from '../common/ClientAvatar';
+import { ProcedureBadge } from '../common/ProcedureBadge';
 import {
   Users,
   CalendarCheck,
@@ -394,11 +395,11 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
                         </button>
                       </td>
                       <td className="py-3.5 px-3 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#F3F3F3] text-[#111111] border border-[#E5E5E5]">
-                          {apt.procedureType === 'Outro' && apt.customProcedureName
-                            ? apt.customProcedureName
-                            : apt.procedureType}
-                        </span>
+                        <ProcedureBadge
+                          procedure={apt.procedureType}
+                          customName={apt.customProcedureName}
+                          size="sm"
+                        />
                       </td>
                       <td className="py-3.5 px-3 text-[#777777] whitespace-nowrap">
                         {apt.professional}

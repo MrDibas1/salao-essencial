@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import type { Client, Appointment } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
 import { ClientAvatar } from '../common/ClientAvatar';
+import { ProcedureBadge } from '../common/ProcedureBadge';
 import {
   UserPlus,
   Search,
@@ -275,11 +276,12 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
                       <td className="py-4 px-4 whitespace-nowrap">
                         {lastApt ? (
                           <div>
-                            <span className="font-semibold text-[#111111] block">
-                              {lastApt.procedureType === 'Outro' && lastApt.customProcedureName
-                                ? lastApt.customProcedureName
-                                : lastApt.procedureType}
-                            </span>
+                            <ProcedureBadge
+                              procedure={lastApt.procedureType}
+                              customName={lastApt.customProcedureName}
+                              size="sm"
+                              className="mb-1"
+                            />
                             <span className="text-[11px] text-[#777777] flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               {lastAptFormatted}

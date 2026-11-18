@@ -2,6 +2,8 @@ import React from 'react';
 import { Modal } from '../ui/Modal';
 import type { Appointment, Client } from '../../types';
 import { ClientAvatar } from '../common/ClientAvatar';
+import { ProcedureBadge } from '../common/ProcedureBadge';
+import { getHairToneColor } from '../../utils/hairColor';
 import {
   Calendar,
   User,
@@ -89,11 +91,11 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#111111] text-white">
-              {appointment.procedureType === 'Outro' && appointment.customProcedureName
-                ? appointment.customProcedureName
-                : appointment.procedureType}
-            </span>
+            <ProcedureBadge
+              procedure={appointment.procedureType}
+              customName={appointment.customProcedureName}
+              size="lg"
+            />
           </div>
         </div>
 
@@ -134,40 +136,50 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                 Tintas & Tonalidades Utilizadas ({appointment.colorFormula.products.length})
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {appointment.colorFormula.products.map((prod, idx) => (
-                  <div
-                    key={prod.id || idx}
-                    className="p-3 rounded-lg bg-[#FAFAFA] border border-[#E5E5E5] flex flex-col justify-between"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-mono font-bold text-sm text-[#111111]">
-                            {prod.shadeNumber}
-                          </span>
-                          {prod.shadeName && (
-                            <span className="text-xs text-[#292929] font-medium">
-                              — {prod.shadeName}
+                {appointment.colorFormula.products.map((prod, idx) => {
+                  const tone = getHairToneColor(prod.shadeNumber);
+                  return (
+                    <div
+                      key={prod.id || idx}
+                      className="p-3 rounded-lg bg-[#FAFAFA] border border-[#E5E5E5] flex flex-col justify-between"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            {tone && (
+                              <span
+                                className="w-3 h-3 rounded-full shrink-0 shadow-xs"
+                                style={{ backgroundColor: tone.bg, border: `1px solid ${tone.border}` }}
+                                title={tone.name}
+                              />
+                            )}
+                            <span className="font-mono font-bold text-sm text-[#111111]">
+                              {prod.shadeNumber}
                             </span>
-                          )}
+                            {prod.shadeName && (
+                              <span className="text-xs text-[#292929] font-medium">
+                                — {prod.shadeName}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-[#777777] mt-0.5">
+                            {prod.brand} {prod.line ? `(${prod.line})` : ''}
+                          </p>
                         </div>
-                        <p className="text-xs text-[#777777] mt-0.5">
-                          {prod.brand} {prod.line ? `(${prod.line})` : ''}
-                        </p>
+                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-white border border-[#E5E5E5] text-[#111111]">
+                          {prod.quantity}
+                        </span>
                       </div>
-                      <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-white border border-[#E5E5E5] text-[#111111]">
-                        {prod.quantity}
-                      </span>
-                    </div>
 
-                    {prod.region && (
-                      <div className="mt-2 pt-2 border-t border-[#E5E5E5] flex items-center justify-between text-[11px] text-[#777777]">
-                        <span>Região de aplicação:</span>
-                        <strong className="text-[#111111]">{prod.region}</strong>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                      {prod.region && (
+                        <div className="mt-2 pt-2 border-t border-[#E5E5E5] flex items-center justify-between text-[11px] text-[#777777]">
+                          <span>Região de aplicação:</span>
+                          <strong className="text-[#111111]">{prod.region}</strong>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

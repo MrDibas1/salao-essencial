@@ -1,6 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import type { Appointment } from '../../types';
+import type { Appointment, Client } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
+import { ProcedureBadge } from '../common/ProcedureBadge';
+import { ClientAvatar } from '../common/ClientAvatar';
+import { getHairToneColor } from '../../utils/hairColor';
 import {
   Search,
   Filter,
@@ -15,7 +18,7 @@ import {
 
 interface HistoryModuleProps {
   appointments: Appointment[];
-  clients?: any[];
+  clients?: Client[];
   onNavigate: (tab: NavigationTab, params?: { clientId?: string; appointmentId?: string }) => void;
   onViewAppointmentDetails: (appointment: Appointment) => void;
   onEditAppointment: (appointment: Appointment) => void;
@@ -46,6 +49,15 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
     });
     return Array.from(set).sort();
   }, [appointments]);
+
+  // Mapa de clientes para fotos
+  const clientMap = useMemo(() => {
+    const map = new Map<string, Client>();
+    if (clients) {
+      clients.forEach((c) => map.set(c.id, c));
+    }
+    return map;
+  }, [clients]);
 
   // Lista única de procedimentos presentes no histórico
   const procedures = useMemo(() => {
@@ -324,20 +336,27 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
                             e.stopPropagation();
                             onNavigate('client-detail', { clientId: apt.clientId });
                           }}
-                          className="font-bold text-[#111111] hover:underline flex items-center gap-1.5"
+                          className="flex items-center gap-2.5 text-left group-hover:underline"
                         >
-                          <span>{apt.clientName}</span>
-                          <ExternalLink className="w-3 h-3 text-[#777777] opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <ClientAvatar
+                            name={apt.clientName}
+                            avatarUrl={clientMap.get(apt.clientId)?.avatarUrl}
+                            size="sm"
+                          />
+                          <div className="flex items-center gap-1.5 font-bold text-[#111111]">
+                            <span>{apt.clientName}</span>
+                            <ExternalLink className="w-3 h-3 text-[#777777] opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
                         </button>
                       </td>
 
-                      {/* Procedimento */}
+                      {/* Procedimento com badge visual sugestivo */}
                       <td className="py-4 px-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#F3F3F3] text-[#111111] border border-[#E5E5E5]">
-                          {apt.procedureType === 'Outro' && apt.customProcedureName
-                            ? apt.customProcedureName
-                            : apt.procedureType}
-                        </span>
+                        <ProcedureBadge
+                          procedure={apt.procedureType}
+                          customName={apt.customProcedureName}
+                          size="md"
+                        />
                       </td>
 
                       {/* Profissional */}
@@ -345,20 +364,35 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
                         {apt.professional}
                       </td>
 
-                      {/* Resumo da fórmula de tintas */}
+                      {/* Resumo da fórmula de tintas com amostras visuais de cor */}
                       <td className="py-4 px-4 max-w-sm">
                         {apt.hasColorInfo && apt.colorFormula ? (
                           <div className="flex flex-wrap items-center gap-1.5">
-                            {apt.colorFormula.products.map((p, i) => (
-                              <span
-                                key={i}
-                                className="px-2 py-0.5 rounded bg-[#FAFAFA] border border-[#E5E5E5] font-mono text-[11px] font-bold text-[#111111]"
-                              >
-                                {p.shadeNumber || p.brand} {p.quantity ? `(${p.quantity})` : ''}
-                              </span>
-                            ))}
+                            {apt.colorFormula.products.map((p, i) => {
+                              const tone = getHairToneColor(p.shadeNumber);
+                              return (
+                                <span
+                                  key={i}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-[#E5E5E5] font-mono text-[11px] font-bold text-[#111111] shadow-2xs"
+                                >
+                                  {tone && (
+                                    <span
+                                      className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                                      style={{ backgroundColor: tone.bg, border: `1px solid ${tone.border}` }}
+                                      title={`${tone.name} (${p.shadeNumber})`}
+                                    />
+                                  )}
+                                  <span>{p.shadeNumber || p.brand}</span>
+                                  {p.quantity && (
+                                    <span className="text-[10px] text-[#777777] font-normal font-sans">
+                                      ({p.quantity})
+                                    </span>
+                                  )}
+                                </span>
+                              );
+                            })}
                             {apt.colorFormula.oxidant?.used && apt.colorFormula.oxidant.volume && (
-                              <span className="text-[10px] text-[#777777] font-medium">
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-sky-800 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded">
                                 + {apt.colorFormula.oxidant.volume}
                               </span>
                             )}

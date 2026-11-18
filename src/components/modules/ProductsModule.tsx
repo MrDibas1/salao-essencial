@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import type { Product, ProductCategory } from '../../types';
 import { Modal } from '../ui/Modal';
+import { getHairToneColor } from '../../utils/hairColor';
 import {
   Package,
   Plus,
@@ -9,6 +10,47 @@ import {
   Trash2,
   Info,
 } from 'lucide-react';
+
+const getCategoryBadgeStyle = (category: ProductCategory) => {
+  switch (category) {
+    case 'Tintas':
+      return {
+        badge: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
+        dot: 'bg-amber-600',
+      };
+    case 'Oxidantes':
+      return {
+        badge: 'bg-sky-100 text-sky-950 border-sky-300 font-bold',
+        dot: 'bg-sky-600',
+      };
+    case 'Descolorantes':
+      return {
+        badge: 'bg-cyan-100 text-cyan-950 border-cyan-300 font-bold',
+        dot: 'bg-cyan-600',
+      };
+    case 'Tonalizantes':
+      return {
+        badge: 'bg-purple-100 text-purple-950 border-purple-300 font-bold',
+        dot: 'bg-purple-600',
+      };
+    case 'Hidratação':
+    case 'Tratamentos':
+      return {
+        badge: 'bg-emerald-100 text-emerald-950 border-emerald-300 font-bold',
+        dot: 'bg-emerald-600',
+      };
+    case 'Reconstrução':
+      return {
+        badge: 'bg-rose-100 text-rose-950 border-rose-300 font-bold',
+        dot: 'bg-rose-600',
+      };
+    default:
+      return {
+        badge: 'bg-neutral-100 text-neutral-800 border-neutral-300 font-bold',
+        dot: 'bg-neutral-500',
+      };
+  }
+};
 
 interface ProductsModuleProps {
   products: Product[];
@@ -187,26 +229,41 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
             </button>
           </div>
         ) : (
-          filteredProducts.map((prod) => (
-            <div
-              key={prod.id}
-              className="p-5 rounded-2xl bg-white border border-[#E5E5E5] shadow-2xs hover:border-[#111111] transition-all flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#F3F3F3] text-[#111111] border border-[#E5E5E5]">
-                    {prod.category}
-                  </span>
-                  {prod.shadeNumber && (
-                    <span className="font-mono text-xs font-bold text-[#111111] bg-white border border-[#111111] px-2 py-0.5 rounded">
-                      {prod.shadeNumber}
-                    </span>
-                  )}
-                </div>
+          filteredProducts.map((prod) => {
+            const catStyle = getCategoryBadgeStyle(prod.category);
+            const tone = getHairToneColor(prod.shadeNumber);
 
-                <h4 className="text-sm font-bold text-[#111111] mt-2.5 leading-snug">
-                  {prod.name}
-                </h4>
+            return (
+              <div
+                key={prod.id}
+                className="p-5 rounded-2xl bg-white border border-[#E5E5E5] shadow-2xs hover:border-[#111111] hover:shadow-xs transition-all flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] border ${catStyle.badge}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${catStyle.dot}`} />
+                      <span>{prod.category}</span>
+                    </span>
+
+                    {prod.shadeNumber && (
+                      <span className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-[#111111] bg-white border border-[#E5E5E5] px-2.5 py-0.5 rounded-md shadow-2xs">
+                        {tone && (
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                            style={{ backgroundColor: tone.bg, border: `1px solid ${tone.border}` }}
+                            title={tone.name}
+                          />
+                        )}
+                        <span>{prod.shadeNumber}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <h4 className="text-sm font-bold text-[#111111] mt-2.5 leading-snug">
+                    {prod.name}
+                  </h4>
 
                 <p className="text-xs text-[#777777] mt-1">
                   <strong>Marca:</strong> {prod.brand} {prod.line ? `• Linha: ${prod.line}` : ''}
@@ -240,7 +297,8 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                 </div>
               </div>
             </div>
-          ))
+          );
+        })
         )}
       </div>
 
