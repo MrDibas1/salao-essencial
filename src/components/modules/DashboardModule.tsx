@@ -83,45 +83,100 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
 
   const maxChartCount = Math.max(...chartData.map((c) => c.count), 5);
 
+  // Clientes com foto para exibição no avatar stack da Hero
+  const clientsWithAvatar = clients.filter((c) => Boolean(c.avatarUrl));
+  const avatarClients =
+    clientsWithAvatar.length >= 3 ? clientsWithAvatar.slice(0, 5) : clients.slice(0, 5);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Welcome Banner & Quick Shortcuts */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-[#111111] text-white flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-md">
-        <div>
-          <span className="text-xs uppercase font-semibold tracking-widest text-[#E5E5E5]/70">
-            Painel de Controle
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-serif font-light tracking-wide mt-1">
-            Salão Essencial
-          </h2>
-          <p className="text-xs sm:text-sm text-[#E5E5E5]/80 mt-1 max-w-lg leading-relaxed">
-            Gestão precisa de fichas técnicas, fórmulas de coloração e acompanhamento personalizado de cada cliente.
-          </p>
-        </div>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#181818] via-[#111111] to-[#0D0D0D] border border-white/10 p-6 sm:p-8 text-white shadow-xl">
+        {/* Glow decorativo sutil com toque âmbar que remete à marca */}
+        <div className="absolute -top-16 -right-16 w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none" />
 
-        {/* Action Shortcuts */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            onClick={() => onNavigate('appointment-form')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#F3F3F3] text-[#111111] text-xs font-semibold transition-all shadow-xs"
-          >
-            <CalendarPlus className="w-4 h-4" />
-            <span>Novo Atendimento</span>
-          </button>
-          <button
-            onClick={onOpenNewClientModal}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#292929] hover:bg-neutral-800 text-white text-xs font-medium border border-white/10 transition-all"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>Cadastrar Cliente</span>
-          </button>
-          <button
-            onClick={() => onNavigate('clients')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#292929] hover:bg-neutral-800 text-white text-xs font-medium border border-white/10 transition-all"
-          >
-            <Search className="w-4 h-4" />
-            <span>Consultar Clientes</span>
-          </button>
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-4 max-w-xl">
+            <div>
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-[10px] font-semibold tracking-wider uppercase text-neutral-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                <span>Painel de Controle • Gestão do Salão</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-serif font-light tracking-wide mt-2 text-white">
+                Salão Essencial
+              </h2>
+              <p className="text-xs sm:text-sm text-neutral-300 mt-1 leading-relaxed">
+                Gestão precisa de fichas técnicas, fórmulas de coloração e acompanhamento personalizado de cada cliente.
+              </p>
+            </div>
+
+            {/* Avatar Stack de Clientes (Círculos sobrepostos) */}
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <div className="flex -space-x-2.5 overflow-hidden p-0.5">
+                {avatarClients.map((c, index) => (
+                  <div
+                    key={c.id || index}
+                    className="inline-block h-9 w-9 sm:h-10 sm:w-10 rounded-full ring-2 ring-[#111111] overflow-hidden bg-neutral-800 shrink-0 shadow-md transition-transform hover:scale-110 hover:z-20 cursor-pointer"
+                    title={c.name}
+                    onClick={() => onNavigate('client-detail', { clientId: c.id })}
+                  >
+                    {c.avatarUrl ? (
+                      <img src={c.avatarUrl} alt={c.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-xs font-bold text-white bg-neutral-700">
+                        {c.name.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {clients.length > avatarClients.length && (
+                  <div
+                    onClick={() => onNavigate('clients')}
+                    className="inline-flex h-9 w-9 sm:h-10 sm:w-10 rounded-full ring-2 ring-[#111111] bg-neutral-800 hover:bg-neutral-700 text-white items-center justify-center text-[11px] font-bold shrink-0 shadow-md cursor-pointer transition-colors"
+                    title="Ver todas as clientes"
+                  >
+                    +{clients.length - avatarClients.length}
+                  </div>
+                )}
+              </div>
+
+              <div className="text-xs">
+                <div className="flex items-center gap-1.5 font-bold text-white">
+                  <span>{clients.length} clientes ativas</span>
+                  <span className="text-amber-400 text-xs">★★★★★</span>
+                </div>
+                <p className="text-[11px] text-neutral-400">
+                  Fórmulas e histórico preservados
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Shortcuts */}
+          <div className="relative z-10 flex flex-wrap items-center gap-2.5 pt-2 lg:pt-0">
+            <button
+              onClick={() => onNavigate('appointment-form')}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-100 text-[#111111] text-xs font-bold transition-all shadow-md active:scale-[0.98]"
+            >
+              <CalendarPlus className="w-4 h-4" />
+              <span>Novo Atendimento</span>
+            </button>
+            <button
+              onClick={onOpenNewClientModal}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold border border-white/20 transition-all shadow-sm active:scale-[0.98]"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>Cadastrar Cliente</span>
+            </button>
+            <button
+              onClick={() => onNavigate('clients')}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold border border-white/20 transition-all shadow-sm active:scale-[0.98]"
+            >
+              <Search className="w-4 h-4" />
+              <span>Consultar Clientes</span>
+            </button>
+          </div>
         </div>
       </div>
 
