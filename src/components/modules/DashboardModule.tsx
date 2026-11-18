@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Client, Appointment } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
+import { ClientAvatar } from '../common/ClientAvatar';
 import {
   Users,
   CalendarCheck,
@@ -291,9 +292,11 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
                   className="py-3 flex items-center justify-between hover:bg-[#FAFAFA] px-2 rounded-lg cursor-pointer transition-colors group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#F3F3F3] text-[#111111] font-bold text-xs flex items-center justify-center group-hover:bg-[#111111] group-hover:text-white transition-colors">
-                      {client.name.charAt(0)}
-                    </div>
+                    <ClientAvatar
+                      name={client.name}
+                      avatarUrl={client.avatarUrl}
+                      size="sm"
+                    />
                     <div>
                       <p className="text-xs font-semibold text-[#111111] group-hover:underline">
                         {client.name}

@@ -8,6 +8,7 @@ import type {
   ColorProductItem,
 } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
+import { ClientAvatar } from '../common/ClientAvatar';
 import {
   FlaskConical,
   Plus,
@@ -395,9 +396,11 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
                 /* Card da Cliente Selecionada */
                 <div className="p-3.5 sm:p-4 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] flex items-center justify-between gap-4 transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
-                      {selectedClient.name.charAt(0)}
-                    </div>
+                    <ClientAvatar
+                      name={selectedClient.name}
+                      avatarUrl={selectedClient.avatarUrl}
+                      size="md"
+                    />
                     <div>
                       <div className="flex items-center gap-2">
                         <h4 className="text-sm font-bold text-[#111111]">{selectedClient.name}</h4>
@@ -521,9 +524,11 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
                               className="w-full p-3 flex items-center justify-between text-left hover:bg-[#FAFAFA] transition-colors group"
                             >
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[#F3F3F3] text-[#111111] group-hover:bg-[#111111] group-hover:text-white font-bold text-xs flex items-center justify-center transition-colors shrink-0">
-                                  {client.name.charAt(0)}
-                                </div>
+                                <ClientAvatar
+                                  name={client.name}
+                                  avatarUrl={client.avatarUrl}
+                                  size="sm"
+                                />
                                 <div>
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-[#111111] group-hover:underline">

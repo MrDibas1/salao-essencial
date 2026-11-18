@@ -407,6 +407,7 @@ const MainApp: React.FC = () => {
         isOpen={Boolean(viewingAppointment)}
         onClose={() => setViewingAppointment(null)}
         appointment={viewingAppointment}
+        client={clients.find((c) => c.id === viewingAppointment?.clientId)}
         onEdit={(apt) => {
           setViewingAppointment(null);
           handleEditAppointment(apt);

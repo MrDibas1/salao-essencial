@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import type { Client, Appointment } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
+import { ClientAvatar } from '../common/ClientAvatar';
 import {
   ArrowLeft,
   CalendarPlus,
@@ -13,6 +14,7 @@ import {
   Layers,
   CheckCircle2,
   ChevronRight,
+  Camera,
 } from 'lucide-react';
 
 interface ClientDetailModuleProps {
@@ -133,8 +135,20 @@ export const ClientDetailModule: React.FC<ClientDetailModuleProps> = ({
       <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-2xs overflow-hidden">
         <div className="p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-[#F3F3F3]">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#111111] text-white flex items-center justify-center font-serif text-2xl font-light shadow-sm">
-              {client.name.charAt(0)}
+            <div
+              onClick={() => onEditClient(client)}
+              className="relative group cursor-pointer"
+              title="Clique para alterar a foto de perfil"
+            >
+              <ClientAvatar
+                name={client.name}
+                avatarUrl={client.avatarUrl}
+                size="xl"
+                className="border-2 border-white ring-2 ring-[#E5E5E5] shadow-sm transition-transform group-hover:scale-105"
+              />
+              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="w-5 h-5 text-white" />
+              </div>
             </div>
             <div>
               <div className="flex items-center gap-3">

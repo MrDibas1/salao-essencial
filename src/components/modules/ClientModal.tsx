@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Modal } from '../ui/Modal';
 import type { Client } from '../../types';
+import { ClientAvatar } from '../common/ClientAvatar';
+import { Camera, Upload, Trash2 } from 'lucide-react';
 
 interface ClientModalProps {
   isOpen: boolean;
@@ -21,8 +23,11 @@ export const ClientModal: React.FC<ClientModalProps> = ({
   const [sameAsPhone, setSameAsPhone] = useState(true);
   const [birthDate, setBirthDate] = useState('');
   const [email, setEmail] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (clientToEdit) {
@@ -32,6 +37,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
       setSameAsPhone(clientToEdit.whatsapp === clientToEdit.phone);
       setBirthDate(clientToEdit.birthDate || '');
       setEmail(clientToEdit.email || '');
+      setAvatarUrl(clientToEdit.avatarUrl || '');
       setNotes(clientToEdit.notes || '');
     } else {
       setName('');
@@ -40,6 +46,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
       setSameAsPhone(true);
       setBirthDate('');
       setEmail('');
+      setAvatarUrl('');
       setNotes('');
     }
     setErrors({});
@@ -57,6 +64,26 @@ export const ClientModal: React.FC<ClientModalProps> = ({
     if (checked) {
       setWhatsapp(phone);
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('A imagem é muito grande. Escolha uma foto de até 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      if (result) {
+        setAvatarUrl(result);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -82,6 +109,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
         whatsapp: sameAsPhone ? phone.trim() : whatsapp.trim(),
         birthDate: birthDate ? birthDate : undefined,
         email: email.trim() ? email.trim() : undefined,
+        avatarUrl: avatarUrl.trim() ? avatarUrl.trim() : undefined,
         notes: notes.trim() ? notes.trim() : undefined,
         status: clientToEdit ? clientToEdit.status : 'active',
       },
@@ -100,6 +128,49 @@ export const ClientModal: React.FC<ClientModalProps> = ({
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Foto de Perfil */}
+        <div className="p-3.5 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <ClientAvatar name={name || 'Cliente'} avatarUrl={avatarUrl} size="lg" />
+            <div>
+              <span className="block text-xs font-semibold uppercase tracking-wider text-[#111111]">
+                Foto de Perfil
+              </span>
+              <p className="text-[11px] text-[#777777] mt-0.5">
+                Facilita a identificação visual rápida da cliente
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 py-2 px-3 rounded-lg border border-[#E5E5E5] bg-white hover:bg-[#F3F3F3] text-xs font-semibold text-[#111111] transition-colors shadow-2xs"
+            >
+              <Camera className="w-3.5 h-3.5 text-[#777777]" />
+              <span>{avatarUrl ? 'Trocar Foto' : 'Adicionar Foto'}</span>
+            </button>
+            {avatarUrl && (
+              <button
+                type="button"
+                onClick={() => setAvatarUrl('')}
+                className="p-2 rounded-lg text-[#777777] hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                title="Remover foto"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Nome */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">

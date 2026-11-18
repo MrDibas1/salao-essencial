@@ -6,6 +6,7 @@ export interface Client {
   birthDate?: string;
   email?: string;
   notes?: string;
+  avatarUrl?: string;
   createdAt: string;
   updatedAt: string;
   status: 'active' | 'archived';

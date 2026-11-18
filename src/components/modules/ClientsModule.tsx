@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import type { Client, Appointment } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
+import { ClientAvatar } from '../common/ClientAvatar';
 import {
   UserPlus,
   Search,
@@ -224,9 +225,11 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
                       {/* Nome e Avatar */}
                       <td className="py-4 px-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-xs shrink-0">
-                            {client.name.charAt(0)}
-                          </div>
+                          <ClientAvatar
+                            name={client.name}
+                            avatarUrl={client.avatarUrl}
+                            size="md"
+                          />
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-[#111111] text-xs sm:text-sm group-hover:underline">

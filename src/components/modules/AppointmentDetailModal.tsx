@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from '../ui/Modal';
-import type { Appointment } from '../../types';
+import type { Appointment, Client } from '../../types';
+import { ClientAvatar } from '../common/ClientAvatar';
 import {
   Calendar,
   User,
@@ -17,6 +18,7 @@ interface AppointmentDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   appointment: Appointment | null;
+  client?: Client | null;
   onEdit?: (appointment: Appointment) => void;
   onViewClient?: (clientId: string) => void;
 }
@@ -25,6 +27,7 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
   isOpen,
   onClose,
   appointment,
+  client,
   onEdit,
   onViewClient,
 }) => {
@@ -52,9 +55,11 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
         {/* Top summary card */}
         <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-sm">
-              {appointment.clientName.charAt(0)}
-            </div>
+            <ClientAvatar
+              name={appointment.clientName}
+              avatarUrl={client?.avatarUrl}
+              size="md"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <h4 className="text-sm font-bold text-[#111111]">{appointment.clientName}</h4>

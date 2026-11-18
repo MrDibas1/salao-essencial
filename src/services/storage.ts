@@ -36,6 +36,23 @@ export const StorageService = {
     if (!initialized) {
       this.restoreDemoData();
       localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
+    } else {
+      // Atualiza clientes demo com fotos caso estejam sem avatarUrl
+      const clients = this.getAllClientsRaw();
+      let updated = false;
+      const patchedClients = clients.map((c) => {
+        if (c.isDemo && !c.avatarUrl) {
+          const demoMatch = DEMO_CLIENTS.find((d) => d.id === c.id);
+          if (demoMatch?.avatarUrl) {
+            updated = true;
+            return { ...c, avatarUrl: demoMatch.avatarUrl };
+          }
+        }
+        return c;
+      });
+      if (updated) {
+        saveToStorage(STORAGE_KEYS.CLIENTS, patchedClients);
+      }
     }
   },
 
