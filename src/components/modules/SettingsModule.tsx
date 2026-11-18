@@ -11,6 +11,7 @@ import {
   Upload,
   CheckCircle2,
   Shield,
+  Smartphone,
 } from 'lucide-react';
 
 interface SettingsModuleProps {
@@ -20,6 +21,7 @@ interface SettingsModuleProps {
   onClearDemo: () => void;
   onExportBackup: () => void;
   onImportBackup: (jsonString: string) => boolean;
+  onOpenInstallModal?: () => void;
   hasDemoData: boolean;
 }
 
@@ -30,6 +32,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
   onClearDemo,
   onExportBackup,
   onImportBackup,
+  onOpenInstallModal,
   hasDemoData,
 }) => {
   const [name, setName] = useState(settings.name);
@@ -236,6 +239,59 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
               * A logomarca oficial fornecida está salva no repositório em alta fidelidade. O sistema está preparado para receber arquivos SVG ou novas resoluções a qualquer momento na pasta de ativos sem necessidade de reprogramação.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Aplicativo Móvel & PWA */}
+      <div className="bg-white rounded-2xl border border-[#D1D5DB] p-6 sm:p-7 shadow-2xs space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E7EB] pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#111111] text-white flex items-center justify-center shadow-xs">
+              <Smartphone className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#111111]">
+                Aplicativo Móvel & Suporte PWA
+              </h3>
+              <p className="text-xs text-[#6B7280]">
+                Instalação direta no iPhone, Android e Desktop com suporte a funcionamento offline
+              </p>
+            </div>
+          </div>
+
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 inline-flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>PWA Habilitado</span>
+          </span>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl bg-[#F8F9FA] border border-[#E5E7EB]">
+          <div className="flex items-center gap-3.5">
+            <img
+              src="/assets/pwa/icon-192.png"
+              alt="Ícone PWA"
+              className="w-12 h-12 rounded-xl border border-neutral-800 shadow-2xs shrink-0"
+            />
+            <div>
+              <h4 className="text-xs font-bold text-[#111111] uppercase tracking-wider">
+                Ícone Nativo na Tela de Início
+              </h4>
+              <p className="text-[11px] text-[#4B5563] mt-0.5 leading-relaxed">
+                Abra o salão em tela cheia como um app nativo, sem barras de navegador.
+              </p>
+            </div>
+          </div>
+
+          {onOpenInstallModal && (
+            <button
+              type="button"
+              onClick={onOpenInstallModal}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#111111] hover:bg-black text-white text-xs font-semibold transition-all shadow-xs shrink-0 active:scale-[0.98]"
+            >
+              <Download className="w-4 h-4" />
+              <span>Instalar Aplicativo</span>
+            </button>
+          )}
         </div>
       </div>
 

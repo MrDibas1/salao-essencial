@@ -1,11 +1,12 @@
 import React from 'react';
-import { Menu, UserPlus, Database } from 'lucide-react';
+import { Menu, UserPlus, Database, Download } from 'lucide-react';
 import type { NavigationTab } from './Sidebar';
 
 interface HeaderProps {
   currentTab: NavigationTab;
   onOpenMobileSidebar: () => void;
   onOpenNewClientModal: () => void;
+  onOpenInstallModal?: () => void;
   hasDemoData: boolean;
 }
 
@@ -13,6 +14,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentTab,
   onOpenMobileSidebar,
   onOpenNewClientModal,
+  onOpenInstallModal,
   hasDemoData,
 }) => {
   const getPageTitle = () => {
@@ -79,6 +81,18 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-xs font-semibold text-[#111111]">{displayDate}</span>
           <span className="text-[10px] text-[#6B7280] font-medium">Ambiente Seguro Local</span>
         </div>
+
+        {/* Install PWA Button */}
+        {onOpenInstallModal && (
+          <button
+            onClick={onOpenInstallModal}
+            className="inline-flex items-center gap-1.5 py-2 px-3 rounded-xl border border-[#D1D5DB] bg-[#F4F5F7] hover:bg-[#E5E7EB] text-[#111111] text-xs font-semibold transition-all shadow-2xs hover:shadow-xs active:scale-[0.98]"
+            title="Instalar aplicativo na tela de início"
+          >
+            <Download className="w-3.5 h-3.5 text-[#111111]" />
+            <span className="hidden sm:inline">Instalar App</span>
+          </button>
+        )}
 
         {/* Quick New Client Button */}
         <button

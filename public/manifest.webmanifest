@@ -1,0 +1,62 @@
+{
+  "name": "ESSENCIAL — Gestão para Salão de Beleza",
+  "short_name": "ESSENCIAL",
+  "description": "Sistema de gestão especializado em controle de clientes, fichas técnicas, fórmulas de coloração e histórico de atendimentos.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "/assets/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/pwa/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": [
+    "beauty",
+    "business",
+    "productivity"
+  ],
+  "shortcuts": [
+    {
+      "name": "Registrar Atendimento",
+      "short_name": "Atendimento",
+      "description": "Abrir formulário de atendimento e coloração",
+      "url": "/?tab=appointment-form",
+      "icons": [
+        {
+          "src": "/assets/pwa/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Nova Cliente",
+      "short_name": "Nova Cliente",
+      "description": "Cadastrar nova cliente no salão",
+      "url": "/?action=new-client",
+      "icons": [
+        {
+          "src": "/assets/pwa/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import { AppointmentDetailModal } from './components/modules/AppointmentDetailMo
 import { HistoryModule } from './components/modules/HistoryModule';
 import { ProductsModule } from './components/modules/ProductsModule';
 import { SettingsModule } from './components/modules/SettingsModule';
+import { InstallPwaModal } from './components/common/InstallPwaModal';
 
 const MainApp: React.FC = () => {
   const { success, error, info } = useToast();
@@ -34,6 +35,7 @@ const MainApp: React.FC = () => {
   const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
   const [viewingAppointment, setViewingAppointment] = useState<Appointment | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
 
   // Dialog de confirmação
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -303,6 +305,7 @@ const MainApp: React.FC = () => {
             setClientToEdit(null);
             setIsClientModalOpen(true);
           }}
+          onOpenInstallModal={() => setIsInstallModalOpen(true)}
           hasDemoData={hasDemoData}
         />
 
@@ -389,6 +392,7 @@ const MainApp: React.FC = () => {
               onClearDemo={handleClearDemo}
               onExportBackup={handleExportBackup}
               onImportBackup={handleImportBackup}
+              onOpenInstallModal={() => setIsInstallModalOpen(true)}
               hasDemoData={hasDemoData}
             />
           )}
@@ -396,6 +400,11 @@ const MainApp: React.FC = () => {
       </div>
 
       {/* Global Modals */}
+      <InstallPwaModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
+      />
+
       <ClientModal
         isOpen={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
