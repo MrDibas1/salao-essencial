@@ -48,30 +48,31 @@ export const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in"
+        className="fixed inset-0 bg-neutral-950/75 backdrop-blur-md transition-opacity animate-in fade-in"
         onClick={onClose}
       />
 
       {/* Modal Box */}
       <div
-        className={`relative w-full ${maxWidthClasses[maxWidth]} bg-white rounded-xl shadow-2xl border border-[#E5E5E5] z-10 my-8 overflow-hidden transform transition-all animate-in zoom-in-95`}
+        className={`relative w-full ${maxWidthClasses[maxWidth]} bg-white rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35)] ring-1 ring-black/15 z-10 my-8 overflow-hidden flex flex-col max-h-[90vh] transform transition-all animate-in zoom-in-95`}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4.5 border-b border-[#E5E5E5] bg-[#FAFAFA]">
+        {/* Header com Alto Contraste Premium */}
+        <div className="flex items-center justify-between px-6 py-4.5 bg-[#111111] text-white border-b border-black select-none shrink-0">
           <div>
-            <h3 className="text-base font-semibold text-[#111111]">{title}</h3>
-            {subtitle && <p className="text-xs text-[#777777] mt-0.5">{subtitle}</p>}
+            <h3 className="text-base font-semibold text-white tracking-wide">{title}</h3>
+            {subtitle && <p className="text-xs text-neutral-400 mt-0.5">{subtitle}</p>}
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#777777] hover:text-[#111111] hover:bg-[#E5E5E5] transition-colors"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/15 transition-colors focus:outline-none"
+            title="Fechar (Esc)"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 max-h-[calc(85vh-120px)] overflow-y-auto">{children}</div>
+        <div className="p-6 overflow-y-auto flex-1 bg-white">{children}</div>
       </div>
     </div>
   );

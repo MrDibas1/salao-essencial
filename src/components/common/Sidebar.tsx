@@ -99,12 +99,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-white border-r border-[#E5E5E5] flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-white border-r border-[#D4D4D8]/80 shadow-2xs flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isOpenMobile ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Brand header */}
-        <div className="h-20 px-6 flex items-center justify-between border-b border-[#E5E5E5]">
+        <div className="h-20 px-6 flex items-center justify-between border-b border-[#E5E7EB]">
           <button
             onClick={() => handleItemClick('dashboard')}
             className="text-left focus:outline-none"
@@ -120,10 +120,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Quick action button */}
-        <div className="p-4 border-b border-[#F3F3F3]">
+        <div className="p-4 border-b border-[#E5E7EB]">
           <button
             onClick={() => handleItemClick('appointment-form')}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#111111] hover:bg-[#292929] text-white text-sm font-medium transition-all shadow-xs group"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#111111] hover:bg-[#292929] text-white text-sm font-semibold transition-all shadow-xs hover:shadow active:scale-[0.99] group"
           >
             <CalendarPlus className="w-4 h-4 text-white/90 group-hover:scale-105 transition-transform" />
             <span>Registrar Atendimento</span>
@@ -179,14 +179,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         {/* Footer info & salon identity */}
-        <div className="p-4 border-t border-[#E5E5E5] bg-[#FAFAFA]">
+        <div className="p-4 border-t border-[#E5E7EB] bg-[#F4F5F7]">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center font-serif text-sm">
+            <div className="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center font-serif text-sm shadow-xs">
               E
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-[#111111] truncate">Salão Essencial</p>
-              <p className="text-[10px] text-[#777777] truncate">Ambiente de Gestão Interna</p>
+              <p className="text-xs font-bold text-[#111111] truncate">Salão Essencial</p>
+              <p className="text-[10px] text-[#6B7280] truncate font-medium">Ambiente de Gestão Interna</p>
             </div>
           </div>
         </div>

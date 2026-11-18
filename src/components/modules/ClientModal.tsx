@@ -129,14 +129,14 @@ export const ClientModal: React.FC<ClientModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Foto de Perfil */}
-        <div className="p-3.5 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] flex items-center justify-between gap-4">
+        <div className="p-3.5 rounded-xl border border-[#D1D5DB] bg-[#F4F5F7] flex items-center justify-between gap-4 shadow-2xs">
           <div className="flex items-center gap-3.5">
             <ClientAvatar name={name || 'Cliente'} avatarUrl={avatarUrl} size="lg" />
             <div>
-              <span className="block text-xs font-semibold uppercase tracking-wider text-[#111111]">
+              <span className="block text-xs font-bold uppercase tracking-wider text-[#111111]">
                 Foto de Perfil
               </span>
-              <p className="text-[11px] text-[#777777] mt-0.5">
+              <p className="text-[11px] text-[#6B7280] mt-0.5">
                 Facilita a identificação visual rápida da cliente
               </p>
             </div>
@@ -153,16 +153,16 @@ export const ClientModal: React.FC<ClientModalProps> = ({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 py-2 px-3 rounded-lg border border-[#E5E5E5] bg-white hover:bg-[#F3F3F3] text-xs font-semibold text-[#111111] transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 py-2 px-3 rounded-lg border border-[#D1D5DB] bg-white hover:bg-[#F3F3F3] text-xs font-semibold text-[#111111] transition-colors shadow-2xs"
             >
-              <Camera className="w-3.5 h-3.5 text-[#777777]" />
+              <Camera className="w-3.5 h-3.5 text-[#555555]" />
               <span>{avatarUrl ? 'Trocar Foto' : 'Adicionar Foto'}</span>
             </button>
             {avatarUrl && (
               <button
                 type="button"
                 onClick={() => setAvatarUrl('')}
-                className="p-2 rounded-lg text-[#777777] hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                className="p-2 rounded-lg text-[#6B7280] hover:text-rose-600 hover:bg-rose-50 transition-colors"
                 title="Remover foto"
               >
                 <Trash2 className="w-4 h-4" />
@@ -173,7 +173,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
 
         {/* Nome */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">
+          <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
             Nome Completo <span className="text-rose-500">*</span>
           </label>
           <input
@@ -184,10 +184,10 @@ export const ClientModal: React.FC<ClientModalProps> = ({
               setName(e.target.value);
               if (errors.name) setErrors({ ...errors, name: '' });
             }}
-            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all ${
+            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all shadow-2xs ${
               errors.name
-                ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
-                : 'border-[#E5E5E5] bg-white focus:border-[#111111]'
+                ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                : 'border-[#D1D5DB] bg-white focus:border-[#111111] focus:ring-1 focus:ring-[#111111]'
             }`}
           />
           {errors.name && <p className="text-[11px] text-rose-500 mt-1">{errors.name}</p>}
@@ -196,7 +196,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
         {/* Telefone e WhatsApp */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
               Telefone Principal <span className="text-rose-500">*</span>
             </label>
             <input
@@ -207,10 +207,10 @@ export const ClientModal: React.FC<ClientModalProps> = ({
                 handlePhoneChange(e.target.value);
                 if (errors.phone) setErrors({ ...errors, phone: '' });
               }}
-              className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all ${
+              className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all shadow-2xs ${
                 errors.phone
-                  ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
-                  : 'border-[#E5E5E5] bg-white focus:border-[#111111]'
+                  ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                  : 'border-[#D1D5DB] bg-white focus:border-[#111111] focus:ring-1 focus:ring-[#111111]'
               }`}
             />
             {errors.phone && <p className="text-[11px] text-rose-500 mt-1">{errors.phone}</p>}
@@ -218,15 +218,15 @@ export const ClientModal: React.FC<ClientModalProps> = ({
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111]">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111]">
                 WhatsApp
               </label>
-              <label className="inline-flex items-center gap-1.5 text-[11px] text-[#777777] cursor-pointer">
+              <label className="inline-flex items-center gap-1.5 text-[11px] text-[#6B7280] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={sameAsPhone}
                   onChange={(e) => handleSameAsPhoneToggle(e.target.checked)}
-                  className="rounded border-[#E5E5E5] text-[#111111] focus:ring-0"
+                  className="rounded border-[#D1D5DB] text-[#111111] focus:ring-0"
                 />
                 <span>Mesmo do telefone</span>
               </label>
@@ -237,7 +237,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
               value={sameAsPhone ? phone : whatsapp}
               disabled={sameAsPhone}
               onChange={(e) => setWhatsapp(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] text-sm bg-white focus:outline-none focus:border-[#111111] disabled:bg-[#F3F3F3] disabled:text-[#777777] transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] text-sm bg-white focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] disabled:bg-[#F3F4F6] disabled:text-[#6B7280] disabled:border-[#E5E7EB] transition-all shadow-2xs"
             />
           </div>
         </div>
@@ -245,19 +245,19 @@ export const ClientModal: React.FC<ClientModalProps> = ({
         {/* Data de Nascimento e E-mail */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#374151] mb-1">
               Data de Nascimento (opcional)
             </label>
             <input
               type="date"
               value={birthDate}
               onChange={(e) => setBirthDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] text-sm bg-white focus:outline-none focus:border-[#111111] transition-all text-[#292929]"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] text-sm bg-white focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] transition-all text-[#111111] shadow-2xs"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#374151] mb-1">
               E-mail (opcional)
             </label>
             <input
@@ -265,14 +265,14 @@ export const ClientModal: React.FC<ClientModalProps> = ({
               placeholder="cliente@exemplo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] text-sm bg-white focus:outline-none focus:border-[#111111] transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] text-sm bg-white focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] transition-all shadow-2xs"
             />
           </div>
         </div>
 
         {/* Observações Gerais */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
+          <label className="block text-xs font-bold uppercase tracking-wider text-[#374151] mb-1">
             Observações Gerais / Preferências
           </label>
           <textarea
@@ -280,22 +280,22 @@ export const ClientModal: React.FC<ClientModalProps> = ({
             placeholder="Ex: Alergias, sensibilidade no couro cabeludo, preferência de café, hábitos..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] text-sm bg-white focus:outline-none focus:border-[#111111] transition-all resize-none"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] text-sm bg-white focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] transition-all resize-none shadow-2xs"
           />
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E5E5E5]">
+        <div className="pt-4 mt-6 border-t border-[#E5E7EB] flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="py-2.5 px-4 rounded-xl border border-[#E5E5E5] text-xs font-medium text-[#777777] hover:text-[#111111] hover:bg-[#F3F3F3] transition-colors"
+            className="py-2.5 px-4 rounded-xl border border-[#D1D5DB] bg-white text-xs font-semibold text-[#374151] hover:text-[#111111] hover:bg-neutral-100 transition-colors shadow-2xs"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="py-2.5 px-5 rounded-xl bg-[#111111] hover:bg-black text-white text-xs font-semibold transition-all shadow-xs"
+            className="py-2.5 px-5 rounded-xl bg-[#111111] hover:bg-black text-white text-xs font-semibold transition-all shadow-xs hover:shadow active:scale-[0.99]"
           >
             {clientToEdit ? 'Salvar Alterações' : 'Concluir Cadastro'}
           </button>

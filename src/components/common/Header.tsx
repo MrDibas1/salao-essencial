@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
   const displayDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 
   return (
-    <header className="h-20 bg-white border-b border-[#E5E5E5] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30">
+    <header className="h-20 bg-white border-b border-[#D4D4D8]/80 shadow-2xs px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30">
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileSidebar}
@@ -61,29 +61,29 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div>
           <h1 className="text-lg font-bold text-[#111111] tracking-tight">{title}</h1>
-          <p className="text-xs text-[#777777] hidden sm:block">{desc}</p>
+          <p className="text-xs text-[#6B7280] hidden sm:block">{desc}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-3">
         {/* Badge de dados demonstrativos se ativo */}
         {hasDemoData && (
-          <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#F3F3F3] text-[#292929] border border-[#E5E5E5]">
-            <Database className="w-3.5 h-3.5 text-[#777777]" />
+          <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#F3F4F6] text-[#1F2937] border border-[#D1D5DB] shadow-2xs">
+            <Database className="w-3.5 h-3.5 text-[#6B7280]" />
             <span>Dados Demonstrativos</span>
           </span>
         )}
 
         {/* Data formatada */}
         <div className="hidden xl:flex flex-col text-right pr-2">
-          <span className="text-xs font-medium text-[#111111]">{displayDate}</span>
-          <span className="text-[10px] text-[#777777]">Ambiente Seguro Local</span>
+          <span className="text-xs font-semibold text-[#111111]">{displayDate}</span>
+          <span className="text-[10px] text-[#6B7280] font-medium">Ambiente Seguro Local</span>
         </div>
 
         {/* Quick New Client Button */}
         <button
           onClick={onOpenNewClientModal}
-          className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-lg border border-[#E5E5E5] bg-white hover:bg-[#F3F3F3] text-[#111111] text-xs font-semibold transition-colors shadow-2xs"
+          className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl border border-[#D1D5DB] bg-white hover:bg-neutral-50 text-[#111111] text-xs font-semibold transition-all shadow-2xs hover:shadow-xs active:scale-[0.98]"
         >
           <UserPlus className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Nova Cliente</span>

@@ -312,7 +312,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
       >
         <form onSubmit={handleFormSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
               Nome do Produto <span className="text-rose-500">*</span>
             </label>
             <input
@@ -323,10 +323,10 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                 setName(e.target.value);
                 if (errors.name) setErrors({ ...errors, name: '' });
               }}
-              className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all ${
+              className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all shadow-2xs ${
                 errors.name
-                  ? 'border-rose-400 bg-rose-50/20'
-                  : 'border-[#E5E5E5] bg-white focus:border-[#111111]'
+                  ? 'border-rose-400 bg-rose-50/20 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                  : 'border-[#D1D5DB] bg-white focus:border-[#111111] focus:ring-1 focus:ring-[#111111]'
               }`}
             />
             {errors.name && <p className="text-[11px] text-rose-500 mt-1">{errors.name}</p>}
@@ -334,7 +334,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
                 Marca <span className="text-rose-500">*</span>
               </label>
               <input
@@ -345,17 +345,17 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                   setBrand(e.target.value);
                   if (errors.brand) setErrors({ ...errors, brand: '' });
                 }}
-                className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all ${
+                className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all shadow-2xs ${
                   errors.brand
-                    ? 'border-rose-400 bg-rose-50/20'
-                    : 'border-[#E5E5E5] bg-white focus:border-[#111111]'
+                    ? 'border-rose-400 bg-rose-50/20 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                    : 'border-[#D1D5DB] bg-white focus:border-[#111111] focus:ring-1 focus:ring-[#111111]'
                 }`}
               />
               {errors.brand && <p className="text-[11px] text-rose-500 mt-1">{errors.brand}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1">
                 Linha (opcional)
               </label>
               <input
@@ -363,20 +363,20 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                 placeholder="Ex: Permanent Color Pro"
                 value={line}
                 onChange={(e) => setLine(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] bg-white text-sm focus:outline-none focus:border-[#111111]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-sm focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] shadow-2xs"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
                 Categoria
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                className="w-full px-3 py-2.5 rounded-xl border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111]"
+                className="w-full px-3 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs font-medium focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] shadow-2xs"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -387,7 +387,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1">
                 Tonalidade / Tom
               </label>
               <input
@@ -395,12 +395,12 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                 placeholder="Ex: 7.1, 20 Vol..."
                 value={shadeNumber}
                 onChange={(e) => setShadeNumber(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-[#E5E5E5] bg-white text-xs font-mono font-bold focus:outline-none focus:border-[#111111]"
+                className="w-full px-3 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs font-mono font-bold focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] shadow-2xs"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1">
                 Embalagem / Unidade
               </label>
               <input
@@ -408,13 +408,13 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                 placeholder="Ex: tubo 60g, frasco 900ml"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111]"
+                className="w-full px-3 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] shadow-2xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1">
               Observações Técnicas do Produto
             </label>
             <textarea
@@ -422,21 +422,21 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
               placeholder="Ex: Recomendações de uso, neutralização ou tempo padrão..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111] resize-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] resize-none shadow-2xs"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E5E5E5]">
+          <div className="pt-4 mt-6 border-t border-[#E5E7EB] flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="py-2.5 px-4 rounded-xl border border-[#E5E5E5] text-xs font-medium text-[#777777] hover:bg-[#F3F3F3]"
+              className="py-2.5 px-4 rounded-xl border border-[#D1D5DB] bg-white text-xs font-semibold text-[#374151] hover:text-[#111111] hover:bg-neutral-100 transition-colors shadow-2xs"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="py-2.5 px-5 rounded-xl bg-[#111111] hover:bg-black text-white text-xs font-semibold"
+              className="py-2.5 px-5 rounded-xl bg-[#111111] hover:bg-black text-white text-xs font-semibold transition-all shadow-xs hover:shadow active:scale-[0.99]"
             >
               {editingProduct ? 'Salvar Produto' : 'Cadastrar Produto'}
             </button>
