@@ -52,9 +52,9 @@ export const InstallPwaModal: React.FC<InstallPwaModalProps> = ({ isOpen, onClos
             className="w-16 h-16 rounded-2xl shadow-sm border border-neutral-800 shrink-0"
           />
           <div>
-            <h4 className="text-sm font-bold text-[#111111] tracking-tight">ESSENCIAL</h4>
+            <h4 className="text-sm font-bold text-[#111111] tracking-tight">Essencial</h4>
             <p className="text-xs text-[#4B5563] mt-0.5 font-medium">
-              Hair & Beauty Studio — Gestão Interna
+              Salão de Beleza e Aluguel de Roupas
             </p>
             <div className="flex items-center gap-2 mt-2 text-[11px] text-[#6B7280]">
               <span className="inline-flex items-center gap-1 font-semibold text-[#111111]">

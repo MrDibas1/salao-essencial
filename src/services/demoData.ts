@@ -2,7 +2,7 @@ import type { Client, Appointment, Product, SalonSettings } from '../types';
 
 export const INITIAL_SETTINGS: SalonSettings = {
   name: 'ESSENCIAL',
-  tagline: 'Hair & Beauty Studio',
+  tagline: 'Salão de Beleza e Aluguel de Roupas',
   phone: '(11) 98765-4321',
   address: 'Rua Oscar Freire, 1420 - Jardins, São Paulo - SP',
   instagram: '@salaoessencial',

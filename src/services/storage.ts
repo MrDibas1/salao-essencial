@@ -256,7 +256,12 @@ export const StorageService = {
   // CONFIGURAÇÕES
   // -------------------------------------------------------------
   getSettings(): SalonSettings {
-    return loadFromStorage<SalonSettings>(STORAGE_KEYS.SETTINGS, INITIAL_SETTINGS);
+    const settings = loadFromStorage<SalonSettings>(STORAGE_KEYS.SETTINGS, INITIAL_SETTINGS);
+    if (settings.tagline === 'Hair & Beauty Studio') {
+      settings.tagline = 'Salão de Beleza e Aluguel de Roupas';
+      saveToStorage(STORAGE_KEYS.SETTINGS, settings);
+    }
+    return settings;
   },
 
   updateSettings(updates: Partial<SalonSettings>): SalonSettings {

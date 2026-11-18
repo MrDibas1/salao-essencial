@@ -19,9 +19,9 @@ export const Logo: React.FC<LogoProps> = ({
 
   // Tamanhos padronizados
   const heightClasses = {
-    sm: 'h-7',
-    md: 'h-9',
-    lg: 'h-12',
+    sm: 'h-8 max-w-[140px]',
+    md: 'h-11 max-w-[180px]',
+    lg: 'h-14 max-w-[240px]',
   };
 
   const textClasses = {
@@ -31,12 +31,12 @@ export const Logo: React.FC<LogoProps> = ({
   };
 
   const subtitleClasses = {
-    sm: 'text-[8.5px] tracking-[0.22em]',
-    md: 'text-[9.5px] tracking-[0.28em]',
-    lg: 'text-[11px] tracking-[0.32em]',
+    sm: 'text-[8px] tracking-[0.16em]',
+    md: 'text-[9px] tracking-[0.18em]',
+    lg: 'text-[10px] tracking-[0.20em]',
   };
 
-  const logoSrc = customSrc || '/assets/logo-essencial.svg';
+  const logoSrc = customSrc || '/assets/logo-essencial.png';
 
   if (forceTypographic || imageError) {
     return (
@@ -49,8 +49,8 @@ export const Logo: React.FC<LogoProps> = ({
             ESSENCIAL
           </span>
           {showSubtitle && (
-            <span className={`font-sans font-semibold text-[#777777] uppercase mt-1 leading-none ${subtitleClasses[size]}`}>
-              Hair &amp; Beauty Studio
+            <span className={`font-sans font-medium text-[#777777] mt-1 leading-none ${subtitleClasses[size]}`}>
+              Salão de Beleza e Aluguel de Roupas
             </span>
           )}
         </div>

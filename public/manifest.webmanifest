@@ -1,12 +1,12 @@
 {
-  "name": "ESSENCIAL — Gestão para Salão de Beleza",
-  "short_name": "ESSENCIAL",
+  "name": "Essencial — Salão de Beleza e Aluguel de Roupas",
+  "short_name": "Essencial",
   "description": "Sistema de gestão especializado em controle de clientes, fichas técnicas, fórmulas de coloração e histórico de atendimentos.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#111111",
+  "background_color": "#FFFFFF",
   "theme_color": "#111111",
   "icons": [
     {
