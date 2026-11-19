@@ -358,23 +358,23 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
         {/* ============================================================== */}
         {/* SEÇÃO 1: INFORMAÇÕES DO ATENDIMENTO                           */}
         {/* ============================================================== */}
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-5 sm:p-7 shadow-2xs space-y-5">
-          <div className="border-b border-[#E5E5E5] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#111111] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-4 sm:p-7 shadow-2xs space-y-5">
+          <div className="border-b border-[#E5E5E5] pb-4 flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#111111] text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-xs shrink-0">
                 1
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-[#111111] tracking-tight">
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-[#111111] tracking-tight leading-snug">
                   Informações do Atendimento
                 </h3>
-                <p className="text-xs text-[#666666] mt-0.5">
-                  Identificação da cliente, data, profissional e procedimento principal
+                <p className="text-[11px] sm:text-xs text-[#666666] mt-0.5 leading-tight">
+                  Identificação da cliente, data, profissional e procedimento
                 </p>
               </div>
             </div>
-            <div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 text-[11px] font-bold shadow-2xs">
+            <div className="shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 text-[10px] sm:text-[11px] font-bold shadow-2xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
                 <span>Obrigatório</span>
               </span>
