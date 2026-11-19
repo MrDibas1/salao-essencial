@@ -5,6 +5,7 @@ import { ToastProvider, useToast } from './components/ui/Toast';
 import { ConfirmDialog } from './components/ui/ConfirmDialog';
 import { Sidebar, type NavigationTab } from './components/common/Sidebar';
 import { Header } from './components/common/Header';
+import { BottomNav } from './components/common/BottomNav';
 import { DashboardModule } from './components/modules/DashboardModule';
 import { ClientsModule } from './components/modules/ClientsModule';
 import { ClientDetailModule } from './components/modules/ClientDetailModule';
@@ -306,11 +307,12 @@ const MainApp: React.FC = () => {
             setIsClientModalOpen(true);
           }}
           onOpenInstallModal={() => setIsInstallModalOpen(true)}
+          onNavigate={(tab) => handleNavigate(tab)}
           hasDemoData={hasDemoData}
         />
 
         {/* Content view area */}
-        <main className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto pb-24 lg:pb-8">
           {currentTab === 'dashboard' && (
             <DashboardModule
               clients={clients.filter((c) => c.status !== 'archived')}
@@ -434,6 +436,13 @@ const MainApp: React.FC = () => {
         title={confirmDialog.title}
         message={confirmDialog.message}
         confirmText={confirmDialog.confirmText}
+      />
+
+      {/* Mobile Bottom Navigation (4 Pilares) */}
+      <BottomNav
+        currentTab={currentTab}
+        onNavigate={(tab) => handleNavigate(tab)}
+        totalClientsCount={clients.filter((c) => c.status !== 'archived').length}
       />
     </div>
   );

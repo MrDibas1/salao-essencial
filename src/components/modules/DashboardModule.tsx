@@ -6,13 +6,13 @@ import { ProcedureBadge } from '../common/ProcedureBadge';
 import {
   Users,
   CalendarCheck,
-  Calendar,
-  FlaskConical,
-  ArrowRight,
-  UserPlus,
   CalendarPlus,
-  Search,
-  CheckCircle,
+  UserPlus,
+  Package,
+  ArrowRight,
+  Sparkles,
+  Phone,
+  Calendar,
 } from 'lucide-react';
 
 interface DashboardModuleProps {
@@ -32,10 +32,8 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
 }) => {
   // Cálculos dinâmicos em tempo real
   const totalClients = clients.length;
-  const totalAppointments = appointments.length;
-
   const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth(); // 0-indexed
+  const currentMonth = new Date().getMonth();
 
   // Atendimentos realizados no mês corrente
   const appointmentsThisMonth = appointments.filter((apt) => {
@@ -43,45 +41,13 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
     return aptDate.getFullYear() === currentYear && aptDate.getMonth() === currentMonth;
   }).length;
 
-  // Clientes cadastradas nos últimos 30 dias
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
   const recentClients = clients
     .slice()
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
-  const newClientsCount = clients.filter(
-    (c) => new Date(c.createdAt).getTime() >= thirtyDaysAgo.getTime()
-  ).length;
-
-  // Procedimentos de coloração total
-  const colorAppointmentsCount = appointments.filter((a) => a.hasColorInfo).length;
-
-  // Últimos 5 atendimentos
+  // Últimos 6 atendimentos
   const recentAppointments = appointments.slice(0, 6);
-
-  // Atendimentos por mês nos últimos 6 meses para o gráfico dinâmico
-  const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-  const chartData = [];
-
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(currentYear, currentMonth - i, 1);
-    const m = d.getMonth();
-    const y = d.getFullYear();
-    const count = appointments.filter((apt) => {
-      const aptDate = new Date(`${apt.date}T00:00:00`);
-      return aptDate.getFullYear() === y && aptDate.getMonth() === m;
-    }).length;
-
-    chartData.push({
-      label: `${monthNames[m]}`,
-      count,
-    });
-  }
-
-  const maxChartCount = Math.max(...chartData.map((c) => c.count), 5);
 
   // Clientes com foto para exibição no avatar stack da Hero
   const clientsWithAvatar = clients.filter((c) => Boolean(c.avatarUrl));
@@ -89,25 +55,25 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
     clientsWithAvatar.length >= 3 ? clientsWithAvatar.slice(0, 5) : clients.slice(0, 5);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* Welcome Banner & Quick Shortcuts */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#181818] via-[#111111] to-[#0D0D0D] border border-white/10 p-6 sm:p-8 text-white shadow-xl">
-        {/* Glow decorativo sutil com toque âmbar que remete à marca */}
+        {/* Glow decorativo suave */}
         <div className="absolute -top-16 -right-16 w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-4 max-w-xl">
+          <div className="space-y-3.5 max-w-xl">
             <div>
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-[10px] font-semibold tracking-wider uppercase text-neutral-300">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                <span>Painel de Controle • Gestão do Salão</span>
+                <span>Salão Essencial • Gestão Direta</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-serif font-light tracking-wide mt-2 text-white">
-                Salão Essencial
+                Bem-vindo ao Essencial
               </h2>
               <p className="text-xs sm:text-sm text-neutral-300 mt-1 leading-relaxed">
-                Gestão precisa de fichas técnicas, fórmulas de coloração e acompanhamento personalizado de cada cliente.
+                Acesse fichas de clientes, registre novos atendimentos e consulte o catálogo de produtos com fotos em poucos toques.
               </p>
             </div>
 
@@ -147,48 +113,51 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
                   <span className="text-amber-400 text-xs">★★★★★</span>
                 </div>
                 <p className="text-[11px] text-neutral-400">
-                  Fórmulas e histórico preservados
+                  Fichas e fórmulas organizadas
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Action Shortcuts */}
-          <div className="relative z-10 flex flex-wrap items-center gap-2.5 pt-2 lg:pt-0">
+          {/* 3 Ações Principais do Salão */}
+          <div className="relative z-10 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 pt-2 lg:pt-0">
             <button
               onClick={() => onNavigate('appointment-form')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-100 text-[#111111] text-xs font-bold transition-all shadow-md active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-neutral-950 text-xs font-bold transition-all shadow-md active:scale-[0.98]"
             >
-              <CalendarPlus className="w-4 h-4" />
-              <span>Novo Atendimento</span>
+              <CalendarPlus className="w-4 h-4 text-neutral-950" />
+              <span>+ Novo Atendimento</span>
             </button>
             <button
               onClick={onOpenNewClientModal}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold border border-white/20 transition-all shadow-sm active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition-all shadow-sm active:scale-[0.98]"
             >
               <UserPlus className="w-4 h-4" />
               <span>Cadastrar Cliente</span>
             </button>
             <button
-              onClick={() => onNavigate('clients')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold border border-white/20 transition-all shadow-sm active:scale-[0.98]"
+              onClick={() => onNavigate('products')}
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition-all shadow-sm active:scale-[0.98]"
             >
-              <Search className="w-4 h-4" />
-              <span>Consultar Clientes</span>
+              <Package className="w-4 h-4" />
+              <span>Ver Produtos</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* METRIC CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {/* Total Clientes */}
-        <div className="p-5 rounded-xl bg-white border border-[#E5E5E5] shadow-2xs">
+      {/* Visão Rápida dos 3 Pilares em Cartões Limpos */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Clientes Ativas */}
+        <div
+          onClick={() => onNavigate('clients')}
+          className="p-5 rounded-2xl bg-white border border-[#E5E5E5] shadow-2xs hover:border-[#111111] hover:shadow-xs transition-all cursor-pointer group"
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-[#777777]">
-              Total de Clientes
+              Clientes Ativas
             </span>
-            <div className="w-9 h-9 rounded-lg bg-[#F3F3F3] flex items-center justify-center text-[#111111]">
+            <div className="w-9 h-9 rounded-lg bg-[#F3F3F3] group-hover:bg-[#111111] group-hover:text-white transition-colors flex items-center justify-center text-[#111111]">
               <Users className="w-4 h-4" />
             </div>
           </div>
@@ -196,310 +165,210 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
             <span className="text-3xl font-bold text-[#111111] font-mono">{totalClients}</span>
             <span className="text-xs text-[#777777]">cadastradas</span>
           </div>
-          <p className="text-[11px] text-[#777777] mt-2">
-            +{newClientsCount} novas nos últimos 30 dias
+          <p className="text-[11px] text-amber-700 font-medium mt-2 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+            <span>Acessar cadastro de clientes</span>
+            <ArrowRight className="w-3 h-3" />
           </p>
         </div>
 
-        {/* Total Atendimentos */}
-        <div className="p-5 rounded-xl bg-white border border-[#E5E5E5] shadow-2xs">
+        {/* Atendimentos do Mês */}
+        <div
+          onClick={() => onNavigate('history')}
+          className="p-5 rounded-2xl bg-white border border-[#E5E5E5] shadow-2xs hover:border-[#111111] hover:shadow-xs transition-all cursor-pointer group"
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-[#777777]">
-              Atendimentos Totais
+              Atendimentos no Mês
             </span>
-            <div className="w-9 h-9 rounded-lg bg-[#F3F3F3] flex items-center justify-center text-[#111111]">
+            <div className="w-9 h-9 rounded-lg bg-[#F3F3F3] group-hover:bg-[#111111] group-hover:text-white transition-colors flex items-center justify-center text-[#111111]">
               <CalendarCheck className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-[#111111] font-mono">{totalAppointments}</span>
+            <span className="text-3xl font-bold text-[#111111] font-mono">{appointmentsThisMonth}</span>
             <span className="text-xs text-[#777777]">procedimentos</span>
           </div>
-          <p className="text-[11px] text-[#777777] mt-2">Histórico completo preservado</p>
-        </div>
-
-        {/* Atendimentos no Mês */}
-        <div className="p-5 rounded-xl bg-white border border-[#E5E5E5] shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#777777]">
-              Realizados no Mês
-            </span>
-            <div className="w-9 h-9 rounded-lg bg-[#F3F3F3] flex items-center justify-center text-[#111111]">
-              <Calendar className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-[#111111] font-mono">{appointmentsThisMonth}</span>
-            <span className="text-xs text-[#777777]">neste mês</span>
-          </div>
-          <p className="text-[11px] text-[#777777] mt-2">
-            {monthNames[currentMonth]} de {currentYear}
+          <p className="text-[11px] text-amber-700 font-medium mt-2 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+            <span>Ver histórico completo</span>
+            <ArrowRight className="w-3 h-3" />
           </p>
         </div>
 
-        {/* Fórmulas Técnicas Registradas */}
-        <div className="p-5 rounded-xl bg-white border border-[#E5E5E5] shadow-2xs">
+        {/* Catálogo de Produtos com Foto */}
+        <div
+          onClick={() => onNavigate('products')}
+          className="p-5 rounded-2xl bg-white border border-[#E5E5E5] shadow-2xs hover:border-[#111111] hover:shadow-xs transition-all cursor-pointer group"
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-[#777777]">
-              Colorações & Fórmulas
+              Catálogo de Produtos
             </span>
-            <div className="w-9 h-9 rounded-lg bg-[#F3F3F3] flex items-center justify-center text-[#111111]">
-              <FlaskConical className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-lg bg-[#F3F3F3] group-hover:bg-[#111111] group-hover:text-white transition-colors flex items-center justify-center text-[#111111]">
+              <Sparkles className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-[#111111] font-mono">
-              {colorAppointmentsCount}
-            </span>
-            <span className="text-xs text-[#777777]">fichas detalhadas</span>
+            <span className="text-3xl font-bold text-[#111111] font-mono">10+</span>
+            <span className="text-xs text-[#777777]">itens com foto</span>
           </div>
-          <p className="text-[11px] text-[#777777] mt-2">Fórmulas e tonalidades salvas</p>
+          <p className="text-[11px] text-amber-700 font-medium mt-2 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+            <span>Explorar produtos & fórmulas</span>
+            <ArrowRight className="w-3 h-3" />
+          </p>
         </div>
       </div>
 
-      {/* GRAPH & RECENT CLIENTS */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Dynamic Period Chart */}
-        <div className="lg:col-span-2 p-6 rounded-2xl bg-white border border-[#E5E5E5] shadow-2xs flex flex-col justify-between">
+      {/* Operação Diária: 2 Colunas Diretas (Últimos Atendimentos & Clientes) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Coluna 1: Últimos Atendimentos Realizados */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#E5E5E5] shadow-2xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-base font-bold text-[#111111]">Atendimentos por Período</h3>
-                <p className="text-xs text-[#777777]">Frequência mensal dos últimos 6 meses</p>
+                <h3 className="text-base font-bold text-[#111111]">Últimos Atendimentos</h3>
+                <p className="text-xs text-[#777777]">Procedimentos e fichas recentes</p>
               </div>
               <button
                 onClick={() => onNavigate('history')}
                 className="text-xs text-[#111111] font-medium flex items-center gap-1 hover:underline"
               >
-                <span>Ver histórico</span>
+                <span>Ver todos</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            {/* Custom Minimalist Monochrome Bar Chart */}
-            <div className="mt-6 pt-4 border-t border-[#F3F3F3]">
-              <div className="h-44 flex items-end justify-between gap-3 px-2">
-                {chartData.map((item, idx) => {
-                  const heightPercent =
-                    maxChartCount > 0 ? Math.max((item.count / maxChartCount) * 100, 8) : 8;
-                  const isCurrent = idx === chartData.length - 1;
+            <div className="divide-y divide-[#F3F3F3]">
+              {recentAppointments.length === 0 ? (
+                <div className="py-10 text-center text-xs text-[#777777]">
+                  Nenhum atendimento registrado ainda.
+                </div>
+              ) : (
+                recentAppointments.map((apt) => {
+                  const client = clients.find((c) => c.id === apt.clientId);
+                  const formattedDate = new Date(`${apt.date}T00:00:00`).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: 'short',
+                  });
 
                   return (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
-                      <span className="text-[11px] font-mono font-semibold text-[#777777] group-hover:text-[#111111]">
-                        {item.count}
-                      </span>
-                      <div className="w-full max-w-[42px] h-32 flex items-end bg-[#F3F3F3] rounded-t-md overflow-hidden">
-                        <div
-                          style={{ height: `${heightPercent}%` }}
-                          className={`w-full transition-all duration-500 rounded-t-md ${
-                            isCurrent
-                              ? 'bg-[#111111]'
-                              : 'bg-[#292929] group-hover:bg-[#111111]'
-                          }`}
-                        />
+                    <div
+                      key={apt.id}
+                      onClick={() => onViewAppointmentDetails(apt)}
+                      className="py-3 flex items-center justify-between hover:bg-[#FAFAFA] px-2 rounded-xl cursor-pointer transition-colors group"
+                      title="Clique para ver os detalhes da ficha técnica"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <ClientAvatar name={client?.name || apt.clientName} avatarUrl={client?.avatarUrl} size="sm" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-[#111111] group-hover:text-amber-700 transition-colors truncate">
+                            {apt.clientName}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] text-[#777777] flex items-center gap-1">
+                              <Calendar className="w-3 h-3 text-[#999999]" />
+                              {formattedDate}
+                            </span>
+                            {apt.professional && (
+                              <span className="text-[11px] text-[#777777] hidden sm:inline">
+                                • {apt.professional}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <span
-                        className={`text-xs ${
-                          isCurrent ? 'font-bold text-[#111111]' : 'text-[#777777]'
-                        }`}
-                      >
-                        {item.label}
-                      </span>
+
+                      <div className="flex items-center gap-2">
+                        <ProcedureBadge procedure={apt.procedureType} customName={apt.customProcedureName} size="sm" />
+                        <ArrowRight className="w-3.5 h-3.5 text-[#CCCCCC] group-hover:text-[#111111] group-hover:translate-x-0.5 transition-all" />
+                      </div>
                     </div>
                   );
-                })}
-              </div>
+                })
+              )}
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-[#F3F3F3] flex items-center justify-between text-xs text-[#777777]">
-            <span>Base de dados ativa</span>
-            <span className="flex items-center gap-1.5 font-medium text-[#292929]">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-              Sincronização local em tempo real
-            </span>
-          </div>
-        </div>
-
-        {/* Recently Registered Clients */}
-        <div className="p-6 rounded-2xl bg-white border border-[#E5E5E5] shadow-2xs flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-base font-bold text-[#111111]">Clientes Recentes</h3>
-              <p className="text-xs text-[#777777]">Últimos cadastros adicionados</p>
-            </div>
-            <button
-              onClick={() => onNavigate('clients')}
-              className="text-xs text-[#111111] font-medium hover:underline"
-            >
-              Ver todas
-            </button>
-          </div>
-
-          <div className="flex-1 divide-y divide-[#F3F3F3]">
-            {recentClients.length === 0 ? (
-              <p className="text-xs text-[#777777] py-8 text-center">Nenhuma cliente cadastrada.</p>
-            ) : (
-              recentClients.map((client) => (
-                <div
-                  key={client.id}
-                  onClick={() => onNavigate('client-detail', { clientId: client.id })}
-                  className="py-3 flex items-center justify-between hover:bg-[#FAFAFA] px-2 rounded-lg cursor-pointer transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <ClientAvatar
-                      name={client.name}
-                      avatarUrl={client.avatarUrl}
-                      size="sm"
-                    />
-                    <div>
-                      <p className="text-xs font-semibold text-[#111111] group-hover:underline">
-                        {client.name}
-                      </p>
-                      <p className="text-[11px] text-[#777777]">{client.phone}</p>
-                    </div>
-                  </div>
-                  <ChevronRightIcon />
-                </div>
-              ))
-            )}
-          </div>
-
-          <button
-            onClick={onOpenNewClientModal}
-            className="mt-4 w-full py-2.5 px-3 rounded-lg border border-dashed border-[#E5E5E5] text-xs font-medium text-[#292929] hover:bg-[#F3F3F3] hover:border-[#111111] transition-all flex items-center justify-center gap-1.5"
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>Cadastrar Nova Cliente</span>
-          </button>
-        </div>
-      </div>
-
-      {/* RECENT APPOINTMENTS TABLE */}
-      <div className="p-6 rounded-2xl bg-white border border-[#E5E5E5] shadow-2xs">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-base font-bold text-[#111111]">Últimos Atendimentos Registrados</h3>
-            <p className="text-xs text-[#777777]">Procedimentos e fórmulas técnicas recentes</p>
-          </div>
-          <button
-            onClick={() => onNavigate('history')}
-            className="text-xs text-[#111111] font-semibold flex items-center gap-1 hover:underline"
-          >
-            <span>Ver histórico completo</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {recentAppointments.length === 0 ? (
-          <div className="py-12 text-center text-[#777777]">
-            <p className="text-sm">Nenhum atendimento registrado até o momento.</p>
+          <div className="mt-4 pt-3 border-t border-[#F3F3F3]">
             <button
               onClick={() => onNavigate('appointment-form')}
-              className="mt-3 inline-flex items-center gap-2 py-2 px-4 rounded-lg bg-[#111111] text-white text-xs font-semibold"
+              className="w-full py-2.5 rounded-xl border border-dashed border-[#D1D5DB] hover:border-[#111111] hover:bg-[#FAFAFA] text-xs font-semibold text-[#111111] transition-all flex items-center justify-center gap-1.5"
             >
-              <CalendarPlus className="w-3.5 h-3.5" />
-              <span>Registrar Primeiro Atendimento</span>
+              <CalendarPlus className="w-4 h-4 text-amber-600" />
+              <span>+ Registrar Novo Atendimento</span>
             </button>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-[#E5E5E5] text-[#777777] uppercase text-[10px] tracking-wider">
-                  <th className="py-3 px-3 font-semibold">Data</th>
-                  <th className="py-3 px-3 font-semibold">Cliente</th>
-                  <th className="py-3 px-3 font-semibold">Procedimento</th>
-                  <th className="py-3 px-3 font-semibold">Profissional</th>
-                  <th className="py-3 px-3 font-semibold">Fórmula / Produtos</th>
-                  <th className="py-3 px-3 text-right font-semibold">Ação</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F3F3F3]">
-                {recentAppointments.map((apt) => {
-                  const formattedDate = new Intl.DateTimeFormat('pt-BR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                  }).format(new Date(`${apt.date}T00:00:00`));
+        </div>
 
-                  // Resumo dos produtos
-                  const productsSummary =
-                    apt.colorFormula?.products?.map((p) => `${p.shadeNumber || p.brand}`).join(' + ') ||
-                    (apt.hasColorInfo ? 'Fórmula registrada' : '—');
+        {/* Coluna 2: Clientes Recentes */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#E5E5E5] shadow-2xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-base font-bold text-[#111111]">Clientes Recentes</h3>
+                <p className="text-xs text-[#777777]">Cadastros ativos no salão</p>
+              </div>
+              <button
+                onClick={() => onNavigate('clients')}
+                className="text-xs text-[#111111] font-medium hover:underline flex items-center gap-1"
+              >
+                <span>Ver todas</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
-                  return (
-                    <tr
-                      key={apt.id}
-                      className="hover:bg-[#FAFAFA] transition-colors group cursor-pointer"
-                      onClick={() => onViewAppointmentDetails(apt)}
+            <div className="divide-y divide-[#F3F3F3]">
+              {recentClients.length === 0 ? (
+                <div className="py-10 text-center text-xs text-[#777777]">
+                  Nenhuma cliente cadastrada.
+                </div>
+              ) : (
+                recentClients.map((client) => (
+                  <div
+                    key={client.id}
+                    onClick={() => onNavigate('client-detail', { clientId: client.id })}
+                    className="py-3 flex items-center justify-between hover:bg-[#FAFAFA] px-2 rounded-xl cursor-pointer transition-colors group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <ClientAvatar name={client.name} avatarUrl={client.avatarUrl} size="sm" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-[#111111] group-hover:text-amber-700 transition-colors truncate">
+                          {client.name}
+                        </p>
+                        <p className="text-[11px] text-[#777777] flex items-center gap-1 mt-0.5">
+                          <Phone className="w-3 h-3 text-[#999999]" />
+                          <span>{client.phone}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigate('appointment-form', { clientId: client.id });
+                      }}
+                      className="inline-flex items-center gap-1 py-1 px-2.5 rounded-lg bg-[#F5F5F5] hover:bg-[#111111] text-[#292929] hover:text-white text-[11px] font-semibold transition-all shadow-2xs"
+                      title="Novo atendimento para esta cliente"
                     >
-                      <td className="py-3.5 px-3 font-mono text-[#292929] whitespace-nowrap">
-                        {formattedDate}
-                      </td>
-                      <td className="py-3.5 px-3 font-semibold text-[#111111] whitespace-nowrap">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onNavigate('client-detail', { clientId: apt.clientId });
-                          }}
-                          className="hover:underline text-left"
-                        >
-                          {apt.clientName}
-                        </button>
-                      </td>
-                      <td className="py-3.5 px-3 whitespace-nowrap">
-                        <ProcedureBadge
-                          procedure={apt.procedureType}
-                          customName={apt.customProcedureName}
-                          size="sm"
-                        />
-                      </td>
-                      <td className="py-3.5 px-3 text-[#777777] whitespace-nowrap">
-                        {apt.professional}
-                      </td>
-                      <td className="py-3.5 px-3 text-[#292929] max-w-xs truncate">
-                        {apt.hasColorInfo ? (
-                          <span className="inline-flex items-center gap-1 font-mono font-medium text-[#111111]">
-                            <FlaskConical className="w-3 h-3 text-[#777777]" />
-                            {productsSummary}
-                          </span>
-                        ) : (
-                          <span className="text-[#777777] italic">Sem química</span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-3 text-right whitespace-nowrap">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onViewAppointmentDetails(apt);
-                          }}
-                          className="py-1 px-2.5 rounded text-[11px] font-semibold text-[#111111] hover:bg-[#E5E5E5] transition-colors"
-                        >
-                          Ver Detalhes
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      <CalendarPlus className="w-3 h-3" />
+                      <span className="hidden sm:inline">Atender</span>
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-        )}
+
+          <div className="mt-4 pt-3 border-t border-[#F3F3F3]">
+            <button
+              onClick={onOpenNewClientModal}
+              className="w-full py-2.5 rounded-xl border border-dashed border-[#D1D5DB] hover:border-[#111111] hover:bg-[#FAFAFA] text-xs font-semibold text-[#111111] transition-all flex items-center justify-center gap-1.5"
+            >
+              <UserPlus className="w-4 h-4 text-[#111111]" />
+              <span>+ Cadastrar Nova Cliente</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
-
-const ChevronRightIcon = () => (
-  <svg
-    className="w-4 h-4 text-[#777777] group-hover:text-[#111111] transition-colors"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-  </svg>
-);

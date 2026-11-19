@@ -37,16 +37,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   totalClientsCount,
   totalAppointmentsCount,
 }) => {
-  const menuItems = [
+  // 4 Pilares Centrais
+  const primaryMenuItems = [
     {
       id: 'dashboard' as NavigationTab,
-      label: 'Dashboard',
+      label: 'Início',
       icon: LayoutDashboard,
       badge: null,
     },
     {
       id: 'clients' as NavigationTab,
-      label: 'Clientes',
+      label: 'Clientes Ativas',
       icon: Users,
       badge: totalClientsCount > 0 ? totalClientsCount : null,
     },
@@ -58,16 +59,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badge: null,
     },
     {
-      id: 'history' as NavigationTab,
-      label: 'Histórico',
-      icon: History,
-      badge: totalAppointmentsCount > 0 ? totalAppointmentsCount : null,
-    },
-    {
       id: 'products' as NavigationTab,
-      label: 'Produtos & Fórmulas',
+      label: 'Produtos',
       icon: Package,
       badge: null,
+    },
+  ];
+
+  // Acessos Secundários
+  const secondaryMenuItems = [
+    {
+      id: 'history' as NavigationTab,
+      label: 'Histórico Geral',
+      icon: History,
+      badge: totalAppointmentsCount > 0 ? totalAppointmentsCount : null,
     },
     {
       id: 'settings' as NavigationTab,
@@ -126,17 +131,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#111111] hover:bg-[#292929] text-white text-sm font-semibold transition-all shadow-xs hover:shadow active:scale-[0.99] group"
           >
             <CalendarPlus className="w-4 h-4 text-white/90 group-hover:scale-105 transition-transform" />
-            <span>Registrar Atendimento</span>
+            <span>+ Novo Atendimento</span>
           </button>
         </div>
 
-        {/* Navigation list */}
-        <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
+        {/* Primary Navigation list (4 Pilares) */}
+        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
           <div className="px-3 pb-2 text-[11px] font-semibold text-[#777777] uppercase tracking-wider">
-            Menu Principal
+            Navegação Principal
           </div>
 
-          {menuItems.map((item) => {
+          {primaryMenuItems.map((item) => {
             const Icon = item.icon;
             const active = isCurrentActive(item.id);
 
@@ -176,12 +181,56 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
             );
           })}
+
+          {/* Divisor & Acessos Secundários */}
+          <div className="pt-6">
+            <div className="px-3 pb-2 text-[10px] font-semibold text-[#999999] uppercase tracking-wider">
+              Outras Opções
+            </div>
+            {secondaryMenuItems.map((item) => {
+              const Icon = item.icon;
+              const active = isCurrentActive(item.id);
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleItemClick(item.id)}
+                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-medium transition-all group ${
+                    active
+                      ? 'bg-neutral-800 text-white shadow-xs'
+                      : 'text-[#555555] hover:bg-[#F3F3F3] hover:text-[#111111]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      className={`w-3.5 h-3.5 transition-colors ${
+                        active ? 'text-white' : 'text-[#888888] group-hover:text-[#111111]'
+                      }`}
+                    />
+                    <span>{item.label}</span>
+                  </div>
+
+                  {item.badge !== null && (
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium ${
+                        active
+                          ? 'bg-white/20 text-white'
+                          : 'bg-[#F3F3F3] text-[#777777]'
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </nav>
 
         {/* Footer info & salon identity */}
         <div className="p-4 border-t border-[#E5E7EB] bg-[#F4F5F7]">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center font-serif text-sm shadow-xs">
+            <div className="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center font-serif text-sm shadow-xs font-bold">
               E
             </div>
             <div className="flex-1 min-w-0">

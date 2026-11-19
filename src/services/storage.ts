@@ -53,6 +53,23 @@ export const StorageService = {
       if (updated) {
         saveToStorage(STORAGE_KEYS.CLIENTS, patchedClients);
       }
+
+      // Atualiza produtos demo com fotos caso estejam sem imageUrl
+      const products = this.getProducts();
+      let updatedProducts = false;
+      const patchedProducts = products.map((p) => {
+        if (p.isDemo && !p.imageUrl) {
+          const demoMatch = DEMO_PRODUCTS.find((d) => d.id === p.id);
+          if (demoMatch?.imageUrl) {
+            updatedProducts = true;
+            return { ...p, imageUrl: demoMatch.imageUrl };
+          }
+        }
+        return p;
+      });
+      if (updatedProducts) {
+        saveToStorage(STORAGE_KEYS.PRODUCTS, patchedProducts);
+      }
     }
   },
 

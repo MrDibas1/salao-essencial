@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, UserPlus, Database, Download } from 'lucide-react';
+import { Menu, UserPlus, Database, Download, Settings } from 'lucide-react';
 import type { NavigationTab } from './Sidebar';
 
 interface HeaderProps {
@@ -7,6 +7,7 @@ interface HeaderProps {
   onOpenMobileSidebar: () => void;
   onOpenNewClientModal: () => void;
   onOpenInstallModal?: () => void;
+  onNavigate?: (tab: NavigationTab) => void;
   hasDemoData: boolean;
 }
 
@@ -15,22 +16,23 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMobileSidebar,
   onOpenNewClientModal,
   onOpenInstallModal,
+  onNavigate,
   hasDemoData,
 }) => {
   const getPageTitle = () => {
     switch (currentTab) {
       case 'dashboard':
-        return { title: 'Dashboard', desc: 'Visão geral das atividades e procedimentos' };
+        return { title: 'Início', desc: 'Atalhos rápidos e visão das clientes ativas' };
       case 'clients':
-        return { title: 'Gestão de Clientes', desc: 'Listagem e cadastros do salão' };
+        return { title: 'Clientes Ativas', desc: 'Consultas e fichas técnicas do salão' };
       case 'client-detail':
         return { title: 'Perfil da Cliente', desc: 'Histórico individual de colorações e atendimentos' };
       case 'appointment-form':
-        return { title: 'Registro de Atendimento', desc: 'Ficha técnica, fórmulas de coloração e serviços' };
+        return { title: 'Novo Atendimento', desc: 'Registro de procedimento e fórmulas técnicas' };
       case 'history':
-        return { title: 'Histórico Geral', desc: 'Todos os procedimentos e fórmulas registradas' };
+        return { title: 'Histórico Geral', desc: 'Todos os atendimentos já realizados' };
       case 'products':
-        return { title: 'Catálogo de Produtos', desc: 'Tinturas, oxidantes, descolorantes e insumos' };
+        return { title: 'Produtos & Insumos', desc: 'Catálogo com fotos, tinturas e tratamentos' };
       case 'settings':
         return { title: 'Configurações', desc: 'Identidade visual, preferências e dados do sistema' };
       default:
@@ -67,12 +69,12 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5 sm:gap-3">
         {/* Badge de dados demonstrativos se ativo */}
         {hasDemoData && (
           <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#F3F4F6] text-[#1F2937] border border-[#D1D5DB] shadow-2xs">
             <Database className="w-3.5 h-3.5 text-[#6B7280]" />
-            <span>Dados Demonstrativos</span>
+            <span>Demonstrativo</span>
           </span>
         )}
 
@@ -102,6 +104,21 @@ export const Header: React.FC<HeaderProps> = ({
           <UserPlus className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Nova Cliente</span>
         </button>
+
+        {/* Settings Shortcut Button */}
+        {onNavigate && (
+          <button
+            onClick={() => onNavigate('settings')}
+            className={`p-2 rounded-xl border transition-all ${
+              currentTab === 'settings'
+                ? 'bg-[#111111] text-white border-[#111111]'
+                : 'bg-white hover:bg-[#F3F3F3] text-[#555555] hover:text-[#111111] border-[#D1D5DB]'
+            }`}
+            title="Configurações e Backup"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </header>
   );

@@ -106,6 +106,7 @@ export interface Product {
   shadeNumber?: string;
   unit: string;
   notes?: string;
+  imageUrl?: string;
   createdAt: string;
   isDemo?: boolean;
 }
