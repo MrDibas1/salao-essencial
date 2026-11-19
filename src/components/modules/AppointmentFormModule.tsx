@@ -4,24 +4,21 @@ import type {
   Appointment,
   Product,
   ProcedureType,
-  ApplicationRegion,
-  ColorProductItem,
 } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
 import { ClientAvatar } from '../common/ClientAvatar';
 import {
-  FlaskConical,
-  Plus,
-  Trash2,
   ArrowLeft,
   Check,
-  Layers,
-  Clock,
   Search,
   X,
   Phone,
+  Plus,
+  Package,
+  Sparkles,
+  Calendar,
   User,
-  ExternalLink,
+  FlaskConical,
 } from 'lucide-react';
 
 interface AppointmentFormModuleProps {
@@ -34,12 +31,11 @@ interface AppointmentFormModuleProps {
   onOpenNewClientModal: () => void;
 }
 
-const DEFAULT_PROCEDURES: ProcedureType[] = [
+const PROCEDURES: ProcedureType[] = [
   'Coloração',
   'Retoque de raiz',
   'Luzes',
   'Mechas',
-  'Descoloração',
   'Tonalização',
   'Hidratação',
   'Reconstrução',
@@ -49,13 +45,17 @@ const DEFAULT_PROCEDURES: ProcedureType[] = [
   'Outro',
 ];
 
-const APPLICATION_REGIONS: ApplicationRegion[] = [
-  'Raiz',
-  'Comprimento',
-  'Pontas',
-  'Cabelo completo',
-  'Raiz e comprimento',
-  'Outra região',
+const OX_SHORTCUTS = [
+  '10 Vol',
+  '20 Vol',
+  '30 Vol',
+  '40 Vol',
+  'Proporção 1:1',
+  'Proporção 1:1.5',
+  'Proporção 1:2',
+  '60g',
+  '45g',
+  '30g',
 ];
 
 export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
@@ -67,12 +67,10 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
   onNavigate,
   onOpenNewClientModal,
 }) => {
-  // SEÇÃO 1: INFORMAÇÕES BÁSICAS
+  // 1. Cliente
   const [selectedClientId, setSelectedClientId] = useState(
     appointmentToEdit?.clientId || initialClientId || ''
   );
-
-  // Estados de busca da cliente com lupa e autocomplete
   const [clientSearchQuery, setClientSearchQuery] = useState('');
   const [isClientDropdownOpen, setIsClientDropdownOpen] = useState(false);
   const clientSearchRef = useRef<HTMLDivElement>(null);
@@ -82,17 +80,14 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
   }, [clients, selectedClientId]);
 
   const filteredClients = useMemo(() => {
-    if (!clientSearchQuery.trim()) {
-      return clients.slice(0, 8);
-    }
-    const query = clientSearchQuery.toLowerCase();
-    return clients.filter((c) => {
-      const matchName = c.name.toLowerCase().includes(query);
-      const matchPhone = c.phone.toLowerCase().includes(query);
-      const matchWhatsapp = c.whatsapp?.toLowerCase().includes(query);
-      const matchEmail = c.email?.toLowerCase().includes(query);
-      return matchName || matchPhone || matchWhatsapp || matchEmail;
-    });
+    if (!clientSearchQuery.trim()) return clients.slice(0, 8);
+    const q = clientSearchQuery.toLowerCase();
+    return clients.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.phone.toLowerCase().includes(q) ||
+        c.whatsapp?.toLowerCase().includes(q)
+    );
   }, [clients, clientSearchQuery]);
 
   useEffect(() => {
@@ -104,243 +99,131 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-  const [date, setDate] = useState(
-    appointmentToEdit?.date || new Date().toISOString().substring(0, 10)
-  );
+
+  // 2. Dados do Atendimento
+  const todayStr = new Date().toISOString().substring(0, 10);
+  const [date, setDate] = useState(appointmentToEdit?.date || todayStr);
   const [professional, setProfessional] = useState(
     appointmentToEdit?.professional || 'Carolina Martins'
   );
+
+  // 3. Serviço
   const [procedureType, setProcedureType] = useState<ProcedureType | string>(
     appointmentToEdit?.procedureType || 'Coloração'
   );
   const [customProcedureName, setCustomProcedureName] = useState(
     appointmentToEdit?.customProcedureName || ''
   );
-  const [description, setDescription] = useState(appointmentToEdit?.description || '');
-  const [generalNotes, setGeneralNotes] = useState(appointmentToEdit?.generalNotes || '');
 
-  // SEÇÃO 2: INFORMAÇÕES DE COLORAÇÃO
-  const isColorProcedureDefault = [
-    'Coloração',
-    'Retoque de raiz',
-    'Luzes',
-    'Mechas',
-    'Descoloração',
-    'Tonalização',
-  ].includes(procedureType);
-
-  const [hasColorInfo, setHasColorInfo] = useState(
-    appointmentToEdit ? appointmentToEdit.hasColorInfo : isColorProcedureDefault
-  );
-
-  // Múltiplos produtos de coloração (+ ADICIONAR OUTRA TINTA)
-  const [colorProducts, setColorProducts] = useState<ColorProductItem[]>(
-    appointmentToEdit?.colorFormula?.products?.length
-      ? appointmentToEdit.colorFormula.products
-      : [
-          {
-            id: `p-${Date.now()}-1`,
-            brand: '',
-            line: '',
-            shadeNumber: '',
-            shadeName: '',
-            quantity: '',
-            unit: 'g',
-            region: 'Cabelo completo',
-          },
-        ]
-  );
-
-  // Oxidante
-  const [oxidantUsed, setOxidantUsed] = useState(
-    appointmentToEdit?.colorFormula?.oxidant?.used ?? true
-  );
-  const [oxidantBrand, setOxidantBrand] = useState(
-    appointmentToEdit?.colorFormula?.oxidant?.brand || ''
-  );
-  const [oxidantVolume, setOxidantVolume] = useState(
-    appointmentToEdit?.colorFormula?.oxidant?.volume || '20 vol (6%)'
-  );
-  const [oxidantQuantityOrRatio, setOxidantQuantityOrRatio] = useState(
-    appointmentToEdit?.colorFormula?.oxidant?.quantityOrRatio || '1:1.5'
-  );
-  const [pauseTime, setPauseTime] = useState(
-    appointmentToEdit?.colorFormula?.pauseTime || '35 minutos'
-  );
-  const [technicalNotes, setTechnicalNotes] = useState(
-    appointmentToEdit?.colorFormula?.technicalNotes || ''
-  );
-
-  // SEÇÃO 3: OBSERVAÇÕES E RESULTADOS TÉCNICOS
-  const [initialCondition, setInitialCondition] = useState(
-    appointmentToEdit?.assessment?.initialCondition || ''
-  );
-  const [relevantHistory, setRelevantHistory] = useState(
-    appointmentToEdit?.assessment?.relevantHistory || ''
-  );
-  const [finalResult, setFinalResult] = useState(
-    appointmentToEdit?.assessment?.finalResult || ''
-  );
-  const [professionalNotes, setProfessionalNotes] = useState(
-    appointmentToEdit?.assessment?.professionalNotes || ''
-  );
-  const [nextRecommendations, setNextRecommendations] = useState(
-    appointmentToEdit?.assessment?.nextRecommendations || ''
-  );
-
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  // Atualiza toggle de coloração caso mude o tipo de procedimento e o usuário não tenha editado manualmente
-  const handleProcedureTypeChange = (type: string) => {
-    setProcedureType(type);
-    const shouldHaveColor = [
-      'Coloração',
-      'Retoque de raiz',
-      'Luzes',
-      'Mechas',
-      'Descoloração',
-      'Tonalização',
-    ].includes(type);
-    setHasColorInfo(shouldHaveColor);
-  };
-
-  // Gerenciamento de múltiplas tintas
-  const handleAddProduct = () => {
-    const newItem: ColorProductItem = {
-      id: `p-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-      brand: colorProducts[colorProducts.length - 1]?.brand || '',
-      line: '',
-      shadeNumber: '',
-      shadeName: '',
-      quantity: '',
-      unit: 'g',
-      region: 'Cabelo completo',
-    };
-    setColorProducts([...colorProducts, newItem]);
-  };
-
-  const handleRemoveProduct = (indexToRemove: number) => {
-    if (colorProducts.length <= 1) {
-      // Se tiver só um, apenas limpa os campos para conveniência
-      setColorProducts([
-        {
-          id: `p-${Date.now()}-reset`,
-          brand: '',
-          line: '',
-          shadeNumber: '',
-          shadeName: '',
-          quantity: '',
-          unit: 'g',
-          region: 'Cabelo completo',
-        },
-      ]);
-      return;
+  // 4. Produto
+  const [selectedProductId, setSelectedProductId] = useState<string>(() => {
+    if (appointmentToEdit?.colorFormula?.products?.[0]?.id) {
+      return appointmentToEdit.colorFormula.products[0].id;
     }
-    setColorProducts(colorProducts.filter((_, idx) => idx !== indexToRemove));
-  };
+    return products[0]?.id || '';
+  });
+  const [customProductName, setCustomProductName] = useState('');
 
-  const handleUpdateProduct = (index: number, updates: Partial<ColorProductItem>) => {
-    const updated = [...colorProducts];
-    updated[index] = { ...updated[index], ...updates };
-    setColorProducts(updated);
-  };
+  // 5. Campo Único de Observação (Oxigenação & Quantidades)
+  const [formulaNotes, setFormulaNotes] = useState<string>(() => {
+    if (appointmentToEdit?.colorFormula?.technicalNotes) {
+      return appointmentToEdit.colorFormula.technicalNotes;
+    }
+    if (appointmentToEdit?.generalNotes) {
+      return appointmentToEdit.generalNotes;
+    }
+    return '';
+  });
 
-  // Preenchimento rápido a partir do catálogo de produtos
-  const handleSelectFromCatalog = (productIndex: number, productId: string) => {
-    const found = products.find((p) => p.id === productId);
-    if (!found) return;
+  const [formError, setFormError] = useState('');
 
-    handleUpdateProduct(productIndex, {
-      brand: found.brand,
-      line: found.line || '',
-      shadeNumber: found.shadeNumber || '',
-      shadeName: found.name,
-      unit: found.unit.includes('ml') ? 'ml' : 'g',
+  // Inserir atalho rápido no campo de texto
+  const handleAddShortcut = (text: string) => {
+    setFormulaNotes((prev) => {
+      if (!prev.trim()) return text;
+      return `${prev.trim()} + ${text}`;
     });
   };
 
-  // Validação e Salvamento
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: { [key: string]: string } = {};
 
     if (!selectedClientId) {
-      newErrors.client = 'Selecione uma cliente para o atendimento.';
-    }
-    if (!date) {
-      newErrors.date = 'Data do atendimento é obrigatória.';
-    }
-    if (!professional.trim()) {
-      newErrors.professional = 'Informe o profissional responsável.';
-    }
-    if (procedureType === 'Outro' && !customProcedureName.trim()) {
-      newErrors.customProcedureName = 'Especifique o nome do procedimento.';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setFormError('Por favor, selecione uma cliente para registrar o atendimento.');
       return;
     }
 
-    const selectedClient = clients.find((c) => c.id === selectedClientId);
-    const clientName = selectedClient ? selectedClient.name : 'Cliente';
+    if (!selectedClient) {
+      setFormError('Cliente não encontrada. Selecione novamente.');
+      return;
+    }
 
-    // Limpar produtos vazios se houver
-    const validProducts = colorProducts.filter(
-      (p) => p.brand.trim() || p.shadeNumber.trim() || p.shadeName?.trim() || p.quantity.trim()
+    if (!procedureType) {
+      setFormError('Por favor, selecione o tipo de serviço realizado.');
+      return;
+    }
+
+    setFormError('');
+
+    // Localizar produto escolhido
+    const chosenProduct = products.find((p) => p.id === selectedProductId);
+    const prodName = chosenProduct ? chosenProduct.name : customProductName.trim();
+
+    // Mapeamento retrocompatível completo
+    onSave(
+      {
+        clientId: selectedClientId,
+        clientName: selectedClient.name,
+        date,
+        professional: professional.trim() || 'Carolina Martins',
+        procedureType,
+        customProcedureName: procedureType === 'Outro' ? customProcedureName.trim() : undefined,
+        description: prodName ? `Produto: ${prodName}` : undefined,
+        generalNotes: formulaNotes.trim() || undefined,
+        hasColorInfo: Boolean(chosenProduct || formulaNotes.trim()),
+        colorFormula: (chosenProduct || formulaNotes.trim())
+          ? {
+              products: chosenProduct
+                ? [
+                    {
+                      id: chosenProduct.id,
+                      brand: chosenProduct.brand,
+                      line: chosenProduct.line,
+                      shadeNumber: chosenProduct.shadeNumber || '',
+                      shadeName: chosenProduct.name,
+                      quantity: '60g',
+                      unit: chosenProduct.unit || 'g',
+                      region: 'Cabelo completo',
+                    },
+                  ]
+                : [],
+              oxidant: {
+                used: formulaNotes.toLowerCase().includes('vol') || formulaNotes.toLowerCase().includes('ox'),
+                volume: formulaNotes.match(/\b(10|20|30|40)\s*vol\b/i)?.[0] || undefined,
+                quantityOrRatio: formulaNotes.match(/\b1:[1-2](\.5)?\b/i)?.[0] || undefined,
+              },
+              technicalNotes: formulaNotes.trim(),
+            }
+          : undefined,
+      },
+      appointmentToEdit ? appointmentToEdit.id : undefined
     );
 
-    const appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'> = {
-      clientId: selectedClientId,
-      clientName,
-      date,
-      professional: professional.trim(),
-      procedureType: procedureType as ProcedureType,
-      customProcedureName:
-        procedureType === 'Outro' ? customProcedureName.trim() : undefined,
-      description: description.trim() || undefined,
-      generalNotes: generalNotes.trim() || undefined,
-      hasColorInfo,
-      colorFormula: hasColorInfo
-        ? {
-            products: validProducts,
-            oxidant: {
-              used: oxidantUsed,
-              brand: oxidantBrand.trim() || undefined,
-              volume: oxidantVolume.trim() || undefined,
-              quantityOrRatio: oxidantQuantityOrRatio.trim() || undefined,
-            },
-            pauseTime: pauseTime.trim() || undefined,
-            technicalNotes: technicalNotes.trim() || undefined,
-          }
-        : undefined,
-      assessment: {
-        initialCondition: initialCondition.trim() || undefined,
-        relevantHistory: relevantHistory.trim() || undefined,
-        finalResult: finalResult.trim() || undefined,
-        professionalNotes: professionalNotes.trim() || undefined,
-        nextRecommendations: nextRecommendations.trim() || undefined,
-      },
-    };
-
-    onSave(appointmentData, appointmentToEdit ? appointmentToEdit.id : undefined);
-
-    // Navegar para o perfil da cliente com o novo histórico
+    // Navega para o perfil da cliente para ver o atendimento salvo
     onNavigate('client-detail', { clientId: selectedClientId });
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
-      {/* Top Navigation bar */}
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-300">
+      {/* Barra superior de navegação */}
       <div className="flex items-center justify-between">
         <button
           type="button"
           onClick={() => {
-            if (initialClientId) {
-              onNavigate('client-detail', { clientId: initialClientId });
+            if (selectedClientId) {
+              onNavigate('client-detail', { clientId: selectedClientId });
             } else {
-              onNavigate('history');
+              onNavigate('dashboard');
             }
           }}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#777777] hover:text-[#111111] transition-colors"
@@ -349,826 +232,351 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
           <span>Voltar</span>
         </button>
 
-        <span className="text-xs text-[#777777]">
-          {appointmentToEdit ? 'Modo de Edição' : 'Novo Registro de Procedimento'}
+        <span className="text-xs font-medium text-[#777777]">
+          {appointmentToEdit ? 'Editar Atendimento' : 'Novo Registro de Atendimento'}
         </span>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* ============================================================== */}
-        {/* SEÇÃO 1: INFORMAÇÕES DO ATENDIMENTO                           */}
-        {/* ============================================================== */}
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-4 sm:p-7 shadow-2xs space-y-5">
-          <div className="border-b border-[#E5E5E5] pb-4 flex items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#111111] text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-xs shrink-0">
+        {formError && (
+          <div className="p-4 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs font-semibold flex items-center justify-between">
+            <span>{formError}</span>
+            <button type="button" onClick={() => setFormError('')}>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* PASSO 1: CLIENTE EM DESTAQUE                                             */}
+        {/* ========================================================================= */}
+        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-5 sm:p-7 shadow-2xs space-y-4">
+          <div className="border-b border-[#F0F0F0] pb-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-[#111111] text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
                 1
               </div>
-              <div className="min-w-0">
-                <h3 className="text-base sm:text-lg font-bold text-[#111111] tracking-tight leading-snug">
-                  Informações do Atendimento
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-[#111111] tracking-tight">
+                  Cliente do Atendimento
                 </h3>
-                <p className="text-[11px] sm:text-xs text-[#666666] mt-0.5 leading-tight">
-                  Identificação da cliente, data, profissional e procedimento
-                </p>
+                <p className="text-xs text-[#777777]">Identificação da cliente para registro da ficha</p>
               </div>
             </div>
-            <div className="shrink-0">
-              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 text-[10px] sm:text-[11px] font-bold shadow-2xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
-                <span>Obrigatório</span>
-              </span>
-            </div>
+
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 text-[11px] font-bold shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+              <span>Obrigatório</span>
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Cliente (Pesquisa com Lupa e Autocomplete) */}
-            <div className="sm:col-span-2">
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111]">
-                  Cliente <span className="text-rose-500">*</span>
-                </label>
-                {!selectedClient && (
-                  <button
-                    type="button"
-                    onClick={onOpenNewClientModal}
-                    className="text-xs text-[#111111] font-medium hover:underline flex items-center gap-1"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Cadastrar nova cliente</span>
-                  </button>
-                )}
+          {selectedClient ? (
+            /* Card da Cliente Selecionada */
+            <div className="p-4 rounded-xl border-2 border-amber-400 bg-amber-50/30 flex items-center justify-between gap-4 transition-all">
+              <div className="flex items-center gap-3.5">
+                <ClientAvatar
+                  name={selectedClient.name}
+                  avatarUrl={selectedClient.avatarUrl}
+                  size="lg"
+                  className="ring-2 ring-white shadow-xs"
+                />
+                <div>
+                  <h4 className="text-base font-bold text-[#111111]">{selectedClient.name}</h4>
+                  <p className="text-xs text-[#555555] flex items-center gap-1.5 mt-0.5 font-medium">
+                    <Phone className="w-3.5 h-3.5 text-[#888888]" />
+                    <span>{selectedClient.phone}</span>
+                  </p>
+                </div>
               </div>
 
-              {selectedClient ? (
-                /* Card da Cliente Selecionada */
-                <div className="p-3.5 sm:p-4 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] flex items-center justify-between gap-4 transition-all">
-                  <div className="flex items-center gap-3">
-                    <ClientAvatar
-                      name={selectedClient.name}
-                      avatarUrl={selectedClient.avatarUrl}
-                      size="md"
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-bold text-[#111111]">{selectedClient.name}</h4>
-                        {selectedClient.status === 'archived' && (
-                          <span className="text-[10px] bg-[#E5E5E5] text-[#777777] px-1.5 py-0.5 rounded font-medium">
-                            Arquivada
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-[#777777] mt-0.5">
-                        <span className="flex items-center gap-1 text-[#292929] font-medium">
-                          <Phone className="w-3 h-3 text-[#777777]" />
-                          {selectedClient.phone}
-                        </span>
-                        {selectedClient.email && (
-                          <span className="hidden sm:inline text-[#777777]">• {selectedClient.email}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedClientId('');
+                  setClientSearchQuery('');
+                  setIsClientDropdownOpen(true);
+                }}
+                className="py-1.5 px-3 rounded-lg border border-[#D1D5DB] bg-white hover:bg-neutral-100 text-xs font-semibold text-[#111111] transition-colors shadow-2xs"
+              >
+                Trocar Cliente
+              </button>
+            </div>
+          ) : (
+            /* Campo de Busca Rápida de Cliente */
+            <div className="relative" ref={clientSearchRef}>
+              <div className="relative">
+                <Search className="w-4 h-4 text-[#888888] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Pesquise o nome da cliente para selecionar..."
+                  value={clientSearchQuery}
+                  onFocus={() => setIsClientDropdownOpen(true)}
+                  onChange={(e) => {
+                    setClientSearchQuery(e.target.value);
+                    setIsClientDropdownOpen(true);
+                  }}
+                  className="w-full pl-10 pr-10 py-3 rounded-xl border border-[#D1D5DB] bg-white text-sm focus:outline-none focus:border-[#111111] shadow-2xs"
+                />
+              </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onNavigate('client-detail', { clientId: selectedClient.id })}
-                      className="hidden sm:inline-flex items-center gap-1 py-1.5 px-2.5 rounded-lg border border-[#E5E5E5] bg-white hover:bg-[#F3F3F3] text-[11px] font-medium text-[#292929] transition-colors"
-                      title="Ver histórico desta cliente"
-                    >
-                      <ExternalLink className="w-3 h-3 text-[#777777]" />
-                      <span>Ver Perfil</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedClientId('');
-                        setClientSearchQuery('');
-                        setIsClientDropdownOpen(true);
-                      }}
-                      className="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg border border-[#E5E5E5] bg-white hover:bg-[#F3F3F3] text-xs font-semibold text-[#111111] transition-colors shadow-2xs"
-                    >
-                      <Search className="w-3.5 h-3.5 text-[#777777]" />
-                      <span>Trocar Cliente</span>
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* Campo de Busca com Lupa e Autocomplete */
-                <div ref={clientSearchRef} className="relative">
-                  <div className="relative">
-                    <Search className="w-4 h-4 text-[#777777] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      type="text"
-                      placeholder="Pesquisar por nome ou telefone da cliente (ex: Mariana, 99123)..."
-                      value={clientSearchQuery}
-                      onChange={(e) => {
-                        setClientSearchQuery(e.target.value);
-                        setIsClientDropdownOpen(true);
-                        if (errors.client) setErrors({ ...errors, client: '' });
-                      }}
-                      onFocus={() => setIsClientDropdownOpen(true)}
-                      className={`w-full pl-10 pr-10 py-3 rounded-xl border text-xs sm:text-sm bg-white focus:outline-none transition-all ${
-                        errors.client
-                          ? 'border-rose-400 bg-rose-50/20 focus:border-rose-500'
-                          : 'border-[#E5E5E5] focus:border-[#111111] shadow-2xs'
-                      }`}
-                    />
-                    {clientSearchQuery && (
+              {isClientDropdownOpen && (
+                <div className="absolute z-30 left-0 right-0 mt-2 bg-white rounded-xl border border-[#D1D5DB] shadow-lg divide-y divide-[#F0F0F0] max-h-64 overflow-y-auto">
+                  {filteredClients.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-[#777777] space-y-2">
+                      <p>Nenhuma cliente encontrada.</p>
                       <button
                         type="button"
-                        onClick={() => {
-                          setClientSearchQuery('');
-                        }}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777777] hover:text-[#111111] p-1"
+                        onClick={onOpenNewClientModal}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 underline"
                       >
-                        <X className="w-4 h-4" />
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Cadastrar agora</span>
                       </button>
-                    )}
-                  </div>
-
-                  {/* Dropdown com os resultados da pesquisa */}
-                  {isClientDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-xl border border-[#E5E5E5] shadow-xl z-30 max-h-72 overflow-y-auto animate-in fade-in zoom-in-95">
-                      <div className="p-2 border-b border-[#F3F3F3] flex items-center justify-between text-[11px] text-[#777777] bg-[#FAFAFA] px-3">
-                        <span>
-                          {filteredClients.length > 0
-                            ? `${filteredClients.length} cliente${filteredClients.length > 1 ? 's' : ''} encontrada${filteredClients.length > 1 ? 's' : ''}`
-                            : 'Nenhum resultado'}
-                        </span>
-                        <span className="text-[10px]">Clique para selecionar</span>
-                      </div>
-
-                      {filteredClients.length === 0 ? (
-                        <div className="p-5 text-center space-y-2">
-                          <p className="text-xs text-[#777777]">
-                            Nenhuma cliente encontrada com o termo "{clientSearchQuery}".
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsClientDropdownOpen(false);
-                              onOpenNewClientModal();
-                            }}
-                            className="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-[#111111] text-white text-xs font-semibold"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                            <span>Cadastrar nova cliente</span>
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="divide-y divide-[#F3F3F3]">
-                          {filteredClients.map((client) => (
-                            <button
-                              key={client.id}
-                              type="button"
-                              onClick={() => {
-                                setSelectedClientId(client.id);
-                                setIsClientDropdownOpen(false);
-                                setClientSearchQuery('');
-                                if (errors.client) setErrors({ ...errors, client: '' });
-                              }}
-                              className="w-full p-3 flex items-center justify-between text-left hover:bg-[#FAFAFA] transition-colors group"
-                            >
-                              <div className="flex items-center gap-3">
-                                <ClientAvatar
-                                  name={client.name}
-                                  avatarUrl={client.avatarUrl}
-                                  size="sm"
-                                />
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs font-bold text-[#111111] group-hover:underline">
-                                      {client.name}
-                                    </span>
-                                    {client.status === 'archived' && (
-                                      <span className="text-[9px] bg-[#E5E5E5] text-[#777777] px-1 rounded">
-                                        Arquivada
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className="text-[11px] text-[#777777] flex items-center gap-1 mt-0.5">
-                                    <Phone className="w-3 h-3" />
-                                    {client.phone}
-                                    {client.email && <span className="ml-1 text-[10px]">• {client.email}</span>}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <span className="text-[11px] font-semibold text-[#111111] opacity-0 group-hover:opacity-100 transition-opacity bg-white border border-[#E5E5E5] px-2 py-0.5 rounded">
-                                Selecionar
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Dropdown footer shortcut */}
-                      <div className="p-2 border-t border-[#F3F3F3] bg-[#FAFAFA] text-center">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsClientDropdownOpen(false);
-                            onOpenNewClientModal();
-                          }}
-                          className="w-full py-1.5 px-3 rounded-lg border border-dashed border-[#E5E5E5] hover:border-[#111111] hover:bg-white text-[11px] font-semibold text-[#111111] transition-all flex items-center justify-center gap-1.5"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Cadastrar outra cliente</span>
-                        </button>
-                      </div>
                     </div>
+                  ) : (
+                    filteredClients.map((c) => (
+                      <div
+                        key={c.id}
+                        onClick={() => {
+                          setSelectedClientId(c.id);
+                          setIsClientDropdownOpen(false);
+                          setFormError('');
+                        }}
+                        className="p-3 flex items-center justify-between hover:bg-amber-50/50 cursor-pointer transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <ClientAvatar name={c.name} avatarUrl={c.avatarUrl} size="sm" />
+                          <div>
+                            <p className="text-xs font-bold text-[#111111]">{c.name}</p>
+                            <p className="text-[11px] text-[#777777]">{c.phone}</p>
+                          </div>
+                        </div>
+                        <span className="text-xs font-semibold text-amber-700">Selecionar</span>
+                      </div>
+                    ))
                   )}
                 </div>
               )}
-
-              {errors.client && (
-                <p className="text-[11px] text-rose-500 mt-1">{errors.client}</p>
-              )}
             </div>
+          )}
 
-            {/* Data */}
+          {/* Linha com Data e Profissional */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">
-                Data do Atendimento <span className="text-rose-500">*</span>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
+                Data do Atendimento
               </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => {
-                  setDate(e.target.value);
-                  if (errors.date) setErrors({ ...errors, date: '' });
-                }}
-                className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all text-[#292929] ${
-                  errors.date
-                    ? 'border-rose-400 bg-rose-50/20'
-                    : 'border-[#E5E5E5] bg-white focus:border-[#111111]'
-                }`}
-              />
-              {errors.date && <p className="text-[11px] text-rose-500 mt-1">{errors.date}</p>}
-            </div>
-
-            {/* Profissional Responsável */}
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">
-                Profissional Responsável <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Ex: Carolina Martins"
-                value={professional}
-                onChange={(e) => {
-                  setProfessional(e.target.value);
-                  if (errors.professional) setErrors({ ...errors, professional: '' });
-                }}
-                className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all ${
-                  errors.professional
-                    ? 'border-rose-400 bg-rose-50/20'
-                    : 'border-[#E5E5E5] bg-white focus:border-[#111111]'
-                }`}
-              />
-              {errors.professional && (
-                <p className="text-[11px] text-rose-500 mt-1">{errors.professional}</p>
-              )}
-            </div>
-
-            {/* Tipo de Procedimento */}
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">
-                Tipo de Procedimento <span className="text-rose-500">*</span>
-              </label>
-              <select
-                value={procedureType}
-                onChange={(e) => handleProcedureTypeChange(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] bg-white text-sm focus:outline-none focus:border-[#111111] transition-all"
-              >
-                {DEFAULT_PROCEDURES.map((proc) => (
-                  <option key={proc} value={proc}>
-                    {proc}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Campo caso seja "Outro" procedimento */}
-            {procedureType === 'Outro' && (
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#111111] mb-1">
-                  Especificar Procedimento <span className="text-rose-500">*</span>
-                </label>
+              <div className="relative">
                 <input
-                  type="text"
-                  placeholder="Ex: Cronograma Personalizado, Spa dos Fios..."
-                  value={customProcedureName}
-                  onChange={(e) => {
-                    setCustomProcedureName(e.target.value);
-                    if (errors.customProcedureName)
-                      setErrors({ ...errors, customProcedureName: '' });
-                  }}
-                  className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all ${
-                    errors.customProcedureName
-                      ? 'border-rose-400 bg-rose-50/20'
-                      : 'border-[#E5E5E5] bg-white focus:border-[#111111]'
-                  }`}
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs font-medium focus:outline-none focus:border-[#111111] shadow-2xs"
                 />
-                {errors.customProcedureName && (
-                  <p className="text-[11px] text-rose-500 mt-1">{errors.customProcedureName}</p>
-                )}
               </div>
-            )}
+            </div>
 
-            {/* Descrição do Serviço */}
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                Descrição do Serviço Realizado
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
+                Profissional Responsável
               </label>
               <input
                 type="text"
-                placeholder="Ex: Coloração global com nuance fria personalizada, neutralização de fundo e escova."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] bg-white text-sm focus:outline-none focus:border-[#111111] transition-all"
-              />
-            </div>
-
-            {/* Observações Gerais */}
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                Observações Gerais do Atendimento
-              </label>
-              <textarea
-                rows={2}
-                placeholder="Ex: Tempo de lavatório, comportamento dos fios ou observações de atendimento."
-                value={generalNotes}
-                onChange={(e) => setGeneralNotes(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] bg-white text-sm focus:outline-none focus:border-[#111111] transition-all resize-none"
+                value={professional}
+                onChange={(e) => setProfessional(e.target.value)}
+                placeholder="Ex: Carolina Martins"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs font-medium focus:outline-none focus:border-[#111111] shadow-2xs"
               />
             </div>
           </div>
         </div>
 
-        {/* ============================================================== */}
-        {/* SEÇÃO 2: INFORMAÇÕES DA COLORAÇÃO & MÚLTIPLAS TINTAS           */}
-        {/* ============================================================== */}
-        <div className="bg-white rounded-2xl border border-[#111111] p-5 sm:p-7 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5E5E5] pb-4">
+        {/* ========================================================================= */}
+        {/* PASSO 2: SELEÇÃO SIMPLES DE SERVIÇO & PRODUTO                             */}
+        {/* ========================================================================= */}
+        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-5 sm:p-7 shadow-2xs space-y-5">
+          <div className="border-b border-[#F0F0F0] pb-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#111111] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-[#111111] text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
                 2
               </div>
               <div>
-                <h3 className="text-lg font-bold text-[#111111] tracking-tight">
-                  Fórmulas de Coloração & Produtos
+                <h3 className="text-base sm:text-lg font-bold text-[#111111] tracking-tight">
+                  Serviço & Produto Utilizado
                 </h3>
-                <p className="text-xs text-[#666666] mt-0.5">
-                  Ficha técnica com suporte a múltiplas tintas, proporções e regiões
-                </p>
+                <p className="text-xs text-[#777777]">Selecione o procedimento e o produto aplicado</p>
               </div>
             </div>
 
-            {/* Toggle switch para habilitar/desabilitar seção de coloração */}
-            <label className="inline-flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={hasColorInfo}
-                onChange={(e) => setHasColorInfo(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-[#E5E5E5] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#111111]"></div>
-              <span className="text-xs font-semibold text-[#111111]">
-                {hasColorInfo ? 'Fórmula Ativa' : 'Sem Química / Coloração'}
-              </span>
-            </label>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 text-[11px] font-bold shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+              <span>Obrigatório</span>
+            </span>
           </div>
 
-          {hasColorInfo ? (
-            <div className="space-y-6">
-              {/* Dynamic Multiple Dyes Container */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#111111]">
-                      Tintas e Tonalidades Utilizadas
-                    </h4>
-                    <p className="text-[11px] text-[#777777]">
-                      Adicione quantas tintas foram misturadas neste procedimento
-                    </p>
-                  </div>
-
-                  {/* + ADICIONAR OUTRA TINTA BUTTON */}
+          {/* Seleção de Serviço por Botões Rápidos (1 Toque) */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-2">
+              Tipo de Serviço Realizado <span className="text-rose-500">*</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {PROCEDURES.map((proc) => {
+                const isSelected = procedureType === proc;
+                return (
                   <button
+                    key={proc}
                     type="button"
-                    onClick={handleAddProduct}
-                    className="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-[#111111] hover:bg-[#292929] text-white text-xs font-semibold transition-all shadow-2xs"
+                    onClick={() => setProcedureType(proc)}
+                    className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all shadow-2xs ${
+                      isSelected
+                        ? 'bg-[#111111] text-white ring-2 ring-[#111111] shadow-xs'
+                        : 'bg-[#F4F5F7] hover:bg-[#E5E7EB] text-[#292929] border border-[#D1D5DB]'
+                    }`}
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>+ ADICIONAR OUTRA TINTA</span>
+                    {proc}
                   </button>
-                </div>
+                );
+              })}
+            </div>
 
-                {/* Items list */}
-                <div className="space-y-4">
-                  {colorProducts.map((product, index) => (
-                    <div
-                      key={product.id || index}
-                      className="p-4 sm:p-5 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] relative space-y-4 group transition-all"
-                    >
-                      <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-2.5">
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-[#111111] text-white font-mono font-bold text-xs flex items-center justify-center">
-                            {index + 1}
-                          </span>
-                          <span className="text-xs font-bold text-[#111111] uppercase tracking-wider">
-                            Produto {index + 1}
-                          </span>
-                        </div>
+            {procedureType === 'Outro' && (
+              <div className="mt-3">
+                <input
+                  type="text"
+                  placeholder="Especifique o procedimento (ex: Botox capilar, Penteado de noiva...)"
+                  value={customProcedureName}
+                  onChange={(e) => setCustomProcedureName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs focus:outline-none focus:border-[#111111] shadow-2xs"
+                />
+              </div>
+            )}
+          </div>
 
-                        <div className="flex items-center gap-3">
-                          {/* Shortcut to select from existing catalog */}
-                          {products.length > 0 && (
-                            <select
-                              onChange={(e) => {
-                                if (e.target.value) {
-                                  handleSelectFromCatalog(index, e.target.value);
-                                  e.target.value = '';
-                                }
-                              }}
-                              className="text-[11px] py-1 px-2.5 rounded border border-[#E5E5E5] bg-white text-[#777777] focus:outline-none focus:border-[#111111]"
-                            >
-                              <option value="">Carregar do catálogo...</option>
-                              {products.map((p) => (
-                                <option key={p.id} value={p.id}>
-                                  {p.shadeNumber ? `[${p.shadeNumber}] ` : ''}
-                                  {p.name} ({p.brand})
-                                </option>
-                              ))}
-                            </select>
-                          )}
-
-                          {/* Remove button */}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveProduct(index)}
-                            className="p-1 rounded text-[#777777] hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                            title="Remover esta tinta"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Product Form Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                        {/* Numeração da tinta */}
-                        <div>
-                          <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#111111] mb-1">
-                            Numeração / Tom
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Ex: 7.1, 8.0, 9.89..."
-                            value={product.shadeNumber}
-                            onChange={(e) =>
-                              handleUpdateProduct(index, { shadeNumber: e.target.value })
-                            }
-                            className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs font-mono font-bold focus:outline-none focus:border-[#111111]"
-                          />
-                        </div>
-
-                        {/* Nome da tonalidade */}
-                        <div>
-                          <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                            Nome da Tonalidade
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Ex: Louro Médio Cinza..."
-                            value={product.shadeName || ''}
-                            onChange={(e) =>
-                              handleUpdateProduct(index, { shadeName: e.target.value })
-                            }
-                            className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111]"
-                          />
-                        </div>
-
-                        {/* Marca */}
-                        <div>
-                          <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                            Marca da Tinta
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Ex: Wella, Igora, Inoa..."
-                            value={product.brand}
-                            onChange={(e) => handleUpdateProduct(index, { brand: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111]"
-                          />
-                        </div>
-
-                        {/* Linha / Produto */}
-                        <div>
-                          <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                            Linha / Produto
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Ex: Koleston Pro, Color Touch..."
-                            value={product.line || ''}
-                            onChange={(e) => handleUpdateProduct(index, { line: e.target.value })}
-                            className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111]"
-                          />
-                        </div>
-
-                        {/* Quantidade */}
-                        <div>
-                          <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#111111] mb-1">
-                            Quantidade Utilizada
-                          </label>
-                          <div className="flex gap-1.5">
-                            <input
-                              type="text"
-                              placeholder="Ex: 30, 45, 1/2..."
-                              value={product.quantity}
-                              onChange={(e) =>
-                                handleUpdateProduct(index, { quantity: e.target.value })
-                              }
-                              className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs font-mono font-medium focus:outline-none focus:border-[#111111]"
-                            />
-                            <select
-                              value={product.unit}
-                              onChange={(e) =>
-                                handleUpdateProduct(index, { unit: e.target.value })
-                              }
-                              className="px-2 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111]"
-                            >
-                              <option value="g">g</option>
-                              <option value="ml">ml</option>
-                              <option value="tubo">tubo</option>
-                              <option value="medida">medida</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* Região de Aplicação */}
-                        <div className="sm:col-span-2 md:col-span-3">
-                          <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                            Região de Aplicação
-                          </label>
-                          <select
-                            value={product.region}
-                            onChange={(e) =>
-                              handleUpdateProduct(index, { region: e.target.value })
-                            }
-                            className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111]"
-                          >
-                            {APPLICATION_REGIONS.map((reg) => (
-                              <option key={reg} value={reg}>
-                                {reg}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
+          {/* Seleção Simples de Produto do Catálogo */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1.5">
+              Produto Principal do Catálogo
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="relative">
+                <select
+                  value={selectedProductId}
+                  onChange={(e) => setSelectedProductId(e.target.value)}
+                  className="w-full px-3.5 py-3 rounded-xl border border-[#D1D5DB] bg-white text-xs font-semibold text-[#111111] focus:outline-none focus:border-[#111111] shadow-2xs"
+                >
+                  <option value="">Nenhum produto cadastrado selecionado</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.brand}{p.shadeNumber ? ` • ${p.shadeNumber}` : ''})
+                    </option>
                   ))}
-                </div>
+                  <option value="custom">Outro produto não listado</option>
+                </select>
               </div>
 
-              {/* OXIDANTE & TEMPO DE PAUSA */}
-              <div className="p-4 sm:p-5 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] space-y-4">
-                <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-2.5">
-                  <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-[#111111]" />
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#111111]">
-                      Oxidante / Revelador & Proporção
-                    </h4>
-                  </div>
-
-                  <label className="inline-flex items-center gap-2 text-xs text-[#292929] cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={oxidantUsed}
-                      onChange={(e) => setOxidantUsed(e.target.checked)}
-                      className="rounded border-[#E5E5E5] text-[#111111] focus:ring-0"
-                    />
-                    <span>Utilizou oxidante</span>
-                  </label>
-                </div>
-
-                {oxidantUsed && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {/* Volume */}
-                    <div>
-                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#111111] mb-1">
-                        Volume do Oxidante
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Ex: 20 vol, 30 vol..."
-                        value={oxidantVolume}
-                        onChange={(e) => setOxidantVolume(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs font-medium focus:outline-none focus:border-[#111111]"
-                      />
+              {selectedProductId === 'custom' ? (
+                <input
+                  type="text"
+                  placeholder="Nome da tinta ou produto usado..."
+                  value={customProductName}
+                  onChange={(e) => setCustomProductName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs focus:outline-none focus:border-[#111111] shadow-2xs"
+                />
+              ) : (
+                /* Card de resumo do produto selecionado */
+                (() => {
+                  const prod = products.find((p) => p.id === selectedProductId);
+                  if (!prod) return null;
+                  return (
+                    <div className="p-2.5 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] flex items-center gap-3">
+                      {prod.imageUrl ? (
+                        <img src={prod.imageUrl} alt={prod.name} className="w-10 h-10 rounded-lg object-cover border border-[#D1D5DB] shrink-0" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-neutral-200 flex items-center justify-center text-neutral-500 shrink-0">
+                          <Package className="w-5 h-5" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-[#111111] truncate">{prod.name}</p>
+                        <p className="text-[11px] text-[#777777]">{prod.brand} • {prod.category}</p>
+                      </div>
                     </div>
-
-                    {/* Proporção / Quantidade */}
-                    <div>
-                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#111111] mb-1">
-                        Proporção da Mistura / Quantidade
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Ex: 1:1, 1:1.5, 60ml..."
-                        value={oxidantQuantityOrRatio}
-                        onChange={(e) => setOxidantQuantityOrRatio(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs font-medium focus:outline-none focus:border-[#111111]"
-                      />
-                    </div>
-
-                    {/* Marca do Oxidante */}
-                    <div>
-                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                        Marca do Oxidante
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Ex: Linha Oxy Pro, Wella Welloxon..."
-                        value={oxidantBrand}
-                        onChange={(e) => setOxidantBrand(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111]"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Tempo de Pausa & Observações da mistura */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                  <div>
-                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#111111] mb-1 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      Tempo de Pausa
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ex: 35 minutos, 40 min..."
-                      value={pauseTime}
-                      onChange={(e) => setPauseTime(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs font-medium focus:outline-none focus:border-[#111111]"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                      Observações Técnicas da Aplicação
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ex: Raiz com 20 vol por 25 min, comprimento emulcionado nos últimos 10 min..."
-                      value={technicalNotes}
-                      onChange={(e) => setTechnicalNotes(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111]"
-                    />
-                  </div>
-                </div>
-              </div>
+                  );
+                })()
+              )}
             </div>
-          ) : (
-            <div className="p-6 text-center bg-[#FAFAFA] rounded-xl border border-dashed border-[#E5E5E5] space-y-2">
-              <p className="text-xs text-[#777777]">
-                Este atendimento está configurado como serviço sem dados químicos (ex: corte, escova ou hidratação simples).
-              </p>
-              <button
-                type="button"
-                onClick={() => setHasColorInfo(true)}
-                className="text-xs font-semibold text-[#111111] underline hover:opacity-80"
-              >
-                Ativar campos de coloração e tintas
-              </button>
-            </div>
-          )}
+          </div>
         </div>
 
-        {/* ============================================================== */}
-        {/* SEÇÃO 3: OBSERVAÇÕES E RESULTADOS TÉCNICOS                     */}
-        {/* ============================================================== */}
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-5 sm:p-7 shadow-2xs space-y-5">
-          <div className="border-b border-[#E5E5E5] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* ========================================================================= */}
+        {/* PASSO 3: CAMPO ÚNICO DE OBSERVAÇÃO (QUANTIDADE & OXIGENAÇÃO)               */}
+        {/* ========================================================================= */}
+        <div className="bg-white rounded-2xl border-2 border-amber-400/80 p-5 sm:p-7 shadow-xs space-y-4">
+          <div className="border-b border-[#F0F0F0] pb-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-neutral-200 text-neutral-800 flex items-center justify-center font-bold text-sm shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-amber-500 text-neutral-950 flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
                 3
               </div>
               <div>
-                <h3 className="text-lg font-bold text-[#111111] tracking-tight">
-                  Avaliação Técnica & Recomendações
+                <h3 className="text-base sm:text-lg font-bold text-[#111111] tracking-tight">
+                  Quantidade & Volume de Oxigenação
                 </h3>
-                <p className="text-xs text-[#666666] mt-0.5">
-                  Campos complementares para acompanhamento dos fios e planejamento do retorno
+                <p className="text-xs text-[#777777]">
+                  Campo único de observações da fórmula e proporções da mistura
                 </p>
               </div>
             </div>
-            <div>
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-300 text-[11px] font-medium">
-                Opcional
-              </span>
+
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+              <Sparkles className="w-3 h-3" />
+              <span>Fórmula</span>
+            </span>
+          </div>
+
+          {/* Atalhos Rápidos de Clique (1 toque para inserir volume/gramatura) */}
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#777777] block mb-1.5">
+              Toque rápido para adicionar à anotação:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {OX_SHORTCUTS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => handleAddShortcut(item)}
+                  className="py-1 px-2.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-[#111111] text-[11px] font-semibold border border-neutral-300 transition-all active:scale-95 shadow-2xs"
+                >
+                  +{item}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Condição inicial do cabelo */}
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                Condição Inicial do Cabelo
-              </label>
-              <textarea
-                rows={2}
-                placeholder="Ex: Fios ressecados nas pontas, fundo de clareamento 8, sensibilidade moderada..."
-                value={initialCondition}
-                onChange={(e) => setInitialCondition(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111] resize-none"
-              />
-            </div>
-
-            {/* Resultado Final */}
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                Resultado Final Obtido
-              </label>
-              <textarea
-                rows={2}
-                placeholder="Ex: Tom uniforme, cobertura 100% de brancos, reflexo cinza neutro e brilho intenso..."
-                value={finalResult}
-                onChange={(e) => setFinalResult(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111] resize-none"
-              />
-            </div>
-
-            {/* Histórico Técnico Relevante */}
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                Histórico Técnico Relevante
-              </label>
-              <textarea
-                rows={2}
-                placeholder="Ex: Química anterior em outro salão, mechas antigas há 6 meses..."
-                value={relevantHistory}
-                onChange={(e) => setRelevantHistory(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111] resize-none"
-              />
-            </div>
-
-            {/* Recomendações para o próximo atendimento */}
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                Recomendações para Próximo Retorno
-              </label>
-              <textarea
-                rows={2}
-                placeholder="Ex: Agendar nutrição em 20 dias; retoque de raiz em 45 dias com a mesma fórmula 7.1 + 8.0..."
-                value={nextRecommendations}
-                onChange={(e) => setNextRecommendations(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111] resize-none"
-              />
-            </div>
-
-            {/* Observações do profissional */}
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#777777] mb-1">
-                Observações Adicionais do Profissional
-              </label>
-              <input
-                type="text"
-                placeholder="Ex: Cabelo reagiu muito rápido ao clareamento. Atenção para não ultrapassar 30 min na próxima vez."
-                value={professionalNotes}
-                onChange={(e) => setProfessionalNotes(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] bg-white text-xs focus:outline-none focus:border-[#111111]"
-              />
-            </div>
+          {/* Campo Único de Texto */}
+          <div>
+            <textarea
+              rows={4}
+              value={formulaNotes}
+              onChange={(e) => setFormulaNotes(e.target.value)}
+              placeholder="Ex: 60g de tinta 7.1 + 60ml OX 20 vol (proporção 1:1), tempo de pausa 35 minutos na raiz."
+              className="w-full p-4 rounded-xl border border-[#D1D5DB] bg-[#FAFAFA] focus:bg-white text-xs sm:text-sm focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] resize-none shadow-2xs leading-relaxed"
+            />
+            <p className="text-[11px] text-[#777777] mt-1.5">
+              Este registro ficará gravado no perfil da cliente para consulta imediata no próximo retorno.
+            </p>
           </div>
         </div>
 
-        {/* BOTTOM ACTION BAR */}
-        <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-[#E5E5E5] shadow-xs">
-          <button
-            type="button"
-            onClick={() => {
-              if (initialClientId) {
-                onNavigate('client-detail', { clientId: initialClientId });
-              } else {
-                onNavigate('history');
-              }
-            }}
-            className="py-2.5 px-4 rounded-xl border border-[#E5E5E5] text-xs font-semibold text-[#777777] hover:text-[#111111] hover:bg-[#F3F3F3] transition-colors"
-          >
-            Cancelar
-          </button>
-
+        {/* ========================================================================= */}
+        {/* BOTÃO DE CONCLUSÃO                                                        */}
+        {/* ========================================================================= */}
+        <div className="pt-2">
           <button
             type="submit"
-            className="inline-flex items-center gap-2 py-3 px-6 rounded-xl bg-[#111111] hover:bg-black text-white text-xs sm:text-sm font-semibold transition-all shadow-md group"
+            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-neutral-950 font-bold text-base shadow-lg hover:shadow-xl active:scale-[0.99] transition-all flex items-center justify-center gap-2 group"
           >
-            <Check className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-            <span>{appointmentToEdit ? 'Salvar Alterações' : 'Salvar Atendimento'}</span>
+            <Check className="w-5 h-5 text-neutral-950 group-hover:scale-110 transition-transform" />
+            <span>SALVAR ATENDIMENTO</span>
           </button>
         </div>
       </form>

@@ -102,35 +102,52 @@ export const ClientDetailModule: React.FC<ClientDetailModuleProps> = ({
     .map(([name]) => name);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Top Navigation & Action Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+      {/* Top Navigation */}
+      <div className="flex items-center justify-between">
         <button
           onClick={() => onNavigate('clients')}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#777777] hover:text-[#111111] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Voltar para Listagem de Clientes</span>
+          <span>Voltar para Clientes</span>
         </button>
 
-        {/* Highlighted NOVO ATENDIMENTO button */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => onEditClient(client)}
-            className="inline-flex items-center gap-1.5 py-2.5 px-4 rounded-xl border border-[#E5E5E5] bg-white hover:bg-[#F3F3F3] text-xs font-semibold text-[#292929] transition-all"
-          >
-            <Edit2 className="w-3.5 h-3.5" />
-            <span>Editar Cadastro</span>
-          </button>
+        <button
+          onClick={() => onEditClient(client)}
+          className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl border border-[#E5E5E5] bg-white hover:bg-[#F3F3F3] text-xs font-semibold text-[#292929] transition-all shadow-2xs"
+        >
+          <Edit2 className="w-3.5 h-3.5" />
+          <span>Editar Cadastro</span>
+        </button>
+      </div>
 
-          <button
-            onClick={() => onNavigate('appointment-form', { clientId: client.id })}
-            className="inline-flex items-center gap-2 py-2.5 px-5 rounded-xl bg-[#111111] hover:bg-black text-white text-xs sm:text-sm font-semibold transition-all shadow-md group"
-          >
-            <CalendarPlus className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
-            <span>NOVO ATENDIMENTO</span>
-          </button>
+      {/* ========================================================================= */}
+      {/* CTA GIGANTE & SUGESTIVO: INICIAR NOVO ATENDIMENTO                        */}
+      {/* ========================================================================= */}
+      <div className="bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 rounded-2xl p-5 sm:p-7 text-neutral-950 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-5 relative overflow-hidden">
+        <div className="space-y-1.5 text-center sm:text-left z-10">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/15 text-[10px] font-bold uppercase tracking-wider text-neutral-900">
+            <span className="w-1.5 h-1.5 rounded-full bg-neutral-950" />
+            <span>Ação Imediata</span>
+          </div>
+          <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-950">
+            Iniciar Atendimento para {client.name}
+          </h3>
+          <p className="text-xs sm:text-sm text-neutral-900/90 font-medium">
+            {lastAppointment
+              ? `Último procedimento realizado: ${lastAppointment.customProcedureName || lastAppointment.procedureType}`
+              : 'Clique para registrar o primeiro procedimento desta cliente'}
+          </p>
         </div>
+
+        <button
+          onClick={() => onNavigate('appointment-form', { clientId: client.id })}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-xl bg-neutral-950 hover:bg-black text-white text-sm font-bold shadow-xl active:scale-95 transition-all shrink-0 z-10 group"
+        >
+          <CalendarPlus className="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform" />
+          <span>+ NOVO ATENDIMENTO</span>
+        </button>
       </div>
 
       {/* CLIENT HEADER & PROFILE OVERVIEW */}
