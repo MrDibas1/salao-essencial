@@ -358,19 +358,27 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
         {/* ============================================================== */}
         {/* SEÇÃO 1: INFORMAÇÕES DO ATENDIMENTO                           */}
         {/* ============================================================== */}
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-6 sm:p-7 shadow-2xs space-y-5">
-          <div className="border-b border-[#F3F3F3] pb-3.5 flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-[#111111]">
-                1. Informações do Atendimento
-              </h3>
-              <p className="text-xs text-[#777777]">
-                Identificação da cliente, data, profissional e procedimento principal
-              </p>
+        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-5 sm:p-7 shadow-2xs space-y-5">
+          <div className="border-b border-[#E5E5E5] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#111111] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                1
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#111111] tracking-tight">
+                  Informações do Atendimento
+                </h3>
+                <p className="text-xs text-[#666666] mt-0.5">
+                  Identificação da cliente, data, profissional e procedimento principal
+                </p>
+              </div>
             </div>
-            <span className="px-2.5 py-1 rounded-md bg-[#F3F3F3] text-[11px] font-semibold text-[#111111]">
-              Obrigatório
-            </span>
+            <div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 text-[11px] font-bold shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+                <span>Obrigatório</span>
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -703,17 +711,17 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
         {/* ============================================================== */}
         {/* SEÇÃO 2: INFORMAÇÕES DA COLORAÇÃO & MÚLTIPLAS TINTAS           */}
         {/* ============================================================== */}
-        <div className="bg-white rounded-2xl border border-[#111111] p-6 sm:p-7 shadow-xs space-y-6">
+        <div className="bg-white rounded-2xl border border-[#111111] p-5 sm:p-7 shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5E5E5] pb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#111111] text-white flex items-center justify-center">
-                <FlaskConical className="w-4 h-4" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#111111] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                2
               </div>
               <div>
-                <h3 className="text-base font-bold text-[#111111]">
-                  2. Fórmulas de Coloração & Misturas Químicas
+                <h3 className="text-lg font-bold text-[#111111] tracking-tight">
+                  Fórmulas de Coloração & Produtos
                 </h3>
-                <p className="text-xs text-[#777777]">
+                <p className="text-xs text-[#666666] mt-0.5">
                   Ficha técnica com suporte a múltiplas tintas, proporções e regiões
                 </p>
               </div>
@@ -1044,14 +1052,26 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
         {/* ============================================================== */}
         {/* SEÇÃO 3: OBSERVAÇÕES E RESULTADOS TÉCNICOS                     */}
         {/* ============================================================== */}
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-6 sm:p-7 shadow-2xs space-y-5">
-          <div className="border-b border-[#F3F3F3] pb-3.5">
-            <h3 className="text-base font-bold text-[#111111]">
-              3. Avaliação Técnica & Recomendações
-            </h3>
-            <p className="text-xs text-[#777777]">
-              Campos complementares para acompanhamento da saúde dos fios e planejamento do retorno (opcionais)
-            </p>
+        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-5 sm:p-7 shadow-2xs space-y-5">
+          <div className="border-b border-[#E5E5E5] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-neutral-200 text-neutral-800 flex items-center justify-center font-bold text-sm shrink-0">
+                3
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#111111] tracking-tight">
+                  Avaliação Técnica & Recomendações
+                </h3>
+                <p className="text-xs text-[#666666] mt-0.5">
+                  Campos complementares para acompanhamento dos fios e planejamento do retorno
+                </p>
+              </div>
+            </div>
+            <div>
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-300 text-[11px] font-medium">
+                Opcional
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
