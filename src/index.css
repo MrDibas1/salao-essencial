@@ -2,35 +2,52 @@
 
 @layer base {
   :root {
-    --color-black: #111111;
-    --color-white: #FFFFFF;
-    --color-gray-light: #F4F5F7;
-    --color-gray-border: #D4D4D8;
-    --color-gray-text: #666666;
-    --color-graphite: #242424;
+    --bg-main: #FAF8F6;
+    --surface-card: #FFFFFF;
+    --border-subtle: #EAE4DE;
+    --text-primary: #1F1D1B;
+    --text-secondary: #736B65;
+    --accent: #C87A14;
+    --accent-hover: #A8630A;
+    --accent-soft: #FDF3E7;
+    --accent-soft-text: #8C530A;
+    --success: #2E7D5B;
+    --success-bg: #E8F4EE;
+    --error: #C94A4A;
+    --error-bg: #FCECEC;
   }
 
   body {
-    background-color: #F1F3F5;
-    color: #111111;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #FAF8F6;
+    color: #1F1D1B;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Impede zoom automático do iOS Safari em inputs */
+  input, select, textarea {
+    font-size: 16px;
+  }
 }
 
-/* Custom subtle scrollbar */
+/* Alinhamento numérico perfeito conforme DESIGN.md */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom subtle scrollbar warm */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #EAECEF;
+  background: #F5EFEB;
 }
 ::-webkit-scrollbar-thumb {
-  background: #C4C7CE;
-  border-radius: 3px;
+  background: #D9D0C7;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #888B93;
+  background: #B8ADA2;
 }

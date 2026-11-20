@@ -1,138 +1,128 @@
-# ESSENCIAL — Sistema de Gestão para Salão de Beleza
+# Salão Essencial — Sistema de Gestão Capilar & Coloração
 
-Sistema web de alta performance desenvolvido exclusivamente para gestão interna e controle técnico de procedimentos em salões de beleza, com ênfase no histórico detalhado de clientes, colorações, fórmulas químicas e insumos.
+[![Version](https://img.shields.io/badge/versão-1.0.0-C87A14.svg)](package.json)
+[![React](https://img.shields.io/badge/React-19.3-61DAFB.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8.x-646CFF.svg)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC.svg)](https://tailwindcss.com/)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare_D1-Serverless_SQLite-F38020.svg)](https://developers.cloudflare.com/d1/)
+[![PWA](https://img.shields.io/badge/PWA-Instalável-2E7D5B.svg)](https://web.dev/progressive-web-apps/)
 
----
+Sistema web progressivo (**PWA**) de alta performance desenvolvido sob medida para gestão interna e controle técnico de procedimentos em salões de beleza, com ênfase no histórico minucioso de clientes, fichas de coloração, fórmulas químicas e mural de transformações (**Antes e Depois**).
 
-## 1. Visão Geral e Objetivo
-
-O **ESSENCIAL** foi concebido para resolver a principal dor de cabeleireiros e coloristas: a perda de informações sobre as formulações exatas, proporções de oxidantes, tempos de pausa e misturas de tonalidades utilizadas em atendimentos anteriores.
-
-Com uma interface moderna, sofisticada e minimalista, o profissional tem acesso imediato à ficha técnica de qualquer cliente em poucos cliques, garantindo consistência no resultado e fidelização.
-
----
-
-## 2. Identidade Visual & Design
-
-O design segue uma proposta minimalista e refinada de software comercial premium:
-
-- **Paleta de Cores Monocromática**:
-  - Preto Principal: `#111111`
-  - Grafite: `#292929`
-  - Branco: `#FFFFFF`
-  - Cinza Claro: `#F3F3F3`
-  - Cinza Bordas: `#E5E5E5`
-  - Cinza Textos Secundários: `#777777`
-- **Tipografia**: Cinzel / Inter para elegância estética e máxima legibilidade.
-- **Logomarca Oficial**: Integrada em SVG e PNG (`public/assets/logo-essencial.svg` e `public/assets/logo-essencial.png`), com suporte a modo tipográfico configurável nas preferências do sistema.
+🌐 **Produção:** [https://salao-essencial.kauemoreiraalternativo.workers.dev](https://salao-essencial.kauemoreiraalternativo.workers.dev)
 
 ---
 
-## 3. Módulos do Sistema
+## 🌟 Principais Funcionalidades
 
-### A. Dashboard
-- **Indicadores Dinâmicos em Tempo Real**:
-  - Total de clientes cadastradas
-  - Total de atendimentos e procedimentos registrados
-  - Atendimentos realizados no mês corrente
-  - Fórmulas técnicas detalhadas de coloração salvas
-- **Gráfico de Atendimentos**: Distribuição da frequência dos últimos 6 meses.
-- **Atalhos Rápidos**: Novo Atendimento, Cadastrar Cliente, Consultar Clientes.
-- **Tabela Recente**: Resumo dos últimos atendimentos e fórmulas aplicadas.
+### 1. Ficha Técnica de Coloração & Cabelos
+* **Registro de Fórmulas:** Suporte a misturas de múltiplas nuances, gramaturas exatas, proporções de oxidante (10, 20, 30, 40 vol), tempo de pausa e observações de aplicação.
+* **Histórico Completo por Cliente:** Consulta instantânea do histórico anterior antes de iniciar qualquer serviço químico.
+* **Segurança da Cliente:** Campo exclusivo para registro de alergias, sensibilidade de couro cabeludo e preferências pessoais.
 
-### B. Módulo de Clientes
-- Cadastro completo: Nome, Telefone, WhatsApp (com opção de mesmo número), E-mail, Data de Nascimento e Observações.
-- Busca instantânea por nome ou telefone.
-- Filtro por status (Ativas, Arquivadas ou Todas).
-- Ações rápidas: Editar, Arquivar/Desarquivar e Excluir com confirmação segura.
+### 2. Galeria de Transformações (Antes e Depois)
+* **Portfólio Visual Integrado:** Exibição lado a lado de fotos do estado inicial (*Antes*) e do resultado final (*Depois*).
+* **Compressão Automática em Canvas (`imageOptimizer.ts`):** Fotos de câmeras de alta resolução (5 MB a 10 MB) são comprimidas no navegador para ~70 KB a 100 KB, garantindo carregamento rápido e economia de tráfego.
+* **Modo Lightbox:** Visualizador comparativo em tela cheia com zoom em alta resolução.
+* **Filtros e Busca:** Filtragem por tipo de procedimento (*Coloração, Mechas, Corte, etc.*) e busca em tempo real por cliente ou fórmula.
 
-### C. Perfil Individual da Cliente
-- **Resumo do Relacionamento**: Quantidade de atendimentos, data do primeiro e último procedimento, serviços frequentes.
-- **Botão Destacado "NOVO ATENDIMENTO"**: Vincula imediatamente o formulário à cliente selecionada.
-- **Linha do Tempo (Timeline) Cronológica**:
-  - Histórico completo do mais recente ao mais antigo.
-  - Exibição visual das tintas misturadas, oxidantes e tempos de pausa.
-  - Acesso à Ficha Técnica Completa com impressão formatada.
+### 3. Banco de Dados em Nuvem & Sincronização (Cloudflare D1)
+* **Prevenção Total de Perda de Dados:** Sincronização automática com banco de dados serverless relacional (Cloudflare D1). Caso o celular quebre ou seja trocado, todos os dados são preservados.
+* **Offline-First:** O aplicativo continua funcionando normalmente mesmo sem internet via cache local e sincroniza assim que a conexão é restabelecida.
 
-### D. Módulo de Atendimentos & Coloração (Principal Diferencial)
-- **Seção 1**: Cliente, data, profissional responsável, tipo de procedimento (Coloração, Retoque de raiz, Luzes, Mechas, Descoloração, Tonalização, Hidratação, Reconstrução, Corte, Escova, Progressiva, Outro) e descrição.
-- **Seção 2 — Fórmulas de Coloração**:
-  - **Suporte a múltiplas tintas em uma única aplicação** via botão **`+ ADICIONAR OUTRA TINTA`**.
-  - Registro de marca, linha, numeração do tom (ex: 7.1, 8.0), quantidade, unidade e região de aplicação (Raiz, Comprimento, Pontas, Cabelo completo).
-  - Oxidante: volume (ex: 20 vol), proporção (ex: 1:1.5), marca.
-  - Tempo de pausa e notas técnicas.
-  - Opção para procedimentos sem química (ex: cortes e escovas).
-- **Seção 3 — Avaliação Técnica**: Condição inicial do cabelo, resultado final, histórico e recomendações para o próximo retorno.
+### 4. PWA (Progressive Web App)
+* **Instalável:** Pode ser adicionado à tela inicial de iPhones (iOS), dispositivos Android e computadores desktop com ícone e tela cheia.
+* **Design Responsivo & Mobile-First:** Navegação pensada para o uso com o polegar no celular e layout expandido para desktops.
 
-### E. Histórico Geral de Atendimentos
-- Lista completa cronológica de todos os procedimentos realizados no salão.
-- Filtros avançados combinados: busca textual, tipo de procedimento, profissional responsável e intervalo de datas.
-- Modal de Ficha Técnica com layout para impressão.
-
-### F. Catálogo de Produtos e Insumos
-- Cadastro auxiliar de tintas, oxidantes, descolorantes, tonalizantes e tratamentos.
-- Agilidade no preenchimento do formulário de atendimento.
-- Não restringe o profissional: é possível digitar qualquer produto livremente no atendimento.
-
-### G. Configurações & Base Demonstrativa
-- Dados do salão: Nome, Slogan, Telefone, Endereço e Redes Sociais.
-- Alternância entre logo gráfica e tipográfica.
-- **Gerenciamento de Demonstração**:
-  - *Restaurar Dados Demonstrativos*: carrega dados fictícios realistas para apresentação a clientes.
-  - *Limpar Registros Fictícios*: remove dados demo mantendo os reais cadastrados pelo usuário.
-  - *Backup JSON*: exportação e importação de segurança de toda a base.
+### 5. Comunicação & Agilidade no Balcão
+* **Atalho Direto para WhatsApp:** Disparo de mensagens com 1 toque sem necessidade de salvar o número na agenda.
+* **Integração com Instagram:** Acesso rápido ao perfil da cliente para visualização de referências estéticas.
 
 ---
 
-## 4. Stack Tecnológica
+## 🛠️ Tecnologias Utilizadas
 
-- **React 19**
-- **TypeScript**
-- **Vite 8**
-- **Tailwind CSS v4**
-- **Lucide React** (ícones minimalistas consistentes)
-- **Arquitetura Desacoplada**: Persistência gerenciada via `StorageService` em LocalStorage com relacionamentos estruturados (`Client` -> `Appointment` -> `ColorFormula` -> `ColorProductItem[]`), pronta para migração transparente para banco de dados relacional (PostgreSQL/Supabase/MySQL).
+* **Frontend:**
+  * [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+  * [Vite](https://vitejs.dev/) (Bundler ultrarrápido)
+  * [Tailwind CSS v4](https://tailwindcss.com/)
+  * [Lucide Icons](https://lucide.dev/) (Ícones modernos)
+* **Backend & Infraestrutura Serverless:**
+  * [Cloudflare Workers](https://workers.cloudflare.com/)
+  * [Cloudflare D1](https://developers.cloudflare.com/d1/) (SQLite distribuído globalmente)
+* **Otimização de Imagens:**
+  * HTML5 Canvas API (Redimensionamento proporcional e compressão JPEG client-side)
 
 ---
 
-## 5. Como Executar o Projeto Localmente
+## 🚀 Como Executar o Projeto Localmente
 
 ### Pré-requisitos
-- Node.js versão 18 ou superior
-- Gerenciador de pacotes `npm` ou `yarn`
+* [Node.js](https://nodejs.org/) versão 18 ou superior
+* Gerenciador de pacotes `npm`
 
-### Instalação
-
+### 1. Clonar o repositório
 ```bash
-# 1. Clone ou acesse a pasta do projeto
-cd "d:/Projetos/Salao Essencial"
-
-# 2. Instale as dependências
-npm install
-
-# 3. Inicie o servidor de desenvolvimento
-npm run dev
+git clone https://github.com/SEU-USUARIO/salao-essencial.git
+cd salao-essencial
 ```
 
-A aplicação estará disponível em `http://localhost:5173`.
-
-### Build de Produção
-
+### 2. Instalar as dependências
 ```bash
-# Gera o build estático otimizado na pasta dist/
-npm run build
+npm install
+```
 
-# Pré-visualização do build de produção
-npm run preview
+### 3. Iniciar o servidor de desenvolvimento
+```bash
+npm run dev
+```
+Acesse a aplicação no seu navegador em `http://localhost:5173`.
+
+### 4. Compilar para produção
+```bash
+npm run build
 ```
 
 ---
 
-## 6. Preparação para Expansão Futura
+## ☁️ Deploy no Cloudflare Workers & D1
 
-A arquitetura do código foi projetada modularmente para suportar as seguintes extensões sem retrabalho:
-1. Conexão a API REST / GraphQL e Banco de Dados na nuvem.
-2. Módulo de agendamento online e calendário de profissionais.
-3. Registro fotográfico de evolução capilar (Antes / Depois).
-4. Notificações automáticas de retorno via WhatsApp API.
-5. Controle de estoque e baixa automática de insumos.
+O projeto já conta com o arquivo de configuração `wrangler.jsonc` pronto para deploy na infraestrutura da Cloudflare.
+
+```bash
+# Login na Cloudflare (caso ainda não esteja autenticado)
+npx wrangler login
+
+# Publicar aplicação e rotas de API
+npx wrangler deploy
+```
+
+---
+
+## 📄 Estrutura de Pastas
+
+```
+├── public/                 # Favicon, assets estáticos e logotipo oficial
+│   └── assets/logo-essencial.png
+├── src/
+│   ├── components/
+│   │   ├── common/         # Header, Sidebar, BottomNav, ClientAvatar, etc.
+│   │   ├── modules/        # Telas: Dashboard, Clients, Gallery, Appointment, etc.
+│   │   └── ui/             # Modais, Toasts, Diálogos de Confirmação
+│   ├── services/           # StorageService (local + nuvem) e Dados Demonstrativos
+│   ├── types/              # Tipagens TypeScript (Client, Appointment, etc.)
+│   ├── utils/              # imageOptimizer.ts e utilitários auxiliares
+│   ├── App.tsx             # Componente raiz e roteamento de abas
+│   └── main.tsx            # Ponto de entrada React
+├── worker/
+│   └── index.ts            # API Serverless no Cloudflare Workers + D1
+├── schema.sql              # Estrutura das tabelas SQL no Cloudflare D1
+├── package.json            # Dependências e scripts
+└── wrangler.jsonc          # Configuração do Cloudflare Workers
+```
+
+---
+
+## 📝 Licença
+Desenvolvido sob medida para **Salão Essencial**. Todos os direitos reservados.

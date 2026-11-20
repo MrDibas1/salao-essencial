@@ -8,50 +8,40 @@ import {
   Search,
   Edit2,
   Trash2,
-  Info,
   Camera,
   Upload,
   X,
-  Sparkles,
 } from 'lucide-react';
 
 const getCategoryBadgeStyle = (category: ProductCategory) => {
   switch (category) {
     case 'Tintas':
-      return {
-        badge: 'bg-amber-100 text-amber-950 border-amber-300 font-bold',
-        dot: 'bg-amber-600',
-      };
-    case 'Oxidantes':
-      return {
-        badge: 'bg-sky-100 text-sky-950 border-sky-300 font-bold',
-        dot: 'bg-sky-600',
-      };
-    case 'Descolorantes':
-      return {
-        badge: 'bg-cyan-100 text-cyan-950 border-cyan-300 font-bold',
-        dot: 'bg-cyan-600',
-      };
     case 'Tonalizantes':
       return {
-        badge: 'bg-purple-100 text-purple-950 border-purple-300 font-bold',
-        dot: 'bg-purple-600',
+        badge: 'bg-[#FDF3E7] text-[#8C530A] border-[#EAE4DE]',
+        dot: 'bg-[#C87A14]',
+      };
+    case 'Oxidantes':
+    case 'Descolorantes':
+      return {
+        badge: 'bg-[#FAF2E8] text-[#8C6239] border-[#EAE4DE]',
+        dot: 'bg-[#C28C53]',
       };
     case 'Hidratação':
     case 'Tratamentos':
       return {
-        badge: 'bg-emerald-100 text-emerald-950 border-emerald-300 font-bold',
-        dot: 'bg-emerald-600',
+        badge: 'bg-[#E8F4EE] text-[#2E7D5B] border-[#2E7D5B]/20',
+        dot: 'bg-[#2E7D5B]',
       };
     case 'Reconstrução':
       return {
-        badge: 'bg-rose-100 text-rose-950 border-rose-300 font-bold',
-        dot: 'bg-rose-600',
+        badge: 'bg-[#FCECEC] text-[#A8630A] border-[#EAE4DE]',
+        dot: 'bg-[#C87A14]',
       };
     default:
       return {
-        badge: 'bg-neutral-100 text-neutral-800 border-neutral-300 font-bold',
-        dot: 'bg-neutral-500',
+        badge: 'bg-[#FAF8F6] text-[#736B65] border-[#EAE4DE]',
+        dot: 'bg-[#736B65]',
       };
   }
 };
@@ -193,36 +183,35 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
   }, [products, searchTerm, selectedCategory]);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Informative Note */}
-      <div className="p-4 rounded-xl bg-white border border-[#E5E5E5] flex items-start gap-3 shadow-2xs">
-        <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-        <div className="text-xs text-[#777777] leading-relaxed">
-          <strong className="text-[#111111] block mb-0.5">Catálogo com Fotos & Fórmulas:</strong>
-          Visualize os produtos, tinturas e insumos utilizados no salão com fotos de referência. Você pode adicionar ou alterar fotos diretamente da câmera ou galeria do celular.
-        </div>
-      </div>
-
-      {/* Action and Filter Bar */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E5E5E5] shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Search */}
+    <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-300 pb-32 sm:pb-12">
+      {/* Barra de Filtro e Ação */}
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#EAE4DE] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* Campo de Busca */}
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-[#777777] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#736B65] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Pesquisar por nome, marca ou tom..."
+            placeholder="Buscar por nome, marca ou tom..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E5E5E5] text-xs sm:text-sm bg-[#FAFAFA] focus:bg-white focus:outline-none focus:border-[#111111] transition-all"
+            className="w-full min-h-[44px] pl-10 pr-10 py-2.5 rounded-xl border border-[#EAE4DE] text-[16px] text-[#1F1D1B] bg-[#FAF8F6] focus:bg-white focus:outline-none focus:border-[#C87A14] transition-all shadow-xs placeholder:text-[#736B65]/70"
           />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#736B65] hover:text-[#1F1D1B]"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
-        {/* Category filter & Add button */}
+        {/* Filtro de Categoria e Botão Novo */}
         <div className="flex flex-wrap items-center gap-2.5">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2.5 rounded-xl border border-[#E5E5E5] bg-white text-xs text-[#292929] focus:outline-none focus:border-[#111111]"
+            className="min-h-[44px] px-3 py-2 rounded-xl border border-[#EAE4DE] bg-white text-xs font-medium text-[#1F1D1B] focus:outline-none focus:border-[#C87A14]"
           >
             <option value="all">Todas as categorias ({products.length})</option>
             {CATEGORIES.map((cat) => (
@@ -234,7 +223,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
 
           <button
             onClick={openCreateModal}
-            className="inline-flex items-center gap-2 py-2.5 px-4 rounded-xl bg-[#111111] hover:bg-neutral-800 text-white text-xs font-semibold transition-all shadow-xs"
+            className="min-h-[44px] inline-flex items-center gap-1.5 py-2 px-4 rounded-xl bg-[#C87A14] hover:bg-[#A8630A] text-white text-xs sm:text-sm font-semibold transition-all shadow-xs active:scale-[0.98]"
           >
             <Plus className="w-4 h-4" />
             <span>Novo Produto</span>
@@ -242,23 +231,23 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
         </div>
       </div>
 
-      {/* Products Grid (Visual com Fotos) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      {/* Grade de Produtos */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredProducts.length === 0 ? (
-          <div className="col-span-full py-16 text-center bg-white rounded-2xl border border-dashed border-[#E5E5E5] space-y-3">
-            <div className="w-12 h-12 rounded-full bg-[#F3F3F3] text-[#777777] flex items-center justify-center mx-auto">
-              <Package className="w-6 h-6" />
+          <div className="col-span-full py-14 text-center bg-white rounded-2xl border border-dashed border-[#EAE4DE] space-y-2.5 px-4">
+            <div className="w-10 h-10 rounded-full bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center mx-auto">
+              <Package className="w-5 h-5" />
             </div>
-            <h4 className="text-sm font-semibold text-[#111111]">Nenhum produto encontrado</h4>
-            <p className="text-xs text-[#777777] max-w-sm mx-auto">
-              Cadastre tintas, oxidantes ou tratamentos no catálogo com fotos para facilitar a gestão.
+            <h4 className="text-sm font-semibold text-[#1F1D1B]">Nenhum produto encontrado</h4>
+            <p className="text-xs text-[#736B65] max-w-sm mx-auto">
+              Cadastre tintas, oxidantes ou tratamentos no catálogo com fotos para agilizar os atendimentos.
             </p>
             <button
               onClick={openCreateModal}
-              className="mt-2 inline-flex items-center gap-1.5 py-2 px-4 rounded-xl bg-[#111111] text-white text-xs font-medium"
+              className="mt-1 min-h-[44px] inline-flex items-center gap-1.5 py-2 px-4 rounded-xl bg-[#C87A14] text-white text-xs font-semibold active:scale-[0.98]"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Cadastrar Primeiro Produto</span>
+              <span>Cadastrar produto</span>
             </button>
           </div>
         ) : (
@@ -269,11 +258,11 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
             return (
               <div
                 key={prod.id}
-                className="rounded-2xl bg-white border border-[#E5E5E5] shadow-2xs hover:border-[#111111] hover:shadow-md transition-all flex flex-col justify-between group overflow-hidden"
+                className="rounded-2xl bg-white border border-[#EAE4DE] shadow-xs hover:border-[#C87A14]/60 transition-all flex flex-col justify-between group overflow-hidden"
               >
                 <div>
                   {/* Foto de Capa do Produto */}
-                  <div className="relative h-44 w-full bg-neutral-100 overflow-hidden border-b border-[#F0F0F0]">
+                  <div className="relative h-40 w-full bg-[#FAF8F6] overflow-hidden border-b border-[#EAE4DE]">
                     {prod.imageUrl ? (
                       <img
                         src={prod.imageUrl}
@@ -282,9 +271,9 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-200 text-neutral-400">
-                        <Package className="w-10 h-10 mb-1 opacity-60" />
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                      <div className="w-full h-full flex flex-col items-center justify-center text-[#736B65]">
+                        <Package className="w-9 h-9 mb-1 opacity-40 text-[#C87A14]" />
+                        <span className="text-[11px] font-medium text-[#736B65]">
                           {prod.brand}
                         </span>
                       </div>
@@ -300,10 +289,10 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                       </span>
                     </div>
 
-                    {/* Badge do Tom / Numeração sobre a foto */}
+                    {/* Badge do Tom / Numeração em tabular-nums */}
                     {prod.shadeNumber && (
                       <div className="absolute top-2.5 right-2.5">
-                        <span className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-[#111111] bg-white/95 backdrop-blur-xs border border-white/40 px-2 py-0.5 rounded-md shadow-xs">
+                        <span className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-[#1F1D1B] bg-white/95 backdrop-blur-xs border border-[#EAE4DE] px-2 py-0.5 rounded-full shadow-xs tabular-nums">
                           {tone && (
                             <span
                               className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
@@ -318,18 +307,18 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                   </div>
 
                   {/* Conteúdo do Card */}
-                  <div className="p-4">
-                    <h4 className="text-sm font-bold text-[#111111] leading-snug line-clamp-2">
+                  <div className="p-4 space-y-1">
+                    <h4 className="text-sm font-semibold text-[#1F1D1B] leading-snug line-clamp-2">
                       {prod.name}
                     </h4>
 
-                    <p className="text-xs text-[#777777] mt-1.5">
-                      <strong className="text-[#333333]">{prod.brand}</strong>
+                    <p className="text-xs text-[#736B65]">
+                      <span className="text-[#1F1D1B] font-medium">{prod.brand}</span>
                       {prod.line ? ` • ${prod.line}` : ''}
                     </p>
 
                     {prod.notes && (
-                      <p className="text-[11px] text-[#555555] mt-2 p-2 rounded-lg bg-[#FAFAFA] border border-[#F3F3F3] line-clamp-2 leading-relaxed">
+                      <p className="text-[11px] text-[#736B65] mt-1.5 p-2 rounded-xl bg-[#FAF8F6] border border-[#EAE4DE] line-clamp-2 leading-relaxed">
                         {prod.notes}
                       </p>
                     )}
@@ -337,22 +326,22 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                 </div>
 
                 {/* Rodapé com Unidade e Ações */}
-                <div className="p-4 pt-2 border-t border-[#F3F3F3] flex items-center justify-between text-xs">
-                  <span className="text-[#777777] font-mono text-[11px] bg-[#F5F5F5] px-2 py-0.5 rounded">
+                <div className="p-3.5 pt-2 border-t border-[#EAE4DE]/60 flex items-center justify-between text-xs">
+                  <span className="text-[#736B65] font-mono text-[11px] bg-[#FAF8F6] border border-[#EAE4DE] px-2 py-0.5 rounded-full tabular-nums">
                     {prod.unit}
                   </span>
 
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => openEditModal(prod)}
-                      className="p-1.5 rounded-lg text-[#777777] hover:text-[#111111] hover:bg-[#F3F3F3] transition-colors"
-                      title="Editar produto e foto"
+                      className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-[#736B65] hover:text-[#1F1D1B] hover:bg-[#FAF8F6] transition-colors"
+                      title="Editar produto"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => onDeleteProduct(prod)}
-                      className="p-1.5 rounded-lg text-[#777777] hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-[#736B65] hover:text-[#C94A4A] hover:bg-[#FCECEC] transition-colors"
                       title="Excluir produto"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -365,37 +354,37 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
         )}
       </div>
 
-      {/* Modal de Cadastro / Edição de Produto */}
+      {/* Modal / Bottom Sheet de Cadastro / Edição */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingProduct ? 'Editar Produto do Catálogo' : 'Cadastrar Novo Produto'}
-        subtitle="Informe os dados e adicione uma foto para identificação visual rápida"
+        title={editingProduct ? 'Editar Produto' : 'Novo Produto'}
+        subtitle="Dados e foto para identificação no catálogo"
         maxWidth="lg"
       >
         <form onSubmit={handleFormSubmit} className="space-y-4">
-          {/* Seção de Foto do Produto */}
+          {/* Foto do Produto */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1.5">
+            <label className="block text-xs font-medium text-[#736B65] mb-1">
               Foto do Produto
             </label>
-            <div className="flex flex-col sm:flex-row items-center gap-4 p-3.5 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA]">
+            <div className="flex flex-col sm:flex-row items-center gap-3.5 p-3.5 rounded-2xl border border-[#EAE4DE] bg-[#FAF8F6]">
               {/* Preview da Imagem */}
-              <div className="relative w-24 h-24 rounded-lg bg-neutral-200 border border-[#D1D5DB] overflow-hidden shrink-0 flex items-center justify-center shadow-2xs">
+              <div className="relative w-20 h-20 rounded-xl bg-white border border-[#EAE4DE] overflow-hidden shrink-0 flex items-center justify-center shadow-xs">
                 {imageUrl ? (
                   <>
                     <img src={imageUrl} alt="Pré-visualização" className="w-full h-full object-cover" />
                     <button
                       type="button"
                       onClick={() => setImageUrl('')}
-                      className="absolute top-1 right-1 p-1 bg-black/70 hover:bg-black text-white rounded-full transition-colors"
+                      className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-black text-white rounded-full transition-colors"
                       title="Remover foto"
                     >
                       <X className="w-3 h-3" />
                     </button>
                   </>
                 ) : (
-                  <Camera className="w-8 h-8 text-neutral-400" />
+                  <Camera className="w-6 h-6 text-[#736B65]" />
                 )}
               </div>
 
@@ -408,37 +397,30 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                   onChange={handleImageFileChange}
                   className="hidden"
                 />
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-[#D1D5DB] hover:bg-neutral-100 text-xs font-semibold text-[#111111] shadow-2xs transition-all"
-                  >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>Escolher Imagem do Dispositivo</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="min-h-[44px] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#EAE4DE] hover:bg-[#FAF8F6] text-xs font-medium text-[#1F1D1B] shadow-xs transition-all active:scale-[0.98]"
+                >
+                  <Upload className="w-3.5 h-3.5 text-[#C87A14]" />
+                  <span>Escolher Foto do Aparelho</span>
+                </button>
 
-                <div className="relative">
-                  <input
-                    type="url"
-                    placeholder="Ou cole o link direto da imagem (https://...)"
-                    value={imageUrl.startsWith('data:') ? '' : imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg border border-[#D1D5DB] bg-white text-xs focus:outline-none focus:border-[#111111] shadow-2xs placeholder:text-neutral-400"
-                  />
-                </div>
-                {errors.image && <p className="text-[11px] text-rose-500">{errors.image}</p>}
-                <p className="text-[10px] text-[#777777]">
-                  A foto será salva com segurança no seu dispositivo para visualização instantânea.
-                </p>
+                <input
+                  type="url"
+                  placeholder="Ou link direto da imagem (https://...)"
+                  value={imageUrl.startsWith('data:') ? '' : imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="w-full min-h-[40px] px-3 py-1.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs placeholder:text-[#736B65]/70"
+                />
+                {errors.image && <p className="text-[11px] text-[#C94A4A]">{errors.image}</p>}
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
-              Nome do Produto <span className="text-rose-500">*</span>
+            <label className="block text-xs font-medium text-[#736B65] mb-1">
+              Nome do Produto <span className="text-[#C94A4A]">*</span>
             </label>
             <input
               type="text"
@@ -448,60 +430,60 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                 setName(e.target.value);
                 if (errors.name) setErrors({ ...errors, name: '' });
               }}
-              className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all shadow-2xs ${
+              className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border text-[16px] text-[#1F1D1B] focus:outline-none transition-all shadow-xs ${
                 errors.name
-                  ? 'border-rose-400 bg-rose-50/20 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
-                  : 'border-[#D1D5DB] bg-white focus:border-[#111111] focus:ring-1 focus:ring-[#111111]'
+                  ? 'border-[#C94A4A] bg-[#FCECEC]/30 focus:border-[#C94A4A]'
+                  : 'border-[#EAE4DE] bg-white focus:border-[#C87A14]'
               }`}
             />
-            {errors.name && <p className="text-[11px] text-rose-500 mt-1">{errors.name}</p>}
+            {errors.name && <p className="text-[11px] text-[#C94A4A] mt-1">{errors.name}</p>}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
-                Marca <span className="text-rose-500">*</span>
+              <label className="block text-xs font-medium text-[#736B65] mb-1">
+                Marca <span className="text-[#C94A4A]">*</span>
               </label>
               <input
                 type="text"
-                placeholder="Ex: Linha Premium Color, Wella, L'Oréal..."
+                placeholder="Ex: Essência, Wella, L'Oréal..."
                 value={brand}
                 onChange={(e) => {
                   setBrand(e.target.value);
                   if (errors.brand) setErrors({ ...errors, brand: '' });
                 }}
-                className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all shadow-2xs ${
+                className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border text-[16px] text-[#1F1D1B] focus:outline-none transition-all shadow-xs ${
                   errors.brand
-                    ? 'border-rose-400 bg-rose-50/20 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
-                    : 'border-[#D1D5DB] bg-white focus:border-[#111111] focus:ring-1 focus:ring-[#111111]'
+                    ? 'border-[#C94A4A] bg-[#FCECEC]/30 focus:border-[#C94A4A]'
+                    : 'border-[#EAE4DE] bg-white focus:border-[#C87A14]'
                 }`}
               />
-              {errors.brand && <p className="text-[11px] text-rose-500 mt-1">{errors.brand}</p>}
+              {errors.brand && <p className="text-[11px] text-[#C94A4A] mt-1">{errors.brand}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1">
-                Linha (opcional)
+              <label className="block text-xs font-medium text-[#736B65] mb-1">
+                Linha
               </label>
               <input
                 type="text"
                 placeholder="Ex: Permanent Color Pro"
                 value={line}
                 onChange={(e) => setLine(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-sm focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] shadow-2xs"
+                className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
+              <label className="block text-xs font-medium text-[#736B65] mb-1">
                 Categoria
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                className="w-full px-3 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs font-medium focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] shadow-2xs"
+                className="w-full min-h-[44px] px-3 py-2 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -512,58 +494,58 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1">
-                Tonalidade / Tom
+              <label className="block text-xs font-medium text-[#736B65] mb-1">
+                Tom / Numeração
               </label>
               <input
                 type="text"
                 placeholder="Ex: 7.1, 20 Vol..."
                 value={shadeNumber}
                 onChange={(e) => setShadeNumber(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs font-mono font-bold focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] shadow-2xs"
+                className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-[#EAE4DE] bg-white text-[16px] font-mono text-[#1F1D1B] tabular-nums focus:outline-none focus:border-[#C87A14] shadow-xs"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1">
-                Embalagem / Unidade
+              <label className="block text-xs font-medium text-[#736B65] mb-1">
+                Embalagem
               </label>
               <input
                 type="text"
-                placeholder="Ex: tubo 60g, frasco 900ml"
+                placeholder="Ex: tubo 60g, 900ml"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] shadow-2xs"
+                className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] tabular-nums focus:outline-none focus:border-[#C87A14] shadow-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1">
-              Observações Técnicas do Produto
+            <label className="block text-xs font-medium text-[#736B65] mb-1">
+              Observações Técnicas
             </label>
             <textarea
               rows={2}
-              placeholder="Ex: Recomendações de uso, neutralização ou tempo padrão..."
+              placeholder="Ex: Recomendações de uso, tempo padrão..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] resize-none shadow-2xs"
+              className="w-full p-3.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] resize-none shadow-xs"
             />
           </div>
 
-          <div className="pt-4 mt-6 border-t border-[#E5E7EB] flex items-center justify-end gap-3">
+          <div className="pt-3 border-t border-[#EAE4DE] flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="py-2.5 px-4 rounded-xl border border-[#D1D5DB] bg-white text-xs font-semibold text-[#374151] hover:text-[#111111] hover:bg-neutral-100 transition-colors shadow-2xs"
+              className="min-h-[44px] py-2 px-4 rounded-xl border border-[#EAE4DE] bg-white text-xs sm:text-sm font-medium text-[#736B65] hover:text-[#1F1D1B] hover:bg-[#FAF8F6] transition-colors active:scale-[0.98]"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="py-2.5 px-5 rounded-xl bg-[#111111] hover:bg-black text-white text-xs font-semibold transition-all shadow-xs hover:shadow active:scale-[0.99]"
+              className="min-h-[44px] py-2 px-5 rounded-xl bg-[#C87A14] hover:bg-[#A8630A] text-white text-xs sm:text-sm font-semibold transition-all shadow-xs active:scale-[0.98]"
             >
-              {editingProduct ? 'Salvar Alterações' : 'Cadastrar Produto'}
+              {editingProduct ? 'Salvar alterações' : 'Salvar produto'}
             </button>
           </div>
         </form>

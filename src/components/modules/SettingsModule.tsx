@@ -12,7 +12,11 @@ import {
   CheckCircle2,
   Shield,
   Smartphone,
+  Cloud,
+  RefreshCw,
 } from 'lucide-react';
+import { StorageService } from '../../services/storage';
+import { useToast } from '../ui/Toast';
 
 interface SettingsModuleProps {
   settings: SalonSettings;
@@ -35,6 +39,25 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
   onOpenInstallModal,
   hasDemoData,
 }) => {
+  const { success, error: toastError } = useToast();
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncCloud = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await StorageService.syncWithCloud();
+      if (res.success) {
+        success('Nuvem Sincronizada!', 'Seus dados estão protegidos no banco Cloudflare D1.');
+      } else {
+        toastError('Falha na sincronização', 'Verifique sua conexão com a internet.');
+      }
+    } catch {
+      toastError('Erro ao sincronizar', 'Não foi possível conectar ao Cloudflare D1.');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const [name, setName] = useState(settings.name);
   const [tagline, setTagline] = useState(settings.tagline);
   const [phone, setPhone] = useState(settings.phone);
@@ -323,6 +346,38 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
           </span>
         </div>
 
+        {/* Banner de Sincronização Cloudflare D1 */}
+        <div className="p-4 rounded-2xl border border-[#2E7D5B]/30 bg-[#E8F4EE]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#2E7D5B] text-white flex items-center justify-center shrink-0 mt-0.5">
+              <Cloud className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-[#1F1D1B]">
+                  Banco de Dados em Nuvem (Cloudflare D1)
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#2E7D5B] text-white">
+                  Ativo & Seguro
+                </span>
+              </div>
+              <p className="text-xs text-[#736B65] mt-0.5">
+                Todos os cadastros e fórmulas são sincronizados automaticamente na nuvem. Seus dados estão protegidos contra perda de aparelho e acessíveis de qualquer dispositivo.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSyncCloud}
+            disabled={isSyncing}
+            className="min-h-[40px] inline-flex items-center justify-center gap-1.5 py-2 px-3.5 rounded-xl bg-white border border-[#2E7D5B]/30 text-xs font-semibold text-[#2E7D5B] hover:bg-[#E8F4EE] transition-all shadow-xs active:scale-[0.98] shrink-0 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>{isSyncing ? 'Sincronizando...' : 'Sincronizar agora'}</span>
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Restaurar Demonstração */}
           <div className="p-4 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] flex flex-col justify-between space-y-3">
@@ -410,12 +465,23 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
           </div>
         </div>
 
-        {/* Security & Local Storage Notice */}
-        <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] flex items-start gap-3">
-          <Shield className="w-5 h-5 text-[#111111] shrink-0 mt-0.5" />
-          <div className="text-xs text-[#777777] leading-relaxed">
-            <strong className="text-[#111111] block mb-0.5">Segurança & Privacidade dos Dados (LGPD):</strong>
-            No protótipo funcional atual, todos os dados são armazenados localmente e de forma isolada no navegador através da camada de serviços centralizada (<code className="text-[#111111] font-mono">StorageService</code>). Para a futura versão em nuvem com múltiplos dispositivos, o sistema foi estruturado para rápida conexão a banco de dados relacional sem necessidade de refatoração das telas.
+        {/* Informações da Versão e Segurança */}
+        <div className="p-4 rounded-xl bg-[#FAF8F6] border border-[#EAE4DE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <Shield className="w-5 h-5 text-[#C87A14] shrink-0 mt-0.5" />
+            <div className="text-xs text-[#736B65] leading-relaxed">
+              <strong className="text-[#1F1D1B] block mb-0.5">Salão Essencial — Sistema de Gestão</strong>
+              <span>Banco de dados em nuvem Cloudflare D1 ativo com sincronização contínua e proteção contra perda de dados.</span>
+            </div>
+          </div>
+          <div className="shrink-0 flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#FDF3E7] text-[#8C530A] border border-[#C87A14]/30 tabular-nums">
+              Versão 1.0.0
+            </span>
+            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#E8F4EE] text-[#2E7D5B] border border-[#2E7D5B]/30 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D5B]" />
+              <span>Produção</span>
+            </span>
           </div>
         </div>
       </div>

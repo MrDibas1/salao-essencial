@@ -1,37 +1,42 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import type {
-  Client,
-  Appointment,
-  Product,
-  ProcedureType,
-} from '../../types';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import type { Client, Product, Appointment } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
 import { ClientAvatar } from '../common/ClientAvatar';
 import {
   ArrowLeft,
   Check,
   Search,
-  X,
-  Phone,
   Plus,
+  Phone,
   Package,
+  X,
+  Camera,
+  Upload,
+  Trash2,
+  Image as ImageIcon,
   Sparkles,
-  Calendar,
-  User,
-  FlaskConical,
 } from 'lucide-react';
+import { compressImageFile, estimateDataUrlSizeKb } from '../../utils/imageOptimizer';
 
 interface AppointmentFormModuleProps {
-  initialClientId?: string;
-  appointmentToEdit?: Appointment | null;
   clients: Client[];
   products: Product[];
-  onSave: (appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>, id?: string) => void;
+  appointmentToEdit?: Appointment | null;
+  initialClientId?: string;
+  preselectedClientId?: string;
+  onSave?: (
+    appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>,
+    id?: string
+  ) => void;
+  onSaveAppointment?: (
+    appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>,
+    id?: string
+  ) => void;
   onNavigate: (tab: NavigationTab, params?: { clientId?: string; appointmentId?: string }) => void;
   onOpenNewClientModal: () => void;
 }
 
-const PROCEDURES: ProcedureType[] = [
+const PROCEDURES = [
   'Coloração',
   'Retoque de raiz',
   'Luzes',
@@ -59,21 +64,142 @@ const OX_SHORTCUTS = [
 ];
 
 export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
-  initialClientId,
-  appointmentToEdit,
   clients,
   products,
+  appointmentToEdit,
+  initialClientId,
+  preselectedClientId,
   onSave,
+  onSaveAppointment,
   onNavigate,
   onOpenNewClientModal,
 }) => {
-  // 1. Cliente
-  const [selectedClientId, setSelectedClientId] = useState(
-    appointmentToEdit?.clientId || initialClientId || ''
-  );
+  const saveFn = onSave || onSaveAppointment;
+  const clientIdInit = preselectedClientId || initialClientId || '';
+
+  // 1. Cliente Selecionada
+  const [selectedClientId, setSelectedClientId] = useState<string>(() => {
+    if (appointmentToEdit) return appointmentToEdit.clientId;
+    return clientIdInit;
+  });
+
+  // Busca e dropdown de clientes
   const [clientSearchQuery, setClientSearchQuery] = useState('');
   const [isClientDropdownOpen, setIsClientDropdownOpen] = useState(false);
   const clientSearchRef = useRef<HTMLDivElement>(null);
+
+  // 2. Dados Gerais do Procedimento
+  const [date, setDate] = useState<string>(() => {
+    if (appointmentToEdit) return appointmentToEdit.date;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
+
+  const [professional, setProfessional] = useState<string>(() => {
+    return appointmentToEdit?.professional || 'Clarice';
+  });
+
+  const [procedureType, setProcedureType] = useState<string>(() => {
+    return appointmentToEdit?.procedureType || 'Coloração';
+  });
+
+  const [customProcedureName, setCustomProcedureName] = useState<string>(() => {
+    return appointmentToEdit?.customProcedureName || '';
+  });
+
+  // 3. Produto Utilizado do Catálogo
+  const [selectedProductId, setSelectedProductId] = useState<string>(() => {
+    if (appointmentToEdit?.colorFormula?.products?.[0]) {
+      const existingShade = appointmentToEdit.colorFormula.products[0].shadeNumber;
+      const matched = products.find((p) => p.shadeNumber === existingShade);
+      if (matched) return matched.id;
+    }
+    return '';
+  });
+
+  const [customProductName, setCustomProductName] = useState<string>('');
+
+  // 4. Campo Único de Observação (Quantidade, Volumes de OX e Proporções)
+  const [formulaNotes, setFormulaNotes] = useState<string>(() => {
+    if (appointmentToEdit?.colorFormula) {
+      const parts: string[] = [];
+      const prod = appointmentToEdit.colorFormula.products?.[0];
+      if (prod) {
+        parts.push(`${prod.quantity || '60g'} de tinta ${prod.shadeNumber || ''}`);
+      }
+      if (appointmentToEdit.colorFormula.oxidant?.used) {
+        const ox = appointmentToEdit.colorFormula.oxidant;
+        parts.push(`OX ${ox.volume || '20 vol'} (${ox.quantityOrRatio || '1:1'})`);
+      }
+      if (appointmentToEdit.colorFormula.technicalNotes) {
+        parts.push(appointmentToEdit.colorFormula.technicalNotes);
+      }
+      return parts.join(' + ') || appointmentToEdit.generalNotes || '';
+    }
+    return appointmentToEdit?.generalNotes || '';
+  });
+
+  const [formError, setFormError] = useState<string>('');
+
+  // 5. Fotos de Antes e Depois
+  const [beforePhotoUrl, setBeforePhotoUrl] = useState<string>(() => appointmentToEdit?.beforePhotoUrl || '');
+  const [afterPhotoUrl, setAfterPhotoUrl] = useState<string>(() => appointmentToEdit?.afterPhotoUrl || '');
+  const [isProcessingBefore, setIsProcessingBefore] = useState<boolean>(false);
+  const [isProcessingAfter, setIsProcessingAfter] = useState<boolean>(false);
+
+  const handlePhotoUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: 'before' | 'after'
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (type === 'before') {
+      setIsProcessingBefore(true);
+    } else {
+      setIsProcessingAfter(true);
+    }
+
+    try {
+      const compressed = await compressImageFile(file, { maxDimension: 1024, quality: 0.82 });
+      if (type === 'before') {
+        setBeforePhotoUrl(compressed);
+      } else {
+        setAfterPhotoUrl(compressed);
+      }
+    } catch (err) {
+      console.error('Erro ao processar foto:', err);
+      setFormError('Não foi possível carregar a imagem. Tente novamente.');
+    } finally {
+      if (type === 'before') {
+        setIsProcessingBefore(false);
+      } else {
+        setIsProcessingAfter(false);
+      }
+      e.target.value = '';
+    }
+  };
+
+  // Sincronizar preselectedClientId se alterar
+  useEffect(() => {
+    if (preselectedClientId) {
+      setSelectedClientId(preselectedClientId);
+    }
+  }, [preselectedClientId]);
+
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (clientSearchRef.current && !clientSearchRef.current.contains(event.target as Node)) {
+        setIsClientDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const selectedClient = useMemo(() => {
     return clients.find((c) => c.id === selectedClientId) || null;
@@ -81,7 +207,7 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
 
   const filteredClients = useMemo(() => {
     if (!clientSearchQuery.trim()) return clients.slice(0, 8);
-    const q = clientSearchQuery.toLowerCase();
+    const q = clientSearchQuery.toLowerCase().trim();
     return clients.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
@@ -90,132 +216,102 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
     );
   }, [clients, clientSearchQuery]);
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (clientSearchRef.current && !clientSearchRef.current.contains(e.target as Node)) {
-        setIsClientDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // 2. Dados do Atendimento
-  const todayStr = new Date().toISOString().substring(0, 10);
-  const [date, setDate] = useState(appointmentToEdit?.date || todayStr);
-  const [professional, setProfessional] = useState(
-    appointmentToEdit?.professional || 'Carolina Martins'
-  );
-
-  // 3. Serviço
-  const [procedureType, setProcedureType] = useState<ProcedureType | string>(
-    appointmentToEdit?.procedureType || 'Coloração'
-  );
-  const [customProcedureName, setCustomProcedureName] = useState(
-    appointmentToEdit?.customProcedureName || ''
-  );
-
-  // 4. Produto
-  const [selectedProductId, setSelectedProductId] = useState<string>(() => {
-    if (appointmentToEdit?.colorFormula?.products?.[0]?.id) {
-      return appointmentToEdit.colorFormula.products[0].id;
-    }
-    return products[0]?.id || '';
-  });
-  const [customProductName, setCustomProductName] = useState('');
-
-  // 5. Campo Único de Observação (Oxigenação & Quantidades)
-  const [formulaNotes, setFormulaNotes] = useState<string>(() => {
-    if (appointmentToEdit?.colorFormula?.technicalNotes) {
-      return appointmentToEdit.colorFormula.technicalNotes;
-    }
-    if (appointmentToEdit?.generalNotes) {
-      return appointmentToEdit.generalNotes;
-    }
-    return '';
-  });
-
-  const [formError, setFormError] = useState('');
-
-  // Inserir atalho rápido no campo de texto
-  const handleAddShortcut = (text: string) => {
+  // Atalho de 1 clique para inserir volumes ou medidas no campo
+  const handleAddShortcut = (textToAdd: string) => {
     setFormulaNotes((prev) => {
-      if (!prev.trim()) return text;
-      return `${prev.trim()} + ${text}`;
+      const trimmed = prev.trim();
+      if (!trimmed) return textToAdd;
+      if (trimmed.endsWith('+') || trimmed.endsWith(',')) {
+        return `${trimmed} ${textToAdd}`;
+      }
+      return `${trimmed} + ${textToAdd}`;
     });
   };
 
+  // Submissão do Formulário
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
 
     if (!selectedClientId) {
-      setFormError('Por favor, selecione uma cliente para registrar o atendimento.');
+      setFormError('Selecione uma cliente para salvar o atendimento.');
       return;
     }
-
     if (!selectedClient) {
       setFormError('Cliente não encontrada. Selecione novamente.');
       return;
     }
-
+    if (!date) {
+      setFormError('Informe a data do atendimento.');
+      return;
+    }
     if (!procedureType) {
-      setFormError('Por favor, selecione o tipo de serviço realizado.');
+      setFormError('Selecione o tipo de serviço realizado.');
       return;
     }
 
-    setFormError('');
-
-    // Localizar produto escolhido
+    // Identificar produto selecionado
     const chosenProduct = products.find((p) => p.id === selectedProductId);
-    const prodName = chosenProduct ? chosenProduct.name : customProductName.trim();
 
-    // Mapeamento retrocompatível completo
-    onSave(
-      {
-        clientId: selectedClientId,
-        clientName: selectedClient.name,
-        date,
-        professional: professional.trim() || 'Carolina Martins',
-        procedureType,
-        customProcedureName: procedureType === 'Outro' ? customProcedureName.trim() : undefined,
-        description: prodName ? `Produto: ${prodName}` : undefined,
-        generalNotes: formulaNotes.trim() || undefined,
-        hasColorInfo: Boolean(chosenProduct || formulaNotes.trim()),
-        colorFormula: (chosenProduct || formulaNotes.trim())
-          ? {
-              products: chosenProduct
-                ? [
-                    {
-                      id: chosenProduct.id,
-                      brand: chosenProduct.brand,
-                      line: chosenProduct.line,
-                      shadeNumber: chosenProduct.shadeNumber || '',
-                      shadeName: chosenProduct.name,
-                      quantity: '60g',
-                      unit: chosenProduct.unit || 'g',
-                      region: 'Cabelo completo',
-                    },
-                  ]
-                : [],
-              oxidant: {
-                used: formulaNotes.toLowerCase().includes('vol') || formulaNotes.toLowerCase().includes('ox'),
-                volume: formulaNotes.match(/\b(10|20|30|40)\s*vol\b/i)?.[0] || undefined,
-                quantityOrRatio: formulaNotes.match(/\b1:[1-2](\.5)?\b/i)?.[0] || undefined,
-              },
-              technicalNotes: formulaNotes.trim(),
-            }
-          : undefined,
-      },
-      appointmentToEdit ? appointmentToEdit.id : undefined
-    );
+    const appointmentPayload: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'> = {
+      clientId: selectedClientId,
+      clientName: selectedClient.name,
+      date,
+      professional: professional.trim() || 'Clarice',
+      procedureType,
+      customProcedureName: procedureType === 'Outro' ? customProcedureName.trim() : undefined,
+      description: `${procedureType}${chosenProduct ? ` com ${chosenProduct.name}` : ''}`,
+      generalNotes: formulaNotes.trim() || undefined,
+      hasColorInfo: Boolean(chosenProduct || formulaNotes.trim()),
+      colorFormula: (chosenProduct || formulaNotes.trim())
+        ? {
+            products: chosenProduct
+              ? [
+                  {
+                    id: chosenProduct.id,
+                    brand: chosenProduct.brand,
+                    line: chosenProduct.line,
+                    shadeNumber: chosenProduct.shadeNumber || '',
+                    shadeName: chosenProduct.name,
+                    quantity: formulaNotes.match(/\b\d+g\b/i)?.[0] || '60g',
+                    unit: chosenProduct.unit || 'g',
+                    region: 'Cabelo completo',
+                  },
+                ]
+              : customProductName.trim()
+              ? [
+                  {
+                    id: `custom-${Date.now()}`,
+                    brand: 'Personalizada',
+                    shadeNumber: customProductName.trim(),
+                    quantity: formulaNotes.match(/\b\d+g\b/i)?.[0] || '60g',
+                    unit: 'g',
+                    region: 'Cabelo completo',
+                  },
+                ]
+              : [],
+            oxidant: {
+              used: formulaNotes.toLowerCase().includes('vol') || formulaNotes.toLowerCase().includes('ox'),
+              volume: formulaNotes.match(/\b(10|20|30|40)\s*vol\b/i)?.[0] || undefined,
+              quantityOrRatio: formulaNotes.match(/\b1:[1-2](\.5)?\b/i)?.[0] || undefined,
+            },
+            technicalNotes: formulaNotes.trim(),
+          }
+        : undefined,
+      beforePhotoUrl: beforePhotoUrl.trim() || undefined,
+      afterPhotoUrl: afterPhotoUrl.trim() || undefined,
+      photoUrls: [beforePhotoUrl.trim(), afterPhotoUrl.trim()].filter(Boolean),
+    };
 
-    // Navega para o perfil da cliente para ver o atendimento salvo
+    if (saveFn) {
+      saveFn(appointmentPayload, appointmentToEdit ? appointmentToEdit.id : undefined);
+    }
     onNavigate('client-detail', { clientId: selectedClientId });
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-300">
-      {/* Barra superior de navegação */}
+    <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-300 pb-32 sm:pb-12 max-w-3xl mx-auto">
+      {/* Barra de Voltar */}
       <div className="flex items-center justify-between">
         <button
           type="button"
@@ -223,23 +319,23 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
             if (selectedClientId) {
               onNavigate('client-detail', { clientId: selectedClientId });
             } else {
-              onNavigate('dashboard');
+              onNavigate('clients');
             }
           }}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#777777] hover:text-[#111111] transition-colors"
+          className="min-h-[44px] inline-flex items-center gap-1.5 text-xs font-medium text-[#736B65] hover:text-[#1F1D1B] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Voltar</span>
         </button>
 
-        <span className="text-xs font-medium text-[#777777]">
-          {appointmentToEdit ? 'Editar Atendimento' : 'Novo Registro de Atendimento'}
+        <span className="text-xs font-medium text-[#736B65]">
+          {appointmentToEdit ? 'Editar Atendimento' : 'Novo Atendimento'}
         </span>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
         {formError && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs font-semibold flex items-center justify-between">
+          <div className="p-3.5 rounded-xl bg-[#FCECEC] border border-[#C94A4A]/30 text-[#C94A4A] text-xs font-medium flex items-center justify-between">
             <span>{formError}</span>
             <button type="button" onClick={() => setFormError('')}>
               <X className="w-4 h-4" />
@@ -250,30 +346,30 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
         {/* ========================================================================= */}
         {/* PASSO 1: CLIENTE EM DESTAQUE                                             */}
         {/* ========================================================================= */}
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-5 sm:p-7 shadow-2xs space-y-4">
-          <div className="border-b border-[#F0F0F0] pb-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-[#111111] text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
+        <div className="bg-white rounded-2xl border border-[#EAE4DE] p-4 sm:p-6 shadow-xs space-y-3.5">
+          <div className="border-b border-[#EAE4DE]/60 pb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-full bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center font-semibold text-xs shrink-0">
                 1
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-[#111111] tracking-tight">
-                  Cliente do Atendimento
+                <h3 className="text-base sm:text-lg font-semibold text-[#1F1D1B] tracking-tight">
+                  Cliente
                 </h3>
-                <p className="text-xs text-[#777777]">Identificação da cliente para registro da ficha</p>
+                <p className="text-xs text-[#736B65]">Identificação para gravação da ficha</p>
               </div>
             </div>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 text-[11px] font-bold shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FDF3E7] text-[#8C530A] border border-[#EAE4DE] text-[11px] font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C87A14]" />
               <span>Obrigatório</span>
             </span>
           </div>
 
           {selectedClient ? (
             /* Card da Cliente Selecionada */
-            <div className="p-4 rounded-xl border-2 border-amber-400 bg-amber-50/30 flex items-center justify-between gap-4 transition-all">
-              <div className="flex items-center gap-3.5">
+            <div className="p-3.5 rounded-xl border border-[#C87A14]/40 bg-[#FAF8F6] flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
                 <ClientAvatar
                   name={selectedClient.name}
                   avatarUrl={selectedClient.avatarUrl}
@@ -281,9 +377,9 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
                   className="ring-2 ring-white shadow-xs"
                 />
                 <div>
-                  <h4 className="text-base font-bold text-[#111111]">{selectedClient.name}</h4>
-                  <p className="text-xs text-[#555555] flex items-center gap-1.5 mt-0.5 font-medium">
-                    <Phone className="w-3.5 h-3.5 text-[#888888]" />
+                  <h4 className="text-base font-semibold text-[#1F1D1B]">{selectedClient.name}</h4>
+                  <p className="text-xs text-[#736B65] flex items-center gap-1 mt-0.5 tabular-nums">
+                    <Phone className="w-3.5 h-3.5 text-[#736B65]/70" />
                     <span>{selectedClient.phone}</span>
                   </p>
                 </div>
@@ -296,16 +392,16 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
                   setClientSearchQuery('');
                   setIsClientDropdownOpen(true);
                 }}
-                className="py-1.5 px-3 rounded-lg border border-[#D1D5DB] bg-white hover:bg-neutral-100 text-xs font-semibold text-[#111111] transition-colors shadow-2xs"
+                className="min-h-[36px] py-1.5 px-3 rounded-xl border border-[#EAE4DE] bg-white hover:bg-[#FAF8F6] text-xs font-medium text-[#1F1D1B] transition-colors shadow-xs active:scale-[0.98]"
               >
-                Trocar Cliente
+                Trocar
               </button>
             </div>
           ) : (
             /* Campo de Busca Rápida de Cliente */
             <div className="relative" ref={clientSearchRef}>
               <div className="relative">
-                <Search className="w-4 h-4 text-[#888888] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-[#736B65] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Pesquise o nome da cliente para selecionar..."
@@ -315,19 +411,19 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
                     setClientSearchQuery(e.target.value);
                     setIsClientDropdownOpen(true);
                   }}
-                  className="w-full pl-10 pr-10 py-3 rounded-xl border border-[#D1D5DB] bg-white text-sm focus:outline-none focus:border-[#111111] shadow-2xs"
+                  className="w-full min-h-[44px] pl-10 pr-10 py-2.5 rounded-xl border border-[#EAE4DE] bg-[#FAF8F6] focus:bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs"
                 />
               </div>
 
               {isClientDropdownOpen && (
-                <div className="absolute z-30 left-0 right-0 mt-2 bg-white rounded-xl border border-[#D1D5DB] shadow-lg divide-y divide-[#F0F0F0] max-h-64 overflow-y-auto">
+                <div className="absolute z-30 left-0 right-0 mt-1 bg-white rounded-2xl border border-[#EAE4DE] shadow-lg divide-y divide-[#EAE4DE]/60 max-h-60 overflow-y-auto">
                   {filteredClients.length === 0 ? (
-                    <div className="p-4 text-center text-xs text-[#777777] space-y-2">
+                    <div className="p-4 text-center text-xs text-[#736B65] space-y-2">
                       <p>Nenhuma cliente encontrada.</p>
                       <button
                         type="button"
                         onClick={onOpenNewClientModal}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 underline"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#C87A14] hover:underline"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Cadastrar agora</span>
@@ -342,16 +438,16 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
                           setIsClientDropdownOpen(false);
                           setFormError('');
                         }}
-                        className="p-3 flex items-center justify-between hover:bg-amber-50/50 cursor-pointer transition-colors"
+                        className="p-3 flex items-center justify-between hover:bg-[#FAF8F6] cursor-pointer transition-colors"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2.5">
                           <ClientAvatar name={c.name} avatarUrl={c.avatarUrl} size="sm" />
                           <div>
-                            <p className="text-xs font-bold text-[#111111]">{c.name}</p>
-                            <p className="text-[11px] text-[#777777]">{c.phone}</p>
+                            <p className="text-xs font-semibold text-[#1F1D1B]">{c.name}</p>
+                            <p className="text-[11px] text-[#736B65] tabular-nums">{c.phone}</p>
                           </div>
                         </div>
-                        <span className="text-xs font-semibold text-amber-700">Selecionar</span>
+                        <span className="text-xs font-semibold text-[#C87A14]">Selecionar</span>
                       </div>
                     ))
                   )}
@@ -361,31 +457,29 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
           )}
 
           {/* Linha com Data e Profissional */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
+              <label className="block text-xs font-medium text-[#736B65] mb-1">
                 Data do Atendimento
               </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs font-medium focus:outline-none focus:border-[#111111] shadow-2xs"
-                />
-              </div>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] tabular-nums focus:outline-none focus:border-[#C87A14] shadow-xs"
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
+              <label className="block text-xs font-medium text-[#736B65] mb-1">
                 Profissional Responsável
               </label>
               <input
                 type="text"
                 value={professional}
                 onChange={(e) => setProfessional(e.target.value)}
-                placeholder="Ex: Carolina Martins"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs font-medium focus:outline-none focus:border-[#111111] shadow-2xs"
+                placeholder="Ex: Clarice"
+                className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs"
               />
             </div>
           </div>
@@ -394,32 +488,32 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
         {/* ========================================================================= */}
         {/* PASSO 2: SELEÇÃO SIMPLES DE SERVIÇO & PRODUTO                             */}
         {/* ========================================================================= */}
-        <div className="bg-white rounded-2xl border border-[#E5E5E5] p-5 sm:p-7 shadow-2xs space-y-5">
-          <div className="border-b border-[#F0F0F0] pb-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-[#111111] text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
+        <div className="bg-white rounded-2xl border border-[#EAE4DE] p-4 sm:p-6 shadow-xs space-y-4">
+          <div className="border-b border-[#EAE4DE]/60 pb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-full bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center font-semibold text-xs shrink-0">
                 2
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-[#111111] tracking-tight">
-                  Serviço & Produto Utilizado
+                <h3 className="text-base sm:text-lg font-semibold text-[#1F1D1B] tracking-tight">
+                  Serviço e Produto
                 </h3>
-                <p className="text-xs text-[#777777]">Selecione o procedimento e o produto aplicado</p>
+                <p className="text-xs text-[#736B65]">Procedimento e tinta aplicada</p>
               </div>
             </div>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 text-[11px] font-bold shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FDF3E7] text-[#8C530A] border border-[#EAE4DE] text-[11px] font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C87A14]" />
               <span>Obrigatório</span>
             </span>
           </div>
 
-          {/* Seleção de Serviço por Botões Rápidos (1 Toque) */}
+          {/* Seleção de Serviço por Chips de 1 Toque */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-2">
-              Tipo de Serviço Realizado <span className="text-rose-500">*</span>
+            <label className="block text-xs font-medium text-[#736B65] mb-2">
+              Tipo de Procedimento
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {PROCEDURES.map((proc) => {
                 const isSelected = procedureType === proc;
                 return (
@@ -427,10 +521,10 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
                     key={proc}
                     type="button"
                     onClick={() => setProcedureType(proc)}
-                    className={`py-2 px-3 rounded-xl text-xs font-semibold transition-all shadow-2xs ${
+                    className={`min-h-[40px] py-2 px-3.5 rounded-xl text-xs transition-all active:scale-[0.98] ${
                       isSelected
-                        ? 'bg-[#111111] text-white ring-2 ring-[#111111] shadow-xs'
-                        : 'bg-[#F4F5F7] hover:bg-[#E5E7EB] text-[#292929] border border-[#D1D5DB]'
+                        ? 'bg-[#FDF3E7] text-[#8C530A] border border-[#C87A14] font-semibold shadow-xs'
+                        : 'bg-white hover:bg-[#FAF8F6] text-[#736B65] border border-[#EAE4DE]'
                     }`}
                   >
                     {proc}
@@ -440,31 +534,31 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
             </div>
 
             {procedureType === 'Outro' && (
-              <div className="mt-3">
+              <div className="mt-2.5">
                 <input
                   type="text"
-                  placeholder="Especifique o procedimento (ex: Botox capilar, Penteado de noiva...)"
+                  placeholder="Nome do procedimento (ex: Botox capilar...)"
                   value={customProcedureName}
                   onChange={(e) => setCustomProcedureName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs focus:outline-none focus:border-[#111111] shadow-2xs"
+                  className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs"
                 />
               </div>
             )}
           </div>
 
-          {/* Seleção Simples de Produto do Catálogo */}
+          {/* Seleção de Produto do Catálogo */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1.5">
-              Produto Principal do Catálogo
+            <label className="block text-xs font-medium text-[#736B65] mb-1.5">
+              Produto Principal
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="relative">
                 <select
                   value={selectedProductId}
                   onChange={(e) => setSelectedProductId(e.target.value)}
-                  className="w-full px-3.5 py-3 rounded-xl border border-[#D1D5DB] bg-white text-xs font-semibold text-[#111111] focus:outline-none focus:border-[#111111] shadow-2xs"
+                  className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs"
                 >
-                  <option value="">Nenhum produto cadastrado selecionado</option>
+                  <option value="">Nenhum produto selecionado</option>
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name} ({p.brand}{p.shadeNumber ? ` • ${p.shadeNumber}` : ''})
@@ -477,28 +571,27 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
               {selectedProductId === 'custom' ? (
                 <input
                   type="text"
-                  placeholder="Nome da tinta ou produto usado..."
+                  placeholder="Nome da tinta ou produto..."
                   value={customProductName}
                   onChange={(e) => setCustomProductName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] bg-white text-xs focus:outline-none focus:border-[#111111] shadow-2xs"
+                  className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs"
                 />
               ) : (
-                /* Card de resumo do produto selecionado */
                 (() => {
                   const prod = products.find((p) => p.id === selectedProductId);
                   if (!prod) return null;
                   return (
-                    <div className="p-2.5 rounded-xl bg-[#FAFAFA] border border-[#E5E5E5] flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-[#FAF8F6] border border-[#EAE4DE] flex items-center gap-2.5">
                       {prod.imageUrl ? (
-                        <img src={prod.imageUrl} alt={prod.name} className="w-10 h-10 rounded-lg object-cover border border-[#D1D5DB] shrink-0" />
+                        <img src={prod.imageUrl} alt={prod.name} className="w-9 h-9 rounded-lg object-cover border border-[#EAE4DE] shrink-0" />
                       ) : (
-                        <div className="w-10 h-10 rounded-lg bg-neutral-200 flex items-center justify-center text-neutral-500 shrink-0">
-                          <Package className="w-5 h-5" />
+                        <div className="w-9 h-9 rounded-lg bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center shrink-0">
+                          <Package className="w-4 h-4" />
                         </div>
                       )}
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-[#111111] truncate">{prod.name}</p>
-                        <p className="text-[11px] text-[#777777]">{prod.brand} • {prod.category}</p>
+                        <p className="text-xs font-semibold text-[#1F1D1B] truncate">{prod.name}</p>
+                        <p className="text-[11px] text-[#736B65]">{prod.brand} • {prod.category}</p>
                       </div>
                     </div>
                   );
@@ -509,34 +602,29 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
         </div>
 
         {/* ========================================================================= */}
-        {/* PASSO 3: CAMPO ÚNICO DE OBSERVAÇÃO (QUANTIDADE & OXIGENAÇÃO)               */}
+        {/* PASSO 3: OBSERVAÇÕES GERAIS, FÓRMULAS & OXIGENAÇÃO                        */}
         {/* ========================================================================= */}
-        <div className="bg-white rounded-2xl border-2 border-amber-400/80 p-5 sm:p-7 shadow-xs space-y-4">
-          <div className="border-b border-[#F0F0F0] pb-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-amber-500 text-neutral-950 flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
+        <div className="bg-white rounded-2xl border border-[#EAE4DE] p-4 sm:p-6 shadow-xs space-y-3.5">
+          <div className="border-b border-[#EAE4DE]/60 pb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-full bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center font-semibold text-xs shrink-0">
                 3
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-[#111111] tracking-tight">
-                  Quantidade & Volume de Oxigenação
+                <h3 className="text-base sm:text-lg font-semibold text-[#1F1D1B] tracking-tight">
+                  Observações Gerais
                 </h3>
-                <p className="text-xs text-[#777777]">
-                  Campo único de observações da fórmula e proporções da mistura
+                <p className="text-xs text-[#736B65]">
+                  Fórmula, medidas de oxigenação ou notas do procedimento
                 </p>
               </div>
             </div>
-
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
-              <Sparkles className="w-3 h-3" />
-              <span>Fórmula</span>
-            </span>
           </div>
 
           {/* Atalhos Rápidos de Clique (1 toque para inserir volume/gramatura) */}
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#777777] block mb-1.5">
-              Toque rápido para adicionar à anotação:
+            <span className="text-[11px] font-medium text-[#736B65] block mb-1.5">
+              Toque rápido para adicionar:
             </span>
             <div className="flex flex-wrap gap-1.5">
               {OX_SHORTCUTS.map((item) => (
@@ -544,7 +632,7 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
                   key={item}
                   type="button"
                   onClick={() => handleAddShortcut(item)}
-                  className="py-1 px-2.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-[#111111] text-[11px] font-semibold border border-neutral-300 transition-all active:scale-95 shadow-2xs"
+                  className="min-h-[36px] py-1.5 px-3 rounded-xl bg-[#FAF8F6] hover:bg-[#F5EFEB] text-[#1F1D1B] text-xs font-medium border border-[#EAE4DE] transition-all active:scale-[0.98] shadow-xs tabular-nums"
                 >
                   +{item}
                 </button>
@@ -559,24 +647,235 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
               value={formulaNotes}
               onChange={(e) => setFormulaNotes(e.target.value)}
               placeholder="Ex: 60g de tinta 7.1 + 60ml OX 20 vol (proporção 1:1), tempo de pausa 35 minutos na raiz."
-              className="w-full p-4 rounded-xl border border-[#D1D5DB] bg-[#FAFAFA] focus:bg-white text-xs sm:text-sm focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] resize-none shadow-2xs leading-relaxed"
+              className="w-full p-3.5 rounded-xl border border-[#EAE4DE] bg-[#FAF8F6] focus:bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] resize-none shadow-xs leading-relaxed"
             />
-            <p className="text-[11px] text-[#777777] mt-1.5">
-              Este registro ficará gravado no perfil da cliente para consulta imediata no próximo retorno.
+            <p className="text-[11px] text-[#736B65] mt-1.5">
+              Ficará registrado na ficha da cliente para consulta imediata no próximo retorno.
             </p>
           </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* BOTÃO DE CONCLUSÃO                                                        */}
+        {/* PASSO 4: REGISTRO FOTOGRÁFICO (ANTES E DEPOIS)                            */}
+        {/* ========================================================================= */}
+        <div className="bg-white rounded-2xl border border-[#EAE4DE] p-4 sm:p-6 shadow-xs space-y-4">
+          <div className="border-b border-[#EAE4DE]/60 pb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-full bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center font-semibold text-xs shrink-0">
+                4
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-[#1F1D1B] tracking-tight">
+                  Fotos do Atendimento (Antes e Depois)
+                </h3>
+                <p className="text-xs text-[#736B65]">
+                  Tire fotos ou selecione da galeria para alimentar a Galeria do salão
+                </p>
+              </div>
+            </div>
+            {(beforePhotoUrl || afterPhotoUrl) && (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-[#2E7D5B] bg-[#E8F4EE] px-2.5 py-0.5 rounded-full">
+                <Sparkles className="w-3 h-3" />
+                <span>Foto anexada</span>
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* CARD 1: FOTO DE ANTES */}
+            <div className="border border-[#EAE4DE] rounded-xl p-3.5 bg-[#FAF8F6] flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-[#EAE4DE] text-[#4A443F]">
+                  Cabelo Inicial • ANTES
+                </span>
+                {beforePhotoUrl && (
+                  <span className="text-[10px] text-[#736B65] tabular-nums">
+                    ~{estimateDataUrlSizeKb(beforePhotoUrl)} KB
+                  </span>
+                )}
+              </div>
+
+              {isProcessingBefore ? (
+                <div className="h-44 rounded-xl border border-dashed border-[#C87A14] flex flex-col items-center justify-center bg-white gap-2 text-xs text-[#8C530A]">
+                  <div className="w-6 h-6 border-2 border-[#C87A14] border-t-transparent rounded-full animate-spin" />
+                  <span>Otimizando foto...</span>
+                </div>
+              ) : beforePhotoUrl ? (
+                <div className="relative rounded-xl overflow-hidden bg-black/5 aspect-4/3 group border border-[#EAE4DE]">
+                  <img
+                    src={beforePhotoUrl}
+                    alt="Foto de Antes"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 sm:transition-opacity flex items-center justify-center gap-2 p-2">
+                    <label className="cursor-pointer min-h-[38px] px-3 py-1.5 rounded-lg bg-white/95 text-[#1F1D1B] text-xs font-medium hover:bg-white shadow-md flex items-center gap-1.5 active:scale-95 transition-transform">
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>Trocar</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handlePhotoUpload(e, 'before')}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setBeforePhotoUrl('')}
+                      className="min-h-[38px] px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-medium hover:bg-red-700 shadow-md flex items-center gap-1.5 active:scale-95 transition-transform"
+                      title="Remover foto"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Excluir</span>
+                    </button>
+                  </div>
+                  {/* Botões móveis sempre visíveis na parte inferior da foto */}
+                  <div className="sm:hidden absolute bottom-1.5 right-1.5 flex gap-1.5">
+                    <label className="cursor-pointer min-h-[36px] px-2.5 py-1 rounded-lg bg-white/90 text-[#1F1D1B] text-[11px] font-medium shadow-md flex items-center gap-1">
+                      <Camera className="w-3 h-3" />
+                      <span>Trocar</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handlePhotoUpload(e, 'before')}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setBeforePhotoUrl('')}
+                      className="min-h-[36px] px-2 py-1 rounded-lg bg-red-600/90 text-white text-[11px] font-medium shadow-md flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <label className="cursor-pointer h-44 rounded-xl border-2 border-dashed border-[#D6CEC7] hover:border-[#C87A14] bg-white hover:bg-[#FDF3E7]/30 transition-all flex flex-col items-center justify-center p-4 text-center group active:scale-[0.99]">
+                  <div className="w-10 h-10 rounded-full bg-[#FAF8F6] group-hover:bg-[#FDF3E7] text-[#736B65] group-hover:text-[#C87A14] flex items-center justify-center mb-2 transition-colors">
+                    <Camera className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-semibold text-[#1F1D1B] group-hover:text-[#C87A14]">
+                    Adicionar Foto de Antes
+                  </span>
+                  <span className="text-[11px] text-[#736B65] mt-0.5">
+                    Toque para abrir a câmera ou galeria
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handlePhotoUpload(e, 'before')}
+                  />
+                </label>
+              )}
+            </div>
+
+            {/* CARD 2: FOTO DE DEPOIS */}
+            <div className="border border-[#C87A14]/30 rounded-xl p-3.5 bg-[#FDF3E7]/20 flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-[#FDF3E7] text-[#8C530A] border border-[#C87A14]/20 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-[#C87A14]" />
+                  <span>Resultado • DEPOIS</span>
+                </span>
+                {afterPhotoUrl && (
+                  <span className="text-[10px] text-[#8C530A] tabular-nums font-medium">
+                    ~{estimateDataUrlSizeKb(afterPhotoUrl)} KB
+                  </span>
+                )}
+              </div>
+
+              {isProcessingAfter ? (
+                <div className="h-44 rounded-xl border border-dashed border-[#C87A14] flex flex-col items-center justify-center bg-white gap-2 text-xs text-[#8C530A]">
+                  <div className="w-6 h-6 border-2 border-[#C87A14] border-t-transparent rounded-full animate-spin" />
+                  <span>Otimizando foto...</span>
+                </div>
+              ) : afterPhotoUrl ? (
+                <div className="relative rounded-xl overflow-hidden bg-black/5 aspect-4/3 group border border-[#C87A14]/40">
+                  <img
+                    src={afterPhotoUrl}
+                    alt="Foto de Depois"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 sm:transition-opacity flex items-center justify-center gap-2 p-2">
+                    <label className="cursor-pointer min-h-[38px] px-3 py-1.5 rounded-lg bg-white/95 text-[#1F1D1B] text-xs font-medium hover:bg-white shadow-md flex items-center gap-1.5 active:scale-95 transition-transform">
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>Trocar</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handlePhotoUpload(e, 'after')}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setAfterPhotoUrl('')}
+                      className="min-h-[38px] px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-medium hover:bg-red-700 shadow-md flex items-center gap-1.5 active:scale-95 transition-transform"
+                      title="Remover foto"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Excluir</span>
+                    </button>
+                  </div>
+                  {/* Botões móveis sempre visíveis na parte inferior da foto */}
+                  <div className="sm:hidden absolute bottom-1.5 right-1.5 flex gap-1.5">
+                    <label className="cursor-pointer min-h-[36px] px-2.5 py-1 rounded-lg bg-white/90 text-[#1F1D1B] text-[11px] font-medium shadow-md flex items-center gap-1">
+                      <Camera className="w-3 h-3" />
+                      <span>Trocar</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handlePhotoUpload(e, 'after')}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setAfterPhotoUrl('')}
+                      className="min-h-[36px] px-2 py-1 rounded-lg bg-red-600/90 text-white text-[11px] font-medium shadow-md flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <label className="cursor-pointer h-44 rounded-xl border-2 border-dashed border-[#C87A14]/40 hover:border-[#C87A14] bg-white hover:bg-[#FDF3E7]/40 transition-all flex flex-col items-center justify-center p-4 text-center group active:scale-[0.99]">
+                  <div className="w-10 h-10 rounded-full bg-[#FDF3E7] text-[#C87A14] flex items-center justify-center mb-2 transition-transform group-hover:scale-105">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-semibold text-[#1F1D1B] group-hover:text-[#C87A14]">
+                    Adicionar Foto de Depois
+                  </span>
+                  <span className="text-[11px] text-[#736B65] mt-0.5">
+                    Toque para registrar o resultado final
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handlePhotoUpload(e, 'after')}
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+
+          <p className="text-[11px] text-[#736B65] flex items-center gap-1.5">
+            <span className="text-[#2E7D5B]">✓</span>
+            <span>As fotos são comprimidas com qualidade profissional para carregar rápido no celular e sincronizar na nuvem.</span>
+          </p>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* BOTÃO DE CONCLUSÃO COM VERBO CURTO CONFORME DESIGN.MD                      */}
         {/* ========================================================================= */}
         <div className="pt-2">
           <button
             type="submit"
-            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-neutral-950 font-bold text-base shadow-lg hover:shadow-xl active:scale-[0.99] transition-all flex items-center justify-center gap-2 group"
+            className="w-full min-h-[48px] py-3.5 px-6 rounded-xl bg-[#C87A14] hover:bg-[#A8630A] text-white font-semibold text-sm sm:text-base shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 group"
           >
-            <Check className="w-5 h-5 text-neutral-950 group-hover:scale-110 transition-transform" />
-            <span>SALVAR ATENDIMENTO</span>
+            <Check className="w-5 h-5" />
+            <span>Salvar atendimento</span>
           </button>
         </div>
       </form>

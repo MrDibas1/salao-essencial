@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proposta Comercial & Briefing — Web App de Gestão para Salão de Beleza</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAF8F6;
+      --card-bg: #FFFFFF;
+      --text-main: #1F1D1B;
+      --text-muted: #736B65;
+      --accent: #C87A14;
+      --accent-hover: #A8630A;
+      --accent-soft: #FDF3E7;
+      --border: #EAE4DE;
+      --success: #2E7D5B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 60px;
+    }
+
+    .top-actions {
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+
+    .top-actions .badge-status {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-print {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-print:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    header.doc-header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 30px;
+      margin-bottom: 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .header-info h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .header-info p.subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .meta-box {
+      background: var(--accent-soft);
+      border: 1px solid #F3DFCA;
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 13px;
+      min-width: 260px;
+    }
+
+    .meta-box div {
+      margin-bottom: 6px;
+    }
+
+    .meta-box div:last-child {
+      margin-bottom: 0;
+    }
+
+    .meta-box strong {
+      color: #7A4200;
+    }
+
+    h2.section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111;
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title .number-badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: #333;
+      font-size: 15px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .card {
+      background: #FAF8F6;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #111;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+
+    .highlight-pill {
+      display: inline-block;
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    /* Modules list */
+    .module-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      background: #FFFFFF;
+      transition: border-color 0.2s;
+    }
+
+    .module-item:hover {
+      border-color: var(--accent);
+    }
+
+    .module-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .module-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .module-desc {
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* Pricing Table */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .pricing-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 20px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .pricing-card.featured {
+      border: 2px solid var(--accent);
+      background: #FFFAF4;
+      box-shadow: 0 6px 20px rgba(200, 122, 20, 0.08);
+    }
+
+    .featured-tag {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .pricing-card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 8px;
+    }
+
+    .pricing-card .price {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 12px 0 4px;
+      font-feature-settings: "tnum";
+    }
+
+    .pricing-card .recurrence {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .pricing-card ul {
+      list-style: none;
+      font-size: 13px;
+      color: #444;
+      flex: 1;
+      margin-bottom: 16px;
+    }
+
+    .pricing-card ul li {
+      padding: 6px 0;
+      border-top: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pricing-card ul li::before {
+      content: "✓";
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    /* Table */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    table.data-table th, table.data-table td {
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      text-align: left;
+    }
+
+    table.data-table th {
+      background: #FAF8F6;
+      font-weight: 600;
+      color: #111;
+    }
+
+    /* Briefing Form */
+    .briefing-box {
+      background: #FAF8F6;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    .form-group .line-input {
+      width: 100%;
+      border: 1px dashed #C8BFB8;
+      background: #FFF;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .signature-area {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .signature-line {
+      border-top: 1px solid #111;
+      padding-top: 8px;
+      font-size: 14px;
+      text-align: center;
+      color: #333;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+      .top-actions {
+        display: none !important;
+      }
+      .container {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
+      }
+      .pricing-card.featured {
+        box-shadow: none;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 24px 16px;
+        margin: 10px;
+        border-radius: 12px;
+      }
+      header.doc-header {
+        flex-direction: column;
+      }
+      .grid-2, .pricing-grid, .signature-area {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar Actions -->
+  <div class="top-actions">
+    <div>
+      <span class="badge-status">● Proposta Executiva Pronta</span>
+      <span style="font-size: 13px; color: var(--text-muted); margin-left: 10px;">Salão Essencial — Sistema de Gestão</span>
+    </div>
+    <button class="btn-print" onclick="window.print()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+      Imprimir / Salvar em PDF
+    </button>
+  </div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="doc-header">
+      <div class="header-info">
+        <h1>PROPOSTA COMERCIAL</h1>
+        <p class="subtitle">Web Aplicativo de Gestão Interna & Fichas Técnicas de Coloração</p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Infraestrutura Edge Cloudflare + Domínio Próprio Exclusivo</p>
+      </div>
+      <div class="meta-box">
+        <div><strong>Cliente:</strong> [Nome do Salão de Beleza]</div>
+        <div><strong>Responsável:</strong> [Proprietário / Gestor]</div>
+        <div><strong>Desenvolvedor:</strong> [Seu Nome / Agência]</div>
+        <div><strong>Data:</strong> Novembro de 2026</div>
+        <div><strong>Validade:</strong> 15 dias</div>
+      </div>
+    </header>
+
+    <!-- Seção 1: Diagnóstico e Valor -->
+    <h2 class="section-title"><span class="number-badge">1</span> Diagnóstico e Proposta de Valor</h2>
+    <p>O sucesso e a rentabilidade de um salão de beleza moderno dependem diretamente da <strong>precisão técnica</strong> e da <strong>fidelização das clientes</strong>. A perda do histórico de fórmulas químicas (retoques de raiz, misturas de tintas, descolorações e tratamentos) gera retrabalho, desperdício de insumos e insegurança para as clientes.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <span class="highlight-pill">Dores do Salão</span>
+        <h3>O Método Tradicional</h3>
+        <p>Anotações em papel ou WhatsApp que se perdem com o tempo, dependência da memória dos profissionais e dificuldade de consultar a fórmula exata usada há 3 meses.</p>
+      </div>
+      <div class="card" style="background: #FDF9F4; border-color: #F0DFC8;">
+        <span class="highlight-pill" style="background: #C87A14; color: #fff;">Solução Especializada</span>
+        <h3>Web App com Ficha 360°</h3>
+        <p>Acesso imediato no celular da cabeleireira a todas as misturas de tintas, volumes de OX e observações técnicas da cliente, garantindo fidelização e resultado perfeito.</p>
+      </div>
+    </div>
+
+    <!-- Seção 2: Escopo do Sistema -->
+    <h2 class="section-title"><span class="number-badge">2</span> Módulos e Recursos Incluídos</h2>
+    <p>O sistema foi planejado exclusivamente para a rotina dinâmica de salão, permitindo lançamentos e consultas em menos de 30 segundos:</p>
+
+    <div class="module-item">
+      <div class="module-header">
+        <span class="module-title">✨ Fichas Técnicas de Coloração (Diferencial Central)</span>
+        <span class="highlight-pill">Exclusivo</span>
+      </div>
+      <div class="module-desc">Registro de múltiplas tintas por procedimento (marca, tom ex: 7.1 + 8.0, gramatura e área de aplicação: raiz, comprimento ou pontas), volume do oxidante (OX), proporção de mistura e tempo de pausa em minutos.</div>
+    </div>
+
+    <div class="module-item">
+      <div class="module-header">
+        <span class="module-title">👤 Gestão de Clientes & CRM com WhatsApp</span>
+      </div>
+      <div class="module-desc">Cadastro ágil com busca instantânea por nome ou telefone. Botão direto para iniciar conversa no WhatsApp em 1 clique e linha do tempo de procedimentos realizados.</div>
+    </div>
+
+    <div class="module-item">
+      <div class="module-header">
+        <span class="module-title">📊 Dashboard Gerencial em Tempo Real</span>
+      </div>
+      <div class="module-desc">Métricas dinâmicas de atendimentos no mês, total de clientes cadastradas, quantidade de fórmulas ativas e atalhos rápidos para operações do dia a dia.</div>
+    </div>
+
+    <div class="module-item">
+      <div class="module-header">
+        <span class="module-title">📋 Prontuário Capilar & Impressão Formatada</span>
+      </div>
+      <div class="module-desc">Histórico completo de cada cliente disponível para conferência na tela ou impressão limpa da ficha técnica de procedimentos.</div>
+    </div>
+
+    <div class="module-item">
+      <div class="module-header">
+        <span class="module-title">📱 Tecnologia PWA (Progressive Web App)</span>
+      </div>
+      <div class="module-desc">Instalação direta na tela inicial de qualquer smartphone (iPhone ou Android) ou computador. Não requer download de App Store, é leve, rápido e livre de burocracias.</div>
+    </div>
+
+    <!-- Seção 3: Infraestrutura Cloudflare -->
+    <h2 class="section-title"><span class="number-badge">3</span> Infraestrutura em Nuvem & Domínio Próprio</h2>
+    <p>Para garantir máxima performance e blindagem dos dados, o sistema opera na infraestrutura global da <strong>Cloudflare</strong>:</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Componente</th>
+          <th>Tecnologia</th>
+          <th>Vantagem para o Salão</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Domínio Próprio</strong></td>
+          <td><code>app.seusalao.com.br</code></td>
+          <td>Fortalece a marca e transmite credibilidade profissional.</td>
+        </tr>
+        <tr>
+          <td><strong>Nuvem de Borda</strong></td>
+          <td>Cloudflare Workers Edge</td>
+          <td>Carregamento ultrarrápido (tempo de resposta inferior a 50ms).</td>
+        </tr>
+        <tr>
+          <td><strong>Banco de Dados</strong></td>
+          <td>Cloudflare D1 SQL</td>
+          <td>Segurança corporativa, integridade dos registros e backup.</td>
+        </tr>
+        <tr>
+          <td><strong>Criptografia SSL</strong></td>
+          <td>HTTPS Automático</td>
+          <td>Cadeado de segurança ativo para proteção dos contatos e dados.</td>
+        </tr>
+        <tr>
+          <td><strong>Custo de Servidor</strong></td>
+          <td>Edge Serverless</td>
+          <td><strong>R$ 0,00/mês</strong> em hospedagem (suportado pela cota da Cloudflare).</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Seção 4: Opções de Investimento -->
+    <div class="page-break"></div>
+    <h2 class="section-title"><span class="number-badge">4</span> Opções de Investimento</h2>
+    <p>Escolha a opção de investimento que melhor atende à realidade e ao fluxo de caixa do seu salão:</p>
+
+    <div class="pricing-grid">
+      <!-- Opção 1 -->
+      <div class="pricing-card featured">
+        <div class="featured-tag">Mais Escolhida</div>
+        <h3>Opção 1: Implantação + Suporte</h3>
+        <p style="font-size: 13px; color: var(--text-muted);">Equilíbrio entre custo inicial e assistência técnica contínua.</p>
+        <div class="price">R$ 1.600</div>
+        <div class="recurrence">+ R$ 120 / mês (suporte & backup)</div>
+        <ul>
+          <li>Personalização de identidade visual</li>
+          <li>Configuração de domínio próprio</li>
+          <li>Treinamento completo da equipe</li>
+          <li>Suporte prioritário via WhatsApp</li>
+          <li>Rotinas de backup e segurança</li>
+        </ul>
+        <span style="font-size: 12px; color: #8C530A; font-weight: 600;">Condição: 50% entrada + 50% na entrega</span>
+      </div>
+
+      <!-- Opção 2 -->
+      <div class="pricing-card">
+        <h3>Opção 2: Assinatura Mensal (SaaS)</h3>
+        <p style="font-size: 13px; color: var(--text-muted);">Menor desembolso inicial, formato de assinatura mensal.</p>
+        <div class="price">R$ 600</div>
+        <div class="recurrence">Setup + R$ 190 / mês</div>
+        <ul>
+          <li>Taxa de setup inicial reduzida</li>
+          <li>Uso contínuo da plataforma</li>
+          <li>Hospedagem e nuvem inclusas</li>
+          <li>Atualizações preventivas</li>
+          <li>Fidelidade mínima de 12 meses</li>
+        </ul>
+        <span style="font-size: 12px; color: var(--text-muted);">Sem surpresas na fatura mensal</span>
+      </div>
+
+      <!-- Opção 3 -->
+      <div class="pricing-card">
+        <h3>Opção 3: Licença Definitiva</h3>
+        <p style="font-size: 13px; color: var(--text-muted);">Pagamento único, sem mensalidade obrigatória.</p>
+        <div class="price">R$ 3.400</div>
+        <div class="recurrence">Pagamento Único (sem mensalidade)</div>
+        <ul>
+          <li>Entrega completa da solução</li>
+          <li>Configuração no domínio do salão</li>
+          <li>Treinamento prático da equipe</li>
+          <li>30 dias de garantia incondicional</li>
+          <li>Suporte futuro cobrado sob demanda</li>
+        </ul>
+        <span style="font-size: 12px; color: var(--text-muted);">Parcelamento em até 6x no cartão</span>
+      </div>
+    </div>
+
+    <p style="font-size: 13px; color: var(--text-muted);">
+      * <em>Custo anual obrigatório de terceiro: Registro de domínio <code>.com.br</code> junto ao Registro.br (~R$ 40,00/ano).</em>
+    </p>
+
+    <!-- Seção 5: Cronograma -->
+    <h2 class="section-title"><span class="number-badge">5</span> Cronograma de Entrega (14 Dias)</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Prazo</th>
+          <th>Etapa de Trabalho</th>
+          <th>Entregável</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Dias 1 a 3</strong></td>
+          <td>Alinhamento de Briefing e Identidade</td>
+          <td>Envio da logo, cores e lista inicial de profissionais.</td>
+        </tr>
+        <tr>
+          <td><strong>Dias 4 a 6</strong></td>
+          <td>Infraestrutura e Domínio</td>
+          <td>Apontamento do domínio e configuração na Cloudflare.</td>
+        </tr>
+        <tr>
+          <td><strong>Dias 7 a 10</strong></td>
+          <td>Customização e Carga de Insumos</td>
+          <td>Configuração do app com as marcas de tintas do salão.</td>
+        </tr>
+        <tr>
+          <td><strong>Dias 11 a 12</strong></td>
+          <td>Treinamento da Equipe</td>
+          <td>Sessão prática ensinando o uso das fichas no celular.</td>
+        </tr>
+        <tr>
+          <td><strong>Dias 13 a 14</strong></td>
+          <td>Go-Live Oficial</td>
+          <td>Sistema em produção com acesso liberado a toda a equipe.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Seção 6: Briefing para Preenchimento -->
+    <h2 class="section-title"><span class="number-badge">6</span> Ficha de Briefing (Dados para Início)</h2>
+    <div class="briefing-box">
+      <div class="form-group">
+        <label>Nome Fantasia do Salão:</label>
+        <div class="line-input">[Nome a ser exibido no topo do aplicativo]</div>
+      </div>
+      <div class="form-group">
+        <label>WhatsApp Comercial:</label>
+        <div class="line-input">(____) ________________________</div>
+      </div>
+      <div class="form-group">
+        <label>Sugestão de Endereço Web / Domínio:</label>
+        <div class="line-input">ex: app.seusalao.com.br ou gestaosalao.com.br</div>
+      </div>
+      <div class="form-group">
+        <label>Profissionais que utilizarão o sistema:</label>
+        <div class="line-input">1. ___________________  2. ___________________  3. ___________________</div>
+      </div>
+      <div class="form-group">
+        <label>Principais marcas de coloração / tintas utilizadas no salão:</label>
+        <div class="line-input">ex: Wella Professionals, L'Oréal, Truss, Keune, Schwarzkopf</div>
+      </div>
+    </div>
+
+    <!-- Assinaturas -->
+    <div class="signature-area">
+      <div>
+        <div class="signature-line">
+          <strong>[Nome do Salão de Beleza]</strong><br>
+          Aceite do Cliente
+        </div>
+      </div>
+      <div>
+        <div class="signature-line">
+          <strong>[Seu Nome / Sua Agência]</strong><br>
+          Responsável Técnico
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

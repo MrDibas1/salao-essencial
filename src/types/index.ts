@@ -5,6 +5,7 @@ export interface Client {
   whatsapp: string;
   birthDate?: string;
   email?: string;
+  instagram?: string;
   notes?: string;
   avatarUrl?: string;
   createdAt: string;
@@ -82,6 +83,9 @@ export interface Appointment {
   hasColorInfo: boolean;        // Se inclui dados técnicos de coloração
   colorFormula?: ColorFormula;
   assessment?: TechnicalAssessment;
+  beforePhotoUrl?: string;         // Foto de Antes (cabelo inicial)
+  afterPhotoUrl?: string;          // Foto de Depois (resultado final)
+  photoUrls?: string[];            // Fotos adicionais ou compatibilidade
   createdAt: string;
   updatedAt: string;
   isDemo?: boolean;

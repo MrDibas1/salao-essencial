@@ -57,38 +57,34 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <ToastContext.Provider value={{ toast: addToast, success, error, info }}>
       {children}
       {/* Toast Container */}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+      <div className="fixed bottom-20 sm:bottom-5 right-4 sm:right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-2 sm:px-0">
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`pointer-events-auto flex items-start gap-3 p-4 rounded-lg shadow-lg border transition-all duration-300 transform translate-y-0 ${
+            className={`pointer-events-auto flex items-start gap-3 p-4 rounded-2xl shadow-xs border transition-all duration-300 transform translate-y-0 ${
               t.type === 'success'
-                ? 'bg-[#111111] text-white border-black'
+                ? 'bg-[#E8F4EE] text-[#1F1D1B] border-[#2E7D5B]/30'
                 : t.type === 'error'
-                ? 'bg-neutral-900 text-white border-red-500/50'
-                : 'bg-white text-[#111111] border-[#E5E5E5]'
+                ? 'bg-[#FCECEC] text-[#1F1D1B] border-[#C94A4A]/30'
+                : 'bg-[#FDF3E7] text-[#1F1D1B] border-[#EAE4DE]'
             }`}
           >
             <div className="mt-0.5 shrink-0">
-              {t.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
-              {t.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-400" />}
-              {t.type === 'info' && <Info className="w-5 h-5 text-[#111111]" />}
+              {t.type === 'success' && <CheckCircle2 className="w-5 h-5 text-[#2E7D5B]" />}
+              {t.type === 'error' && <AlertCircle className="w-5 h-5 text-[#C94A4A]" />}
+              {t.type === 'info' && <Info className="w-5 h-5 text-[#8C530A]" />}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium leading-tight">{t.title}</p>
+              <p className="text-sm font-semibold leading-tight text-[#1F1D1B]">{t.title}</p>
               {t.description && (
-                <p
-                  className={`text-xs mt-1 leading-relaxed ${
-                    t.type === 'info' ? 'text-[#777777]' : 'text-neutral-300'
-                  }`}
-                >
+                <p className="text-xs mt-1 leading-relaxed text-[#736B65]">
                   {t.description}
                 </p>
               )}
             </div>
             <button
               onClick={() => removeToast(t.id)}
-              className="shrink-0 p-1 rounded hover:bg-white/10 transition-colors text-neutral-400 hover:text-white"
+              className="shrink-0 p-1 rounded-lg hover:bg-black/5 transition-colors text-[#736B65] hover:text-[#1F1D1B]"
             >
               <X className="w-4 h-4" />
             </button>
@@ -102,7 +98,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 export const useToast = (): ToastContextType => {
   const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast deve ser utilizado dentro de um ToastProvider');
+    throw new Error('useToast must be used within a ToastProvider');
   }
   return context;
 };

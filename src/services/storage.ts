@@ -29,6 +29,18 @@ function saveToStorage<T>(key: string, data: T): void {
   }
 }
 
+// Helper: safe fetch com timeout para sincronização em nuvem
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 8000): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(id);
+  }
+}
+
 export const StorageService = {
   // Inicialização com dados demo se primeira vez
   initialize(): void {
@@ -70,6 +82,88 @@ export const StorageService = {
       if (updatedProducts) {
         saveToStorage(STORAGE_KEYS.PRODUCTS, patchedProducts);
       }
+
+      // Atualiza atendimentos demo com fotos de Antes e Depois
+      const appointments = this.getAppointments();
+      let updatedAppointments = false;
+      const patchedAppointments = appointments.map((a) => {
+        if (a.isDemo && (!a.beforePhotoUrl && !a.afterPhotoUrl)) {
+          const demoMatch = DEMO_APPOINTMENTS.find((d) => d.id === a.id);
+          if (demoMatch?.beforePhotoUrl || demoMatch?.afterPhotoUrl) {
+            updatedAppointments = true;
+            return {
+              ...a,
+              beforePhotoUrl: demoMatch.beforePhotoUrl,
+              afterPhotoUrl: demoMatch.afterPhotoUrl,
+              photoUrls: [demoMatch.beforePhotoUrl, demoMatch.afterPhotoUrl].filter(Boolean) as string[],
+            };
+          }
+        }
+        return a;
+      });
+      if (updatedAppointments) {
+        saveToStorage(STORAGE_KEYS.APPOINTMENTS, patchedAppointments);
+      }
+    }
+  },
+
+  // -------------------------------------------------------------
+  // SINCRONIZAÇÃO EM NUVEM (CLOUDFLARE D1)
+  // -------------------------------------------------------------
+  async syncWithCloud(): Promise<{ success: boolean; updated: boolean }> {
+    try {
+      const res = await fetchWithTimeout('/api/sync');
+      if (!res.ok) return { success: false, updated: false };
+      const json: any = await res.json();
+      if (!json.success || !json.data) return { success: false, updated: false };
+
+      const cloudData = json.data;
+      const localClients = this.getAllClientsRaw();
+
+      // Se o banco D1 estiver vazio (primeiro acesso) e temos dados locais, envia para a nuvem
+      if ((!cloudData.clients || cloudData.clients.length === 0) && localClients.length > 0) {
+        await this.pushLocalToCloud();
+        return { success: true, updated: false };
+      }
+
+      // Se o D1 tem dados, sincroniza com o cache local
+      if (cloudData.clients && cloudData.clients.length > 0) {
+        saveToStorage(STORAGE_KEYS.CLIENTS, cloudData.clients);
+        if (Array.isArray(cloudData.appointments)) {
+          saveToStorage(STORAGE_KEYS.APPOINTMENTS, cloudData.appointments);
+        }
+        if (Array.isArray(cloudData.products)) {
+          saveToStorage(STORAGE_KEYS.PRODUCTS, cloudData.products);
+        }
+        if (cloudData.settings) {
+          saveToStorage(STORAGE_KEYS.SETTINGS, cloudData.settings);
+        }
+        return { success: true, updated: true };
+      }
+
+      return { success: true, updated: false };
+    } catch (err) {
+      console.warn('Sincronização Cloudflare D1 em segundo plano indisponível/offline:', err);
+      return { success: false, updated: false };
+    }
+  },
+
+  async pushLocalToCloud(): Promise<boolean> {
+    try {
+      const payload = {
+        clients: this.getAllClientsRaw(),
+        appointments: this.getAppointments(),
+        products: this.getProducts(),
+        settings: this.getSettings(),
+      };
+      const res = await fetchWithTimeout('/api/sync/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return res.ok;
+    } catch {
+      return false;
     }
   },
 
@@ -103,6 +197,14 @@ export const StorageService = {
     };
     clients.unshift(newClient);
     saveToStorage(STORAGE_KEYS.CLIENTS, clients);
+
+    // Salva na nuvem Cloudflare D1
+    fetchWithTimeout('/api/clients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newClient),
+    }).catch((err) => console.warn('Erro ao salvar cliente no D1:', err));
+
     return newClient;
   },
 
@@ -137,6 +239,13 @@ export const StorageService = {
       }
     }
 
+    // Atualiza na nuvem Cloudflare D1
+    fetchWithTimeout('/api/clients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated),
+    }).catch((err) => console.warn('Erro ao atualizar cliente no D1:', err));
+
     return updated;
   },
 
@@ -147,6 +256,11 @@ export const StorageService = {
     // Também remove atendimentos associados a esta cliente
     const appointments = this.getAppointments().filter((apt) => apt.clientId !== id);
     saveToStorage(STORAGE_KEYS.APPOINTMENTS, appointments);
+
+    // Exclui na nuvem Cloudflare D1
+    fetchWithTimeout(`/api/clients/${id}`, { method: 'DELETE' }).catch((err) =>
+      console.warn('Erro ao excluir cliente no D1:', err)
+    );
   },
 
   archiveClient(id: string, archive = true): Client {
@@ -158,7 +272,6 @@ export const StorageService = {
   // -------------------------------------------------------------
   getAppointments(): Appointment[] {
     const appointments = loadFromStorage<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, []);
-    // Ordenar do mais recente para o mais antigo por data e criação
     return appointments.sort((a, b) => {
       const dateA = new Date(`${a.date}T00:00:00Z`).getTime();
       const dateB = new Date(`${b.date}T00:00:00Z`).getTime();
@@ -190,6 +303,13 @@ export const StorageService = {
     appointments.unshift(newAppointment);
     saveToStorage(STORAGE_KEYS.APPOINTMENTS, appointments);
 
+    // Salva na nuvem Cloudflare D1
+    fetchWithTimeout('/api/appointments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newAppointment),
+    }).catch((err) => console.warn('Erro ao salvar atendimento no D1:', err));
+
     // Atualiza updatedAt da cliente
     try {
       this.updateClient(data.clientId, {});
@@ -214,12 +334,25 @@ export const StorageService = {
     };
     appointments[index] = updated;
     saveToStorage(STORAGE_KEYS.APPOINTMENTS, appointments);
+
+    // Atualiza na nuvem Cloudflare D1
+    fetchWithTimeout('/api/appointments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated),
+    }).catch((err) => console.warn('Erro ao atualizar atendimento no D1:', err));
+
     return updated;
   },
 
   deleteAppointment(id: string): void {
     const appointments = this.getAppointments().filter((a) => a.id !== id);
     saveToStorage(STORAGE_KEYS.APPOINTMENTS, appointments);
+
+    // Exclui na nuvem Cloudflare D1
+    fetchWithTimeout(`/api/appointments/${id}`, { method: 'DELETE' }).catch((err) =>
+      console.warn('Erro ao excluir atendimento no D1:', err)
+    );
   },
 
   // -------------------------------------------------------------
@@ -245,6 +378,14 @@ export const StorageService = {
     };
     products.unshift(newProduct);
     saveToStorage(STORAGE_KEYS.PRODUCTS, products);
+
+    // Salva na nuvem Cloudflare D1
+    fetchWithTimeout('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newProduct),
+    }).catch((err) => console.warn('Erro ao salvar produto no D1:', err));
+
     return newProduct;
   },
 
@@ -261,12 +402,25 @@ export const StorageService = {
     };
     products[index] = updated;
     saveToStorage(STORAGE_KEYS.PRODUCTS, products);
+
+    // Atualiza na nuvem Cloudflare D1
+    fetchWithTimeout('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated),
+    }).catch((err) => console.warn('Erro ao atualizar produto no D1:', err));
+
     return updated;
   },
 
   deleteProduct(id: string): void {
     const products = this.getProducts().filter((p) => p.id !== id);
     saveToStorage(STORAGE_KEYS.PRODUCTS, products);
+
+    // Exclui na nuvem Cloudflare D1
+    fetchWithTimeout(`/api/products/${id}`, { method: 'DELETE' }).catch((err) =>
+      console.warn('Erro ao excluir produto no D1:', err)
+    );
   },
 
   // -------------------------------------------------------------
@@ -285,6 +439,14 @@ export const StorageService = {
     const current = this.getSettings();
     const updated = { ...current, ...updates };
     saveToStorage(STORAGE_KEYS.SETTINGS, updated);
+
+    // Atualiza na nuvem Cloudflare D1
+    fetchWithTimeout('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated),
+    }).catch((err) => console.warn('Erro ao salvar configurações no D1:', err));
+
     return updated;
   },
 
@@ -296,6 +458,8 @@ export const StorageService = {
     saveToStorage(STORAGE_KEYS.APPOINTMENTS, DEMO_APPOINTMENTS);
     saveToStorage(STORAGE_KEYS.PRODUCTS, DEMO_PRODUCTS);
     saveToStorage(STORAGE_KEYS.SETTINGS, INITIAL_SETTINGS);
+
+    this.pushLocalToCloud().catch((err) => console.warn('Erro ao sincronizar demo com D1:', err));
   },
 
   clearDemoData(): void {
@@ -306,6 +470,10 @@ export const StorageService = {
     saveToStorage(STORAGE_KEYS.CLIENTS, nonDemoClients);
     saveToStorage(STORAGE_KEYS.APPOINTMENTS, nonDemoAppointments);
     saveToStorage(STORAGE_KEYS.PRODUCTS, nonDemoProducts);
+
+    fetchWithTimeout('/api/demo/clear', { method: 'POST' }).catch((err) =>
+      console.warn('Erro ao limpar demo no D1:', err)
+    );
   },
 
   clearAllData(): void {
@@ -341,6 +509,8 @@ export const StorageService = {
       if (parsed.settings && typeof parsed.settings === 'object') {
         saveToStorage(STORAGE_KEYS.SETTINGS, parsed.settings);
       }
+
+      this.pushLocalToCloud().catch((err) => console.warn('Erro ao sincronizar backup com D1:', err));
       return true;
     } catch (err) {
       console.error('Falha ao importar backup:', err);

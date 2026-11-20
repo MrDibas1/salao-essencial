@@ -41,15 +41,15 @@ export const Logo: React.FC<LogoProps> = ({
   if (forceTypographic || imageError) {
     return (
       <div className={`flex items-center gap-3 select-none ${className}`}>
-        <div className="w-8 h-8 rounded-lg bg-[#111111] text-white flex items-center justify-center font-serif text-base font-semibold shadow-2xs">
+        <div className="w-8 h-8 rounded-xl bg-[#FDF3E7] text-[#8C530A] border border-[#EAE4DE] flex items-center justify-center font-serif text-base font-semibold shadow-xs">
           E
         </div>
         <div className="flex flex-col">
-          <span className={`font-serif font-semibold text-[#111111] uppercase leading-none ${textClasses[size]}`}>
+          <span className={`font-serif font-semibold text-[#1F1D1B] uppercase leading-none ${textClasses[size]}`}>
             ESSENCIAL
           </span>
           {showSubtitle && (
-            <span className={`font-sans font-medium text-[#777777] mt-1 leading-none ${subtitleClasses[size]}`}>
+            <span className={`font-sans font-medium text-[#736B65] mt-1 leading-none ${subtitleClasses[size]}`}>
               Salão de Beleza e Aluguel de Roupas
             </span>
           )}

@@ -1,9 +1,18 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "salao-essencial",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-11-18",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "salao-essencial-db",
+      "database_id": "53b014d2-2bed-47d6-ad54-5ee889801658"
+    }
+  ]
 }

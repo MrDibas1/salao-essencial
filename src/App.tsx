@@ -12,6 +12,7 @@ import { ClientDetailModule } from './components/modules/ClientDetailModule';
 import { ClientModal } from './components/modules/ClientModal';
 import { AppointmentFormModule } from './components/modules/AppointmentFormModule';
 import { AppointmentDetailModal } from './components/modules/AppointmentDetailModal';
+import { GalleryModule } from './components/modules/GalleryModule';
 import { HistoryModule } from './components/modules/HistoryModule';
 import { ProductsModule } from './components/modules/ProductsModule';
 import { SettingsModule } from './components/modules/SettingsModule';
@@ -52,7 +53,9 @@ const MainApp: React.FC = () => {
     onConfirm: () => {},
   });
 
-  // Carregar dados locais na inicialização
+  const [isCloudSynced, setIsCloudSynced] = useState<boolean | null>(null);
+
+  // Carregar dados locais na inicialização e sincronizar com D1
   const reloadData = useCallback(() => {
     StorageService.initialize();
     setClients(StorageService.getAllClientsRaw());
@@ -63,6 +66,17 @@ const MainApp: React.FC = () => {
 
   useEffect(() => {
     reloadData();
+
+    // Sincroniza com a nuvem Cloudflare D1 em segundo plano
+    StorageService.syncWithCloud().then((res) => {
+      setIsCloudSynced(res.success);
+      if (res.updated) {
+        setClients(StorageService.getAllClientsRaw());
+        setAppointments(StorageService.getAppointments());
+        setProducts(StorageService.getProducts());
+        setSettings(StorageService.getSettings());
+      }
+    });
   }, [reloadData]);
 
   // Checagem se base tem dados de demonstração
@@ -285,7 +299,7 @@ const MainApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col antialiased">
+    <div className="min-h-screen bg-[#FAF8F6] text-[#1F1D1B] flex flex-col antialiased">
       {/* Sidebar navigation */}
       <Sidebar
         currentTab={currentTab}
@@ -309,6 +323,7 @@ const MainApp: React.FC = () => {
           onOpenInstallModal={() => setIsInstallModalOpen(true)}
           onNavigate={(tab) => handleNavigate(tab)}
           hasDemoData={hasDemoData}
+          isCloudSynced={isCloudSynced}
         />
 
         {/* Content view area */}
@@ -364,6 +379,15 @@ const MainApp: React.FC = () => {
                 setClientToEdit(null);
                 setIsClientModalOpen(true);
               }}
+            />
+          )}
+
+          {currentTab === 'gallery' && (
+            <GalleryModule
+              appointments={appointments}
+              clients={clients}
+              onNavigate={handleNavigate}
+              onViewAppointmentDetails={(apt) => setViewingAppointment(apt)}
             />
           )}
 

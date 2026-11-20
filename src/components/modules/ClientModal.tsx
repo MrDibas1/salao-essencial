@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal } from '../ui/Modal';
 import type { Client } from '../../types';
 import { ClientAvatar } from '../common/ClientAvatar';
-import { Camera, Upload, Trash2 } from 'lucide-react';
+import { Camera, Trash2 } from 'lucide-react';
 
 interface ClientModalProps {
   isOpen: boolean;
@@ -23,6 +23,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
   const [sameAsPhone, setSameAsPhone] = useState(true);
   const [birthDate, setBirthDate] = useState('');
   const [email, setEmail] = useState('');
+  const [instagram, setInstagram] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -37,6 +38,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
       setSameAsPhone(clientToEdit.whatsapp === clientToEdit.phone);
       setBirthDate(clientToEdit.birthDate || '');
       setEmail(clientToEdit.email || '');
+      setInstagram(clientToEdit.instagram || '');
       setAvatarUrl(clientToEdit.avatarUrl || '');
       setNotes(clientToEdit.notes || '');
     } else {
@@ -46,6 +48,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
       setSameAsPhone(true);
       setBirthDate('');
       setEmail('');
+      setInstagram('');
       setAvatarUrl('');
       setNotes('');
     }
@@ -109,6 +112,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
         whatsapp: sameAsPhone ? phone.trim() : whatsapp.trim(),
         birthDate: birthDate ? birthDate : undefined,
         email: email.trim() ? email.trim() : undefined,
+        instagram: instagram.trim() ? instagram.trim() : undefined,
         avatarUrl: avatarUrl.trim() ? avatarUrl.trim() : undefined,
         notes: notes.trim() ? notes.trim() : undefined,
         status: clientToEdit ? clientToEdit.status : 'active',
@@ -123,21 +127,21 @@ export const ClientModal: React.FC<ClientModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={clientToEdit ? 'Editar Dados da Cliente' : 'Cadastrar Nova Cliente'}
-      subtitle="Preencha os dados de contato e observações gerais"
+      title={clientToEdit ? 'Editar Cliente' : 'Nova Cliente'}
+      subtitle="Dados de contato e notas para atendimento"
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Foto de Perfil */}
-        <div className="p-3.5 rounded-xl border border-[#D1D5DB] bg-[#F4F5F7] flex items-center justify-between gap-4 shadow-2xs">
-          <div className="flex items-center gap-3.5">
+        <div className="p-3.5 rounded-2xl border border-[#EAE4DE] bg-[#FAF8F6] flex items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
             <ClientAvatar name={name || 'Cliente'} avatarUrl={avatarUrl} size="lg" />
             <div>
-              <span className="block text-xs font-bold uppercase tracking-wider text-[#111111]">
+              <span className="block text-xs font-semibold text-[#1F1D1B]">
                 Foto de Perfil
               </span>
-              <p className="text-[11px] text-[#6B7280] mt-0.5">
-                Facilita a identificação visual rápida da cliente
+              <p className="text-[11px] text-[#736B65] mt-0.5">
+                Facilita a identificação rápida
               </p>
             </div>
           </div>
@@ -153,16 +157,16 @@ export const ClientModal: React.FC<ClientModalProps> = ({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 py-2 px-3 rounded-lg border border-[#D1D5DB] bg-white hover:bg-[#F3F3F3] text-xs font-semibold text-[#111111] transition-colors shadow-2xs"
+              className="min-h-[44px] inline-flex items-center gap-1.5 py-2 px-3 rounded-xl border border-[#EAE4DE] bg-white hover:bg-[#FAF8F6] text-xs font-medium text-[#1F1D1B] transition-colors shadow-xs active:scale-[0.98]"
             >
-              <Camera className="w-3.5 h-3.5 text-[#555555]" />
-              <span>{avatarUrl ? 'Trocar Foto' : 'Adicionar Foto'}</span>
+              <Camera className="w-3.5 h-3.5 text-[#C87A14]" />
+              <span>{avatarUrl ? 'Trocar' : 'Foto'}</span>
             </button>
             {avatarUrl && (
               <button
                 type="button"
                 onClick={() => setAvatarUrl('')}
-                className="p-2 rounded-lg text-[#6B7280] hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-[#736B65] hover:text-[#C94A4A] hover:bg-[#FCECEC] transition-colors"
                 title="Remover foto"
               >
                 <Trash2 className="w-4 h-4" />
@@ -173,8 +177,8 @@ export const ClientModal: React.FC<ClientModalProps> = ({
 
         {/* Nome */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
-            Nome Completo <span className="text-rose-500">*</span>
+          <label className="block text-xs font-medium text-[#736B65] mb-1">
+            Nome Completo <span className="text-[#C94A4A]">*</span>
           </label>
           <input
             type="text"
@@ -184,20 +188,20 @@ export const ClientModal: React.FC<ClientModalProps> = ({
               setName(e.target.value);
               if (errors.name) setErrors({ ...errors, name: '' });
             }}
-            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all shadow-2xs ${
+            className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border text-[16px] text-[#1F1D1B] focus:outline-none transition-all shadow-xs ${
               errors.name
-                ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
-                : 'border-[#D1D5DB] bg-white focus:border-[#111111] focus:ring-1 focus:ring-[#111111]'
+                ? 'border-[#C94A4A] bg-[#FCECEC]/30 focus:border-[#C94A4A]'
+                : 'border-[#EAE4DE] bg-white focus:border-[#C87A14]'
             }`}
           />
-          {errors.name && <p className="text-[11px] text-rose-500 mt-1">{errors.name}</p>}
+          {errors.name && <p className="text-[11px] text-[#C94A4A] mt-1">{errors.name}</p>}
         </div>
 
         {/* Telefone e WhatsApp */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1">
-              Telefone Principal <span className="text-rose-500">*</span>
+            <label className="block text-xs font-medium text-[#736B65] mb-1">
+              Telefone <span className="text-[#C94A4A]">*</span>
             </label>
             <input
               type="text"
@@ -207,28 +211,28 @@ export const ClientModal: React.FC<ClientModalProps> = ({
                 handlePhoneChange(e.target.value);
                 if (errors.phone) setErrors({ ...errors, phone: '' });
               }}
-              className={`w-full px-3.5 py-2.5 rounded-xl border text-sm focus:outline-none transition-all shadow-2xs ${
+              className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border text-[16px] text-[#1F1D1B] tabular-nums focus:outline-none transition-all shadow-xs ${
                 errors.phone
-                  ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
-                  : 'border-[#D1D5DB] bg-white focus:border-[#111111] focus:ring-1 focus:ring-[#111111]'
+                  ? 'border-[#C94A4A] bg-[#FCECEC]/30 focus:border-[#C94A4A]'
+                  : 'border-[#EAE4DE] bg-white focus:border-[#C87A14]'
               }`}
             />
-            {errors.phone && <p className="text-[11px] text-rose-500 mt-1">{errors.phone}</p>}
+            {errors.phone && <p className="text-[11px] text-[#C94A4A] mt-1">{errors.phone}</p>}
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111]">
+              <label className="block text-xs font-medium text-[#736B65]">
                 WhatsApp
               </label>
-              <label className="inline-flex items-center gap-1.5 text-[11px] text-[#6B7280] cursor-pointer">
+              <label className="inline-flex items-center gap-1.5 text-[11px] text-[#736B65] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={sameAsPhone}
                   onChange={(e) => handleSameAsPhoneToggle(e.target.checked)}
-                  className="rounded border-[#D1D5DB] text-[#111111] focus:ring-0"
+                  className="rounded border-[#EAE4DE] text-[#C87A14] focus:ring-0"
                 />
-                <span>Mesmo do telefone</span>
+                <span>Igual</span>
               </label>
             </div>
             <input
@@ -237,67 +241,87 @@ export const ClientModal: React.FC<ClientModalProps> = ({
               value={sameAsPhone ? phone : whatsapp}
               disabled={sameAsPhone}
               onChange={(e) => setWhatsapp(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] text-sm bg-white focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] disabled:bg-[#F3F4F6] disabled:text-[#6B7280] disabled:border-[#E5E7EB] transition-all shadow-2xs"
+              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] text-[16px] text-[#1F1D1B] tabular-nums bg-white focus:outline-none focus:border-[#C87A14] disabled:bg-[#FAF8F6] disabled:text-[#736B65] transition-all shadow-xs"
             />
           </div>
         </div>
 
-        {/* Data de Nascimento e E-mail */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        {/* Data de Nascimento */}
+        <div>
+          <label className="block text-xs font-medium text-[#736B65] mb-1">
+            Data de Nascimento
+          </label>
+          <input
+            type="date"
+            value={birthDate}
+            onChange={(e) => setBirthDate(e.target.value)}
+            className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] text-[16px] text-[#1F1D1B] tabular-nums bg-white focus:outline-none focus:border-[#C87A14] transition-all shadow-xs"
+          />
+        </div>
+
+        {/* Instagram e E-mail */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#374151] mb-1">
-              Data de Nascimento (opcional)
+            <label className="block text-xs font-medium text-[#736B65] mb-1">
+              Instagram
             </label>
-            <input
-              type="date"
-              value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] text-sm bg-white focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] transition-all text-[#111111] shadow-2xs"
-            />
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium text-[#736B65]">@</span>
+              <input
+                type="text"
+                placeholder="usuario"
+                value={instagram.replace(/^@/, '')}
+                onChange={(e) => {
+                  const val = e.target.value.trim().replace(/^@/, '');
+                  setInstagram(val ? `@${val}` : '');
+                }}
+                className="w-full min-h-[44px] pl-8 pr-3.5 py-2.5 rounded-xl border border-[#EAE4DE] text-[16px] text-[#1F1D1B] bg-white focus:outline-none focus:border-[#C87A14] transition-all shadow-xs"
+              />
+            </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#374151] mb-1">
-              E-mail (opcional)
+            <label className="block text-xs font-medium text-[#736B65] mb-1">
+              E-mail
             </label>
             <input
               type="email"
               placeholder="cliente@exemplo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] text-sm bg-white focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] transition-all shadow-2xs"
+              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] text-[16px] text-[#1F1D1B] bg-white focus:outline-none focus:border-[#C87A14] transition-all shadow-xs"
             />
           </div>
         </div>
 
         {/* Observações Gerais */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-[#374151] mb-1">
-            Observações Gerais / Preferências
+          <label className="block text-xs font-medium text-[#736B65] mb-1">
+            Preferências e Observações
           </label>
           <textarea
             rows={3}
-            placeholder="Ex: Alergias, sensibilidade no couro cabeludo, preferência de café, hábitos..."
+            placeholder="Ex: Alergias, sensibilidade no couro cabeludo, preferência de café..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-[#D1D5DB] text-sm bg-white focus:outline-none focus:border-[#111111] focus:ring-1 focus:ring-[#111111] transition-all resize-none shadow-2xs"
+            className="w-full p-3.5 rounded-xl border border-[#EAE4DE] text-[16px] text-[#1F1D1B] bg-white focus:outline-none focus:border-[#C87A14] transition-all resize-none shadow-xs"
           />
         </div>
 
         {/* Action buttons */}
-        <div className="pt-4 mt-6 border-t border-[#E5E7EB] flex items-center justify-end gap-3">
+        <div className="pt-3 border-t border-[#EAE4DE] flex items-center justify-end gap-2.5">
           <button
             type="button"
             onClick={onClose}
-            className="py-2.5 px-4 rounded-xl border border-[#D1D5DB] bg-white text-xs font-semibold text-[#374151] hover:text-[#111111] hover:bg-neutral-100 transition-colors shadow-2xs"
+            className="min-h-[44px] py-2 px-4 rounded-xl border border-[#EAE4DE] bg-white text-xs sm:text-sm font-medium text-[#736B65] hover:text-[#1F1D1B] hover:bg-[#FAF8F6] transition-colors active:scale-[0.98]"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="py-2.5 px-5 rounded-xl bg-[#111111] hover:bg-black text-white text-xs font-semibold transition-all shadow-xs hover:shadow active:scale-[0.99]"
+            className="min-h-[44px] py-2 px-5 rounded-xl bg-[#C87A14] hover:bg-[#A8630A] text-white text-xs sm:text-sm font-semibold transition-all shadow-xs active:scale-[0.98]"
           >
-            {clientToEdit ? 'Salvar Alterações' : 'Concluir Cadastro'}
+            {clientToEdit ? 'Salvar alterações' : 'Salvar cliente'}
           </button>
         </div>
       </form>

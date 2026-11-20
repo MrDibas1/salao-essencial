@@ -28,7 +28,7 @@ export const ClientAvatar: React.FC<ClientAvatarProps> = ({
   if (avatarUrl && !hasError) {
     return (
       <div
-        className={`relative rounded-full overflow-hidden shrink-0 border border-[#E5E5E5] bg-[#F3F3F3] shadow-2xs ${sizeClasses[size]} ${className}`}
+        className={`relative rounded-full overflow-hidden shrink-0 border border-[#EAE4DE] bg-[#FAF8F6] shadow-xs ${sizeClasses[size]} ${className}`}
       >
         <img
           src={avatarUrl}
@@ -42,7 +42,7 @@ export const ClientAvatar: React.FC<ClientAvatarProps> = ({
 
   return (
     <div
-      className={`rounded-full bg-[#111111] text-white flex items-center justify-center font-bold shrink-0 shadow-2xs ${sizeClasses[size]} ${className}`}
+      className={`rounded-full bg-[#FDF3E7] text-[#8C530A] border border-[#EAE4DE]/60 flex items-center justify-center font-semibold shrink-0 shadow-xs ${sizeClasses[size]} ${className}`}
     >
       {initial}
     </div>

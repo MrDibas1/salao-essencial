@@ -39,119 +39,118 @@ export const InstallPwaModal: React.FC<InstallPwaModalProps> = ({ isOpen, onClos
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Instalar Aplicativo ESSENCIAL"
-      subtitle="Tenha o sistema com ícone na tela de início do seu celular ou PC"
+      title="Instalar Aplicativo"
+      subtitle="Adicione à tela de início do seu celular para acesso rápido"
       maxWidth="md"
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
         {/* Card de Apresentação do Ícone */}
-        <div className="p-4 rounded-2xl bg-[#F4F5F7] border border-[#D1D5DB] flex items-center gap-4 shadow-2xs">
+        <div className="p-4 rounded-2xl bg-[#FAF8F6] border border-[#EAE4DE] flex items-center gap-3.5 shadow-xs">
           <img
             src="/assets/pwa/icon-192.png"
             alt="Ícone do Aplicativo"
-            className="w-16 h-16 rounded-2xl shadow-sm border border-neutral-800 shrink-0"
+            className="w-14 h-14 rounded-2xl border border-[#EAE4DE] shrink-0"
           />
           <div>
-            <h4 className="text-sm font-bold text-[#111111] tracking-tight">Essencial</h4>
-            <p className="text-xs text-[#4B5563] mt-0.5 font-medium">
-              Salão de Beleza e Aluguel de Roupas
+            <h4 className="text-sm font-semibold text-[#1F1D1B] tracking-tight">Salão Essencial</h4>
+            <p className="text-xs text-[#736B65] mt-0.5">
+              Gestão de Clientes e Fórmulas
             </p>
-            <div className="flex items-center gap-2 mt-2 text-[11px] text-[#6B7280]">
-              <span className="inline-flex items-center gap-1 font-semibold text-[#111111]">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                Offline-First
+            <div className="flex items-center gap-2 mt-1.5 text-[11px] text-[#736B65]">
+              <span className="inline-flex items-center gap-1 font-medium text-[#2E7D5B]">
+                <CheckCircle className="w-3.5 h-3.5" />
+                Offline
               </span>
               <span>•</span>
-              <span>Tela Cheia</span>
+              <span>Tela cheia</span>
               <span>•</span>
-              <span>Sem App Store</span>
+              <span>Rápido</span>
             </div>
           </div>
         </div>
 
         {/* Cenário: Já instalado */}
         {isStandalone ? (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
-            <CheckCircle className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-            <h5 className="text-sm font-bold text-emerald-950">Aplicativo Já Instalado!</h5>
-            <p className="text-xs text-emerald-700 mt-1">
-              Você já está aproveitando a experiência completa em tela cheia do Salão Essencial.
+          <div className="p-4 rounded-xl bg-[#E8F4EE] border border-[#2E7D5B]/30 text-center">
+            <CheckCircle className="w-8 h-8 text-[#2E7D5B] mx-auto mb-2" />
+            <h5 className="text-sm font-semibold text-[#1F1D1B]">Aplicativo Já Instalado!</h5>
+            <p className="text-xs text-[#2E7D5B] mt-1">
+              Você já está utilizando a versão instalada do Salão Essencial.
             </p>
           </div>
         ) : installedSuccess ? (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
-            <CheckCircle className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-            <h5 className="text-sm font-bold text-emerald-950">Instalação Concluída!</h5>
-            <p className="text-xs text-emerald-700 mt-1">
+          <div className="p-4 rounded-xl bg-[#E8F4EE] border border-[#2E7D5B]/30 text-center">
+            <CheckCircle className="w-8 h-8 text-[#2E7D5B] mx-auto mb-2" />
+            <h5 className="text-sm font-semibold text-[#1F1D1B]">Instalação Concluída!</h5>
+            <p className="text-xs text-[#2E7D5B] mt-1">
               O ícone já está disponível na sua tela de início.
             </p>
           </div>
         ) : isIOS ? (
           /* Cenário: iPhone / iPad (Safari) */
-          <div className="space-y-3.5">
-            <div className="flex items-center gap-2 pb-2 border-b border-[#E5E7EB]">
-              <Smartphone className="w-4 h-4 text-[#111111]" />
-              <h5 className="text-xs font-bold uppercase tracking-wider text-[#111111]">
-                Como instalar no iPhone ou iPad:
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-[#EAE4DE]">
+              <Smartphone className="w-4 h-4 text-[#C87A14]" />
+              <h5 className="text-xs font-semibold uppercase tracking-wider text-[#1F1D1B]">
+                Como adicionar no iPhone / iPad:
               </h5>
             </div>
 
-            <ol className="space-y-3 text-xs text-[#374151]">
-              <li className="flex items-start gap-3 p-2.5 rounded-xl bg-[#F8F9FA] border border-[#E5E7EB]">
-                <div className="w-6 h-6 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-[11px] shrink-0">
+            <ol className="space-y-2.5 text-xs text-[#736B65]">
+              <li className="flex items-start gap-2.5 p-3 rounded-xl bg-[#FAF8F6] border border-[#EAE4DE]">
+                <div className="w-5 h-5 rounded-full bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center font-bold text-[11px] shrink-0">
                   1
                 </div>
                 <div>
-                  No Safari, toque no botão de <strong className="text-[#111111]">Compartilhar</strong>{' '}
-                  <Share2 className="inline w-3.5 h-3.5 text-[#111111] mx-0.5" /> (quadrado com a seta para cima na barra inferior).
+                  No Safari, toque no botão <strong className="text-[#1F1D1B]">Compartilhar</strong>{' '}
+                  <Share2 className="inline w-3.5 h-3.5 text-[#C87A14] mx-0.5" /> (barra inferior).
                 </div>
               </li>
 
-              <li className="flex items-start gap-3 p-2.5 rounded-xl bg-[#F8F9FA] border border-[#E5E7EB]">
-                <div className="w-6 h-6 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-[11px] shrink-0">
+              <li className="flex items-start gap-2.5 p-3 rounded-xl bg-[#FAF8F6] border border-[#EAE4DE]">
+                <div className="w-5 h-5 rounded-full bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center font-bold text-[11px] shrink-0">
                   2
                 </div>
                 <div>
-                  Role as opções para cima e selecione{' '}
-                  <strong className="text-[#111111]">"Adicionar à Tela de Início"</strong>{' '}
-                  <PlusSquare className="inline w-3.5 h-3.5 text-[#111111] mx-0.5" />.
+                  Selecione <strong className="text-[#1F1D1B]">"Adicionar à Tela de Início"</strong>{' '}
+                  <PlusSquare className="inline w-3.5 h-3.5 text-[#C87A14] mx-0.5" />.
                 </div>
               </li>
 
-              <li className="flex items-start gap-3 p-2.5 rounded-xl bg-[#F8F9FA] border border-[#E5E7EB]">
-                <div className="w-6 h-6 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-[11px] shrink-0">
+              <li className="flex items-start gap-2.5 p-3 rounded-xl bg-[#FAF8F6] border border-[#EAE4DE]">
+                <div className="w-5 h-5 rounded-full bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center font-bold text-[11px] shrink-0">
                   3
                 </div>
                 <div>
-                  Toque em <strong className="text-[#111111]">"Adicionar"</strong> no canto superior direito para confirmar.
+                  Toque em <strong className="text-[#1F1D1B]">"Adicionar"</strong> no topo direito.
                 </div>
               </li>
             </ol>
           </div>
         ) : (
           /* Cenário: Android / Chrome / Edge */
-          <div className="space-y-4">
-            <p className="text-xs text-[#4B5563] leading-relaxed">
-              Instale o sistema para acessar instantaneamente sem precisar digitar o link, navegar em tela cheia e consultar fórmulas mesmo sem internet.
+          <div className="space-y-3">
+            <p className="text-xs text-[#736B65] leading-relaxed">
+              Adicione à sua tela para abrir com 1 toque, usar em tela cheia e consultar fórmulas offline.
             </p>
 
             {canInstallDirectly ? (
               <button
                 type="button"
                 onClick={handleInstallClick}
-                className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-[#111111] hover:bg-black text-white text-xs font-bold transition-all shadow-md active:scale-[0.99]"
+                className="w-full min-h-[44px] flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-[#C87A14] hover:bg-[#A8630A] text-white text-xs sm:text-sm font-semibold transition-all shadow-xs active:scale-[0.98]"
               >
                 <Download className="w-4 h-4 text-white" />
-                <span>Instalar Aplicativo Agora</span>
+                <span>Instalar Agora</span>
               </button>
             ) : (
-              <div className="p-3.5 rounded-xl bg-[#F8F9FA] border border-[#D1D5DB] space-y-2 text-xs text-[#374151]">
-                <div className="flex items-center gap-2 font-bold text-[#111111]">
-                  <Monitor className="w-4 h-4" />
+              <div className="p-3.5 rounded-xl bg-[#FAF8F6] border border-[#EAE4DE] space-y-1.5 text-xs text-[#736B65]">
+                <div className="flex items-center gap-2 font-semibold text-[#1F1D1B]">
+                  <Monitor className="w-4 h-4 text-[#C87A14]" />
                   <span>No computador ou Android:</span>
                 </div>
-                <p className="text-[11px] text-[#4B5563]">
-                  Clique no ícone de <strong>instalação</strong> (um computador com seta para baixo) na barra de endereços do navegador ou abra o menu do navegador (3 pontinhos) e escolha <strong>"Instalar ESSENCIAL..."</strong>.
+                <p className="text-[11px] text-[#736B65]">
+                  Clique no ícone de instalação na barra de navegação ou menu do navegador e escolha <strong>"Instalar Aplicativo"</strong>.
                 </p>
               </div>
             )}
@@ -159,11 +158,11 @@ export const InstallPwaModal: React.FC<InstallPwaModalProps> = ({ isOpen, onClos
         )}
 
         {/* Rodapé com botão Fechar */}
-        <div className="pt-4 border-t border-[#E5E7EB] flex items-center justify-end">
+        <div className="pt-3 border-t border-[#EAE4DE] flex items-center justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="py-2.5 px-4 rounded-xl border border-[#D1D5DB] bg-white text-xs font-semibold text-[#374151] hover:text-[#111111] hover:bg-neutral-100 transition-colors shadow-2xs"
+            className="min-h-[44px] py-2 px-4 rounded-xl border border-[#EAE4DE] bg-white text-xs font-medium text-[#736B65] hover:text-[#1F1D1B] hover:bg-[#FAF8F6] transition-colors active:scale-[0.98]"
           >
             Fechar
           </button>

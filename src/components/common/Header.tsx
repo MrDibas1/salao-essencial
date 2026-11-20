@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, UserPlus, Database, Download, Settings } from 'lucide-react';
+import { UserPlus, Database, Download, Settings, Cloud } from 'lucide-react';
 import type { NavigationTab } from './Sidebar';
 
 interface HeaderProps {
@@ -9,32 +9,35 @@ interface HeaderProps {
   onOpenInstallModal?: () => void;
   onNavigate?: (tab: NavigationTab) => void;
   hasDemoData: boolean;
+  isCloudSynced?: boolean | null;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   currentTab,
-  onOpenMobileSidebar,
   onOpenNewClientModal,
   onOpenInstallModal,
   onNavigate,
   hasDemoData,
+  isCloudSynced,
 }) => {
   const getPageTitle = () => {
     switch (currentTab) {
       case 'dashboard':
-        return { title: 'Início', desc: 'Atalhos rápidos e visão das clientes ativas' };
+        return { title: 'Início', desc: 'Atalhos rápidos e clientes ativas' };
       case 'clients':
-        return { title: 'Clientes Ativas', desc: 'Consultas e fichas técnicas do salão' };
+        return { title: 'Clientes', desc: 'Fichas técnicas e histórico de coloração' };
       case 'client-detail':
-        return { title: 'Perfil da Cliente', desc: 'Histórico individual de colorações e atendimentos' };
+        return { title: 'Perfil da Cliente', desc: 'Histórico de fórmulas e atendimentos' };
       case 'appointment-form':
         return { title: 'Novo Atendimento', desc: 'Registro de procedimento e fórmulas técnicas' };
+      case 'gallery':
+        return { title: 'Galeria de Fotos', desc: 'Transformações de antes e depois dos atendimentos' };
       case 'history':
-        return { title: 'Histórico Geral', desc: 'Todos os atendimentos já realizados' };
+        return { title: 'Histórico Geral', desc: 'Todos os procedimentos realizados' };
       case 'products':
-        return { title: 'Produtos & Insumos', desc: 'Catálogo com fotos, tinturas e tratamentos' };
+        return { title: 'Produtos & Tintas', desc: 'Catálogo de tintas e insumos' };
       case 'settings':
-        return { title: 'Configurações', desc: 'Identidade visual, preferências e dados do sistema' };
+        return { title: 'Configurações', desc: 'Preferências e backup do sistema' };
       default:
         return { title: 'Salão Essencial', desc: 'Sistema de Gestão' };
     }
@@ -43,82 +46,90 @@ export const Header: React.FC<HeaderProps> = ({
   const { title, desc } = getPageTitle();
 
   const formattedDate = new Intl.DateTimeFormat('pt-BR', {
-    weekday: 'long',
+    weekday: 'short',
     day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+    month: 'short',
   }).format(new Date());
 
-  // Capitalize first letter of date
-  const displayDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-
   return (
-    <header className="h-20 bg-white border-b border-[#D4D4D8]/80 shadow-2xs px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30">
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onOpenMobileSidebar}
-          className="lg:hidden p-2 rounded-lg text-[#292929] hover:bg-[#F3F3F3] transition-colors"
-          title="Abrir menu lateral"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-
+    <header className="bg-white/90 backdrop-blur-md border-b border-[#EAE4DE] px-4 sm:px-8 py-3 sticky top-0 z-30 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <div className="flex items-center justify-between max-w-7xl mx-auto min-h-[44px]">
+        {/* Título Limpo à Esquerda */}
         <div>
-          <h1 className="text-lg font-bold text-[#111111] tracking-tight">{title}</h1>
-          <p className="text-xs text-[#6B7280] hidden sm:block">{desc}</p>
+          <h1 className="text-[20px] sm:text-[24px] font-semibold text-[#1F1D1B] tracking-tight leading-tight">
+            {title}
+          </h1>
+          <p className="text-xs text-[#736B65] hidden sm:block mt-0.5">{desc}</p>
         </div>
-      </div>
 
-      <div className="flex items-center gap-2.5 sm:gap-3">
-        {/* Badge de dados demonstrativos se ativo */}
-        {hasDemoData && (
-          <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#F3F4F6] text-[#1F2937] border border-[#D1D5DB] shadow-2xs">
-            <Database className="w-3.5 h-3.5 text-[#6B7280]" />
-            <span>Demonstrativo</span>
+        {/* Ação Principal à Direita */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Status do Banco Cloudflare D1 */}
+          {isCloudSynced !== false && (
+            <span
+              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#E8F4EE] text-[#2E7D5B] border border-[#2E7D5B]/20"
+              title="Cloudflare D1: Sincronização em nuvem ativa"
+            >
+              <Cloud className="w-3.5 h-3.5 text-[#2E7D5B]" />
+              <span>Nuvem Ativa</span>
+            </span>
+          )}
+
+          {/* Badge demonstrativo no Desktop */}
+          {hasDemoData && (
+            <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#FDF3E7] text-[#8C530A] border border-[#EAE4DE]">
+              <Database className="w-3.5 h-3.5" />
+              <span>Demo</span>
+            </span>
+          )}
+
+          {/* Data compacta no desktop */}
+          <span className="hidden lg:inline-block text-xs font-medium text-[#736B65] capitalize pr-2 tabular-nums">
+            {formattedDate}
           </span>
-        )}
 
-        {/* Data formatada */}
-        <div className="hidden xl:flex flex-col text-right pr-2">
-          <span className="text-xs font-semibold text-[#111111]">{displayDate}</span>
-          <span className="text-[10px] text-[#6B7280] font-medium">Ambiente Seguro Local</span>
+          {/* Install PWA Button (Desktop / Tablet) */}
+          {onOpenInstallModal && (
+            <button
+              onClick={onOpenInstallModal}
+              className="hidden sm:inline-flex items-center gap-1.5 min-h-[40px] py-1.5 px-3 rounded-xl border border-[#EAE4DE] bg-[#FAF8F6] hover:bg-[#F5EFEB] text-[#1F1D1B] text-xs font-medium transition-all active:scale-[0.98]"
+              title="Instalar aplicativo na tela de início"
+            >
+              <Download className="w-3.5 h-3.5 text-[#736B65]" />
+              <span>Instalar</span>
+            </button>
+          )}
+
+          {/* Botão de Configurações (acessível no mobile e no desktop) */}
+          {onNavigate && (
+            <button
+              type="button"
+              onClick={() => onNavigate('settings')}
+              className={`inline-flex min-h-[38px] min-w-[38px] items-center justify-center p-2 rounded-xl border border-[#EAE4DE] transition-all active:scale-[0.98] ${
+                currentTab === 'settings'
+                  ? 'bg-[#FDF3E7] text-[#8C530A] border-[#C87A14]'
+                  : 'bg-white hover:bg-[#FAF8F6] text-[#736B65]'
+              }`}
+              title="Configurações do Sistema"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Logotipo Oficial do Salão (substituindo o botão) */}
+          <button
+            type="button"
+            onClick={() => onNavigate?.('dashboard')}
+            className="flex items-center justify-center focus:outline-none transition-transform active:scale-95 py-1 px-1"
+            title="Salão Essencial"
+          >
+            <img
+              src="/assets/logo-essencial.png"
+              alt="Salão Essencial"
+              className="h-8 sm:h-9 max-w-[130px] sm:max-w-[160px] object-contain"
+            />
+          </button>
         </div>
-
-        {/* Install PWA Button */}
-        {onOpenInstallModal && (
-          <button
-            onClick={onOpenInstallModal}
-            className="inline-flex items-center gap-1.5 py-2 px-3 rounded-xl border border-[#D1D5DB] bg-[#F4F5F7] hover:bg-[#E5E7EB] text-[#111111] text-xs font-semibold transition-all shadow-2xs hover:shadow-xs active:scale-[0.98]"
-            title="Instalar aplicativo na tela de início"
-          >
-            <Download className="w-3.5 h-3.5 text-[#111111]" />
-            <span className="hidden sm:inline">Instalar App</span>
-          </button>
-        )}
-
-        {/* Quick New Client Button */}
-        <button
-          onClick={onOpenNewClientModal}
-          className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl border border-[#D1D5DB] bg-white hover:bg-neutral-50 text-[#111111] text-xs font-semibold transition-all shadow-2xs hover:shadow-xs active:scale-[0.98]"
-        >
-          <UserPlus className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Nova Cliente</span>
-        </button>
-
-        {/* Settings Shortcut Button */}
-        {onNavigate && (
-          <button
-            onClick={() => onNavigate('settings')}
-            className={`p-2 rounded-xl border transition-all ${
-              currentTab === 'settings'
-                ? 'bg-[#111111] text-white border-[#111111]'
-                : 'bg-white hover:bg-[#F3F3F3] text-[#555555] hover:text-[#111111] border-[#D1D5DB]'
-            }`}
-            title="Configurações e Backup"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
-        )}
       </div>
     </header>
   );

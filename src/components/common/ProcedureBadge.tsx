@@ -16,89 +16,65 @@ export const ProcedureBadge: React.FC<ProcedureBadgeProps> = ({
   const displayName = procedure === 'Outro' && customName ? customName : procedure;
   const p = procedure.toLowerCase();
 
-  // Mapeamento visual com cores elegantes, sugestivas e profissionais
+  // Mapeamento harmonioso com a paleta DESIGN.md
   let badgeStyles = {
-    bg: 'bg-neutral-100 text-neutral-800 border-neutral-300',
-    dot: 'bg-neutral-500',
+    bg: 'bg-[#FAF8F6] text-[#736B65] border-[#EAE4DE]',
+    dot: 'bg-[#736B65]',
   };
 
-  if (p.includes('coloração') || p.includes('coloracao')) {
-    // Tom terracota / cobre quente rico
+  if (p.includes('coloração') || p.includes('coloracao') || p.includes('retoque')) {
+    // Terracota rosado / destaque principal do DESIGN.md
     badgeStyles = {
-      bg: 'bg-amber-100 text-amber-950 border-amber-300 shadow-2xs font-bold',
-      dot: 'bg-amber-600',
+      bg: 'bg-[#FDF3E7] text-[#8C530A] border-[#EAE4DE] font-semibold',
+      dot: 'bg-[#C87A14]',
     };
-  } else if (p.includes('retoque')) {
-    // Tom caramelo / âmbar dourado
+  } else if (p.includes('mechas') || p.includes('luzes') || p.includes('descoloração') || p.includes('descoloracao')) {
+    // Louro / champanhe suave
     badgeStyles = {
-      bg: 'bg-orange-100 text-orange-950 border-orange-300 shadow-2xs font-bold',
-      dot: 'bg-orange-600',
-    };
-  } else if (p.includes('mechas') || p.includes('luzes')) {
-    // Louro dourado iluminado / champanhe
-    badgeStyles = {
-      bg: 'bg-yellow-100 text-yellow-950 border-yellow-300 shadow-2xs font-bold',
-      dot: 'bg-yellow-500',
-    };
-  } else if (p.includes('descoloração') || p.includes('descoloracao')) {
-    // Tom platinado / azul gelo
-    badgeStyles = {
-      bg: 'bg-sky-100 text-sky-950 border-sky-300 shadow-2xs font-bold',
-      dot: 'bg-sky-500',
+      bg: 'bg-[#FAF2E8] text-[#8C6239] border-[#EAE4DE] font-medium',
+      dot: 'bg-[#C28C53]',
     };
   } else if (p.includes('tonalização') || p.includes('tonalizacao')) {
-    // Tom lavanda / violeta matizador de salão
+    // Lavanda suave
     badgeStyles = {
-      bg: 'bg-purple-100 text-purple-950 border-purple-300 shadow-2xs font-bold',
-      dot: 'bg-purple-600',
+      bg: 'bg-[#F3EEF8] text-[#694882] border-[#EAE4DE] font-medium',
+      dot: 'bg-[#8F68AF]',
     };
   } else if (p.includes('hidratação') || p.includes('hidratacao')) {
-    // Verde menta / hidratação botânica fresca
+    // Verde sálvia botânico (#2E7D5B / #E8F4EE)
     badgeStyles = {
-      bg: 'bg-emerald-100 text-emerald-950 border-emerald-300 shadow-2xs font-bold',
-      dot: 'bg-emerald-600',
+      bg: 'bg-[#E8F4EE] text-[#2E7D5B] border-[#2E7D5B]/20 font-medium',
+      dot: 'bg-[#2E7D5B]',
     };
   } else if (p.includes('reconstrução') || p.includes('reconstrucao')) {
-    // Rosa coral / queratina restauradora
+    // Rose suave
     badgeStyles = {
-      bg: 'bg-rose-100 text-rose-950 border-rose-300 shadow-2xs font-bold',
-      dot: 'bg-rose-600',
+      bg: 'bg-[#FCECEC] text-[#A8630A] border-[#EAE4DE] font-medium',
+      dot: 'bg-[#C87A14]',
     };
-  } else if (p.includes('corte')) {
-    // Índigo / ardósia moderno
+  } else if (p.includes('corte') || p.includes('escova') || p.includes('progressiva')) {
+    // Neutro grafite acolhedor
     badgeStyles = {
-      bg: 'bg-indigo-100 text-indigo-950 border-indigo-300 shadow-2xs font-bold',
-      dot: 'bg-indigo-600',
-    };
-  } else if (p.includes('escova')) {
-    // Pêssego / seda suave
-    badgeStyles = {
-      bg: 'bg-fuchsia-100 text-fuchsia-950 border-fuchsia-300 shadow-2xs font-bold',
-      dot: 'bg-fuchsia-600',
-    };
-  } else if (p.includes('progressiva') || p.includes('alisamento')) {
-    // Bronze / avelã
-    badgeStyles = {
-      bg: 'bg-stone-200 text-stone-900 border-stone-400 shadow-2xs font-bold',
-      dot: 'bg-stone-600',
+      bg: 'bg-[#FAF8F6] text-[#1F1D1B] border-[#EAE4DE] font-medium',
+      dot: 'bg-[#736B65]',
     };
   }
 
   const sizeClasses = {
     sm: 'text-[10px] px-2 py-0.5 gap-1',
-    md: 'text-[11px] px-2.5 py-1 gap-1.5',
-    lg: 'text-xs px-3 py-1.5 gap-2',
+    md: 'text-[11px] px-2.5 py-0.5 gap-1.5',
+    lg: 'text-xs px-3 py-1 gap-2',
   };
 
   const dotSizes = {
     sm: 'w-1.5 h-1.5',
-    md: 'w-2 h-2',
-    lg: 'w-2.5 h-2.5',
+    md: 'w-1.5 h-1.5',
+    lg: 'w-2 h-2',
   };
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border tracking-wide transition-all select-none ${badgeStyles.bg} ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center rounded-full border tracking-tight transition-all select-none tabular-nums shadow-xs ${badgeStyles.bg} ${sizeClasses[size]} ${className}`}
     >
       <span className={`rounded-full shrink-0 ${badgeStyles.dot} ${dotSizes[size]}`} />
       <span>{displayName}</span>
