@@ -3,6 +3,13 @@
   "name": "salao-essencial",
   "main": "worker/index.ts",
   "compatibility_date": "2026-11-18",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "app.essencialmt.com.br",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
