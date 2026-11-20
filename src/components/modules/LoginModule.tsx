@@ -8,7 +8,6 @@ import {
   EyeOff,
   Shield,
   ArrowRight,
-  Sparkles,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -48,12 +47,6 @@ export const LoginModule: React.FC<LoginModuleProps> = ({ onLoginSuccess }) => {
     }
   };
 
-  const handleAutofill = () => {
-    setEmail('clarice@salaoessencial.com');
-    setPassword('essencial2026');
-    setErrorMessage('');
-  };
-
   return (
     <div className="min-h-screen bg-[#FAF8F6] flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       {/* Luz ambiente de fundo */}
@@ -63,12 +56,12 @@ export const LoginModule: React.FC<LoginModuleProps> = ({ onLoginSuccess }) => {
         {/* Card Principal */}
         <div className="bg-white rounded-3xl border border-[#EAE4DE] p-6 sm:p-8 shadow-[0_4px_24px_rgba(31,29,27,0.06)]">
           {/* Logo e Cabeçalho */}
-          <div className="text-center mb-6">
-            <div className="inline-block py-1 px-2 mb-3">
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="flex items-center justify-center w-full mb-3.5">
               <img
                 src="/assets/logo-essencial.png"
                 alt="Salão Essencial"
-                className="h-10 sm:h-12 w-auto mx-auto object-contain"
+                className="h-16 sm:h-20 w-auto max-w-[240px] sm:max-w-[280px] object-contain mx-auto"
               />
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#FDF3E7] text-[#8C530A] border border-[#C87A14]/20 mb-2">
@@ -174,25 +167,12 @@ export const LoginModule: React.FC<LoginModuleProps> = ({ onLoginSuccess }) => {
               </button>
             </div>
           </form>
-
-          {/* Atalho de Demonstração / Preenchimento Rápido */}
-          <div className="mt-5 pt-4 border-t border-[#EAE4DE]/70 text-center">
-            <button
-              type="button"
-              onClick={handleAutofill}
-              className="text-xs text-[#736B65] hover:text-[#C87A14] transition-colors inline-flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-[#FAF8F6] border border-[#EAE4DE]"
-              title="Preenche o login padrão da Clarice"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#C87A14]" />
-              <span>Acesso Padrão: <strong>Clarice</strong> (Preenchimento Rápido)</span>
-            </button>
-          </div>
         </div>
 
         {/* Rodapé de Segurança */}
         <div className="text-center mt-4 text-[11px] text-[#736B65] flex items-center justify-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D5B]" />
-          <span>Banco de Dados em Nuvem Cloudflare D1 Ativo</span>
+          <span>Banco de Dados em Nuvem</span>
         </div>
       </div>
     </div>
