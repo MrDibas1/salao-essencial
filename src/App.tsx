@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import type { Client, Appointment, Product, SalonSettings } from './types';
+import type { Client, Appointment, Product, SalonSettings, User } from './types';
 import { StorageService } from './services/storage';
+import { AuthService } from './services/auth';
 import { ToastProvider, useToast } from './components/ui/Toast';
 import { ConfirmDialog } from './components/ui/ConfirmDialog';
 import { Sidebar, type NavigationTab } from './components/common/Sidebar';
@@ -16,10 +17,14 @@ import { GalleryModule } from './components/modules/GalleryModule';
 import { HistoryModule } from './components/modules/HistoryModule';
 import { ProductsModule } from './components/modules/ProductsModule';
 import { SettingsModule } from './components/modules/SettingsModule';
+import { LoginModule } from './components/modules/LoginModule';
 import { InstallPwaModal } from './components/common/InstallPwaModal';
 
 const MainApp: React.FC = () => {
   const { success, error, info } = useToast();
+
+  // Autenticação e Sessão
+  const [currentUser, setCurrentUser] = useState<User | null>(() => AuthService.getCurrentUser());
 
   // Estados dos Dados Centrais
   const [clients, setClients] = useState<Client[]>([]);
@@ -298,6 +303,33 @@ const MainApp: React.FC = () => {
     return ok;
   };
 
+  const handleLogout = () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Sair da Conta',
+      message:
+        'Deseja desconectar sua conta deste aparelho? Você precisará digitar a senha novamente no próximo acesso.',
+      confirmText: 'Sair da Conta',
+      onConfirm: () => {
+        AuthService.logout();
+        setCurrentUser(null);
+        info('Sessão encerrada', 'Você saiu da sua conta.');
+      },
+    });
+  };
+
+  // Se o usuário não estiver autenticado, exibe a tela de login
+  if (!currentUser) {
+    return (
+      <LoginModule
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          success(`Bem-vinda, ${user.name}!`, 'Acesso liberado ao Salão Essencial.');
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF8F6] text-[#1F1D1B] flex flex-col antialiased">
       {/* Sidebar navigation */}
@@ -420,6 +452,8 @@ const MainApp: React.FC = () => {
               onImportBackup={handleImportBackup}
               onOpenInstallModal={() => setIsInstallModalOpen(true)}
               hasDemoData={hasDemoData}
+              currentUser={currentUser}
+              onLogout={handleLogout}
             />
           )}
         </main>

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import type { SalonSettings } from '../../types';
+import type { SalonSettings, User } from '../../types';
 import { Logo } from '../common/Logo';
 import {
   Store,
@@ -14,6 +14,7 @@ import {
   Smartphone,
   Cloud,
   RefreshCw,
+  LogOut,
 } from 'lucide-react';
 import { StorageService } from '../../services/storage';
 import { useToast } from '../ui/Toast';
@@ -27,6 +28,8 @@ interface SettingsModuleProps {
   onImportBackup: (jsonString: string) => boolean;
   onOpenInstallModal?: () => void;
   hasDemoData: boolean;
+  currentUser?: User | null;
+  onLogout?: () => void;
 }
 
 export const SettingsModule: React.FC<SettingsModuleProps> = ({
@@ -38,6 +41,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
   onImportBackup,
   onOpenInstallModal,
   hasDemoData,
+  currentUser,
+  onLogout,
 }) => {
   const { success, error: toastError } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
@@ -464,6 +469,39 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Conta & Sessão da Profissional */}
+        {onLogout && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#EAE4DE] shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#FDF3E7] text-[#8C530A] border border-[#EAE4DE] flex items-center justify-center font-bold text-sm">
+                {currentUser?.name?.[0] || 'C'}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-[#1F1D1B]">
+                    {currentUser?.name || 'Clarice'}
+                  </h4>
+                  <span className="px-2 py-0.2 rounded-full text-[10px] font-semibold bg-[#E8F4EE] text-[#2E7D5B]">
+                    Conectada
+                  </span>
+                </div>
+                <p className="text-xs text-[#736B65]">
+                  {currentUser?.email || 'clarice@salaoessencial.com'} • Sessão permanente ativa
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onLogout}
+              className="min-h-[40px] px-3.5 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition-colors flex items-center gap-2 active:scale-95"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sair da Conta (Desconectar)</span>
+            </button>
+          </div>
+        )}
 
         {/* Informações da Versão e Segurança */}
         <div className="p-4 rounded-xl bg-[#FAF8F6] border border-[#EAE4DE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">

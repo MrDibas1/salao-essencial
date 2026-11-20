@@ -62,3 +62,16 @@ CREATE TABLE IF NOT EXISTS settings (
   data TEXT NOT NULL,
   updatedAt TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  passwordHash TEXT NOT NULL,
+  role TEXT DEFAULT 'admin',
+  avatarUrl TEXT,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);

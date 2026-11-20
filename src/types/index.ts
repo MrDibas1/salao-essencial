@@ -1,3 +1,12 @@
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'staff';
+  avatarUrl?: string;
+  createdAt?: string;
+}
+
 export interface Client {
   id: string;
   name: string;

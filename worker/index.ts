@@ -13,13 +13,22 @@ function jsonResponse(data: unknown, status = 200): Response {
       'Content-Type': 'application/json; charset=utf-8',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
   });
 }
 
 function errorResponse(message: string, status = 500): Response {
   return jsonResponse({ error: message, success: false }, status);
+}
+
+async function hashPassword(password: string): Promise<string> {
+  const enc = new TextEncoder();
+  const salt = 'salao_essencial_salt_2026';
+  const data = enc.encode(password + salt);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 export default {
@@ -32,7 +41,7 @@ export default {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
     }
@@ -43,6 +52,74 @@ export default {
     }
 
     try {
+      // -------------------------------------------------------------
+      // AUTENTICAÇÃO: POST /api/auth/login
+      // -------------------------------------------------------------
+      if (url.pathname === '/api/auth/login' && request.method === 'POST') {
+        const body = (await request.json()) as any;
+        const email = String(body.email || '').trim().toLowerCase();
+        const password = String(body.password || '').trim();
+
+        if (!email || !password) {
+          return jsonResponse({ success: false, error: 'E-mail e senha são obrigatórios' }, 400);
+        }
+
+        // Auto-seed admin se tabela users estiver vazia
+        const countRes = await env.DB.prepare('SELECT COUNT(*) as count FROM users').first<{ count: number }>();
+        if (!countRes || countRes.count === 0) {
+          const defaultHash = await hashPassword('essencial2026');
+          const now = new Date().toISOString();
+          await env.DB.prepare(`
+            INSERT INTO users (id, name, email, passwordHash, role, avatarUrl, createdAt, updatedAt)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            'usr-clarice-admin',
+            'Clarice',
+            'clarice@salaoessencial.com',
+            defaultHash,
+            'admin',
+            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+            now,
+            now
+          ).run();
+        }
+
+        const user = await env.DB.prepare('SELECT * FROM users WHERE LOWER(email) = ?').bind(email).first<any>();
+        if (!user) {
+          return jsonResponse({ success: false, error: 'E-mail ou senha incorretos' }, 401);
+        }
+
+        const inputHash = await hashPassword(password);
+        if (user.passwordHash !== inputHash) {
+          return jsonResponse({ success: false, error: 'E-mail ou senha incorretos' }, 401);
+        }
+
+        const sessionToken = `ses_${crypto.randomUUID()}_${Date.now()}`;
+
+        return jsonResponse({
+          success: true,
+          token: sessionToken,
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role || 'admin',
+            avatarUrl: user.avatarUrl,
+            createdAt: user.createdAt,
+          },
+        });
+      }
+
+      // -------------------------------------------------------------
+      // AUTENTICAÇÃO: GET /api/auth/me
+      // -------------------------------------------------------------
+      if (url.pathname === '/api/auth/me' && request.method === 'GET') {
+        const user = await env.DB.prepare('SELECT id, name, email, role, avatarUrl, createdAt FROM users LIMIT 1').first<any>();
+        if (!user) {
+          return jsonResponse({ success: false, error: 'Nenhum usuário cadastrado' }, 404);
+        }
+        return jsonResponse({ success: true, user });
+      }
       // -------------------------------------------------------------
       // GET /api/sync — Carrega toda a base na borda em 1 requisição
       // -------------------------------------------------------------
