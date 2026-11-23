@@ -74,7 +74,7 @@ export default {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           `).bind(
             'usr-clarice-admin',
-            'Clarice',
+            'Clarice Dalla Costa',
             'clarice@salaoessencial.com',
             defaultHash,
             'admin',
@@ -108,6 +108,63 @@ export default {
             createdAt: user.createdAt,
           },
         });
+      }
+
+      // -------------------------------------------------------------
+      // AUTENTICAÇÃO: POST /api/auth/change-password
+      // -------------------------------------------------------------
+      if (url.pathname === '/api/auth/change-password' && request.method === 'POST') {
+        const body = (await request.json()) as any;
+        const email = String(body.email || '').trim().toLowerCase();
+        const currentPassword = String(body.currentPassword || '').trim();
+        const newPassword = String(body.newPassword || '').trim();
+
+        if (!email || !currentPassword || !newPassword) {
+          return jsonResponse({ success: false, error: 'Todos os campos são obrigatórios' }, 400);
+        }
+
+        if (newPassword.length < 6) {
+          return jsonResponse({ success: false, error: 'A nova senha deve ter no mínimo 6 caracteres' }, 400);
+        }
+
+        // Auto-seed admin se tabela users estiver vazia
+        const countRes = await env.DB.prepare('SELECT COUNT(*) as count FROM users').first<{ count: number }>();
+        if (!countRes || countRes.count === 0) {
+          const defaultHash = await hashPassword('essencial2026');
+          const now = new Date().toISOString();
+          await env.DB.prepare(`
+            INSERT INTO users (id, name, email, passwordHash, role, avatarUrl, createdAt, updatedAt)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            'usr-clarice-admin',
+            'Clarice Dalla Costa',
+            'clarice@salaoessencial.com',
+            defaultHash,
+            'admin',
+            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+            now,
+            now
+          ).run();
+        }
+
+        const user = await env.DB.prepare('SELECT * FROM users WHERE LOWER(email) = ?').bind(email).first<any>();
+        if (!user) {
+          return jsonResponse({ success: false, error: 'Usuário não encontrado' }, 404);
+        }
+
+        const currentHash = await hashPassword(currentPassword);
+        if (user.passwordHash !== currentHash) {
+          return jsonResponse({ success: false, error: 'Senha atual incorreta' }, 401);
+        }
+
+        const newHash = await hashPassword(newPassword);
+        const now = new Date().toISOString();
+
+        await env.DB.prepare('UPDATE users SET passwordHash = ?, updatedAt = ? WHERE id = ?')
+          .bind(newHash, now, user.id)
+          .run();
+
+        return jsonResponse({ success: true, message: 'Senha atualizada com sucesso no banco em nuvem!' });
       }
 
       // -------------------------------------------------------------

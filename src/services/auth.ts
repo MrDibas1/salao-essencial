@@ -8,7 +8,7 @@ const STORAGE_KEYS = {
 // Usuário padrão de fallback offline (para nunca travar se estiver sem internet)
 const DEFAULT_OFFLINE_USER: User = {
   id: 'usr-clarice-admin',
-  name: 'Clarice',
+  name: 'Clarice Dalla Costa',
   email: 'clarice@salaoessencial.com',
   role: 'admin',
   avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
@@ -74,10 +74,11 @@ export const AuthService = {
     } catch (err) {
       console.warn('Falha na conexão com a nuvem, tentando autenticação local offline:', err);
 
-      // Fallback offline seguro para a credencial padrão
+      // Fallback offline seguro para a credencial padrão ou personalizada
+      const offlinePassword = localStorage.getItem('essencial_offline_custom_pw') || 'essencial2026';
       if (
         cleanEmail === 'clarice@salaoessencial.com' &&
-        (cleanPassword === 'essencial2026' || cleanPassword === 'clarice123')
+        (cleanPassword === offlinePassword || cleanPassword === 'essencial2026' || cleanPassword === 'clarice123')
       ) {
         const token = `offline_ses_${Date.now()}`;
         localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
@@ -89,6 +90,54 @@ export const AuthService = {
         success: false,
         error: 'Erro de conexão ou credenciais inválidas. Verifique seu e-mail e senha.',
       };
+    }
+  },
+
+  async changePassword(
+    email: string,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<{ success: boolean; error?: string; message?: string }> {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanCurrent = currentPassword.trim();
+    const cleanNew = newPassword.trim();
+
+    if (!cleanCurrent || !cleanNew) {
+      return { success: false, error: 'Preencha a senha atual e a nova senha.' };
+    }
+
+    if (cleanNew.length < 6) {
+      return { success: false, error: 'A nova senha deve ter no mínimo 6 caracteres.' };
+    }
+
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: cleanEmail,
+          currentPassword: cleanCurrent,
+          newPassword: cleanNew,
+        }),
+      });
+
+      const json = (await res.json()) as any;
+      if (!res.ok || !json.success) {
+        return { success: false, error: json.error || 'Erro ao alterar a senha.' };
+      }
+
+      // Salva no storage local para fallback offline
+      localStorage.setItem('essencial_offline_custom_pw', cleanNew);
+
+      return { success: true, message: 'Senha atualizada com sucesso!' };
+    } catch {
+      // Fallback offline se o backend estiver inacessível no momento
+      const offlinePassword = localStorage.getItem('essencial_offline_custom_pw') || 'essencial2026';
+      if (cleanCurrent === offlinePassword || cleanCurrent === 'clarice123') {
+        localStorage.setItem('essencial_offline_custom_pw', cleanNew);
+        return { success: true, message: 'Senha atualizada localmente neste aparelho!' };
+      }
+      return { success: false, error: 'Senha atual incorreta. Tente novamente.' };
     }
   },
 

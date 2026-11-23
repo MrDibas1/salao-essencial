@@ -15,9 +15,11 @@ import {
   Cloud,
   RefreshCw,
   LogOut,
+  KeyRound,
 } from 'lucide-react';
 import { StorageService } from '../../services/storage';
 import { useToast } from '../ui/Toast';
+import { ChangePasswordModal } from './ChangePasswordModal';
 
 interface SettingsModuleProps {
   settings: SalonSettings;
@@ -46,6 +48,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
 }) => {
   const { success, error: toastError } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const handleSyncCloud = async () => {
     setIsSyncing(true);
@@ -480,7 +483,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <h4 className="text-sm font-semibold text-[#1F1D1B]">
-                    {currentUser?.name || 'Clarice'}
+                    {currentUser?.name || 'Clarice Dalla Costa'}
                   </h4>
                   <span className="px-2 py-0.2 rounded-full text-[10px] font-semibold bg-[#E8F4EE] text-[#2E7D5B]">
                     Conectada
@@ -492,14 +495,25 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={onLogout}
-              className="min-h-[40px] px-3.5 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition-colors flex items-center gap-2 active:scale-95"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sair da Conta (Desconectar)</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsChangePasswordOpen(true)}
+                className="min-h-[40px] px-3.5 py-2 rounded-xl border border-[#EAE4DE] hover:border-[#C87A14] bg-white text-[#1F1D1B] hover:text-[#C87A14] hover:bg-[#FAF8F6] text-xs font-semibold transition-all flex items-center gap-1.5 active:scale-95 shadow-xs"
+              >
+                <KeyRound className="w-3.5 h-3.5 text-[#C87A14]" />
+                <span>Alterar Senha</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onLogout}
+                className="min-h-[40px] px-3.5 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition-colors flex items-center gap-2 active:scale-95"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sair da Conta (Desconectar)</span>
+              </button>
+            </div>
           </div>
         )}
 
@@ -514,7 +528,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
           </div>
           <div className="shrink-0 flex items-center gap-2">
             <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#FDF3E7] text-[#8C530A] border border-[#C87A14]/30 tabular-nums">
-              Versão 1.0.0
+              Versão 1.0.1
             </span>
             <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#E8F4EE] text-[#2E7D5B] border border-[#2E7D5B]/30 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D5B]" />
@@ -522,6 +536,14 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Modal de Alterar Senha */}
+        <ChangePasswordModal
+          isOpen={isChangePasswordOpen}
+          onClose={() => setIsChangePasswordOpen(false)}
+          userEmail={currentUser?.email || 'clarice@salaoessencial.com'}
+          onSuccess={(msg) => success('Senha Atualizada!', msg)}
+        />
       </div>
     </div>
   );

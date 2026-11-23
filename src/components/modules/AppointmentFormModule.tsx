@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { compressImageFile, estimateDataUrlSizeKb } from '../../utils/imageOptimizer';
+import { DateInput } from '../ui/DateInput';
 
 interface AppointmentFormModuleProps {
   clients: Client[];
@@ -99,7 +100,7 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
   });
 
   const [professional, setProfessional] = useState<string>(() => {
-    return appointmentToEdit?.professional || 'Clarice';
+    return appointmentToEdit?.professional || 'Clarice Dalla Costa';
   });
 
   const [procedureType, setProcedureType] = useState<string>(() => {
@@ -257,7 +258,7 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
       clientId: selectedClientId,
       clientName: selectedClient.name,
       date,
-      professional: professional.trim() || 'Clarice',
+      professional: professional.trim() || 'Clarice Dalla Costa',
       procedureType,
       customProcedureName: procedureType === 'Outro' ? customProcedureName.trim() : undefined,
       description: `${procedureType}${chosenProduct ? ` com ${chosenProduct.name}` : ''}`,
@@ -462,11 +463,9 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
               <label className="block text-xs font-medium text-[#736B65] mb-1">
                 Data do Atendimento
               </label>
-              <input
-                type="date"
+              <DateInput
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] tabular-nums focus:outline-none focus:border-[#C87A14] shadow-xs"
+                onChange={(newDate) => setDate(newDate)}
               />
             </div>
 
@@ -478,7 +477,7 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
                 type="text"
                 value={professional}
                 onChange={(e) => setProfessional(e.target.value)}
-                placeholder="Ex: Clarice"
+                placeholder="Ex: Clarice Dalla Costa"
                 className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs"
               />
             </div>

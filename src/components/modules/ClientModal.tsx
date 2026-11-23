@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal } from '../ui/Modal';
+import { DateInput } from '../ui/DateInput';
 import type { Client } from '../../types';
 import { ClientAvatar } from '../common/ClientAvatar';
 import { Camera, Trash2 } from 'lucide-react';
@@ -251,11 +252,10 @@ export const ClientModal: React.FC<ClientModalProps> = ({
           <label className="block text-xs font-medium text-[#736B65] mb-1">
             Data de Nascimento
           </label>
-          <input
-            type="date"
+          <DateInput
             value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
-            className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] text-[16px] text-[#1F1D1B] tabular-nums bg-white focus:outline-none focus:border-[#C87A14] transition-all shadow-xs"
+            onChange={(newDate) => setBirthDate(newDate)}
+            placeholder="DD/MM/AAAA"
           />
         </div>
 

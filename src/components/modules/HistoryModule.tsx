@@ -3,6 +3,7 @@ import type { Appointment, Client } from '../../types';
 import type { NavigationTab } from '../common/Sidebar';
 import { ProcedureBadge } from '../common/ProcedureBadge';
 import { ClientAvatar } from '../common/ClientAvatar';
+import { DateInput } from '../ui/DateInput';
 import { getHairToneColor } from '../../utils/hairColor';
 import {
   Search,
@@ -221,11 +222,10 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
               <label className="block text-[11px] font-medium text-[#736B65] mb-1">
                 A partir de
               </label>
-              <input
-                type="date"
+              <DateInput
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full min-h-[44px] px-3 py-2 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] tabular-nums focus:outline-none focus:border-[#C87A14]"
+                onChange={(newDate) => setStartDate(newDate)}
+                placeholder="DD/MM/AAAA"
               />
             </div>
 
@@ -235,12 +235,13 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
                 Até a data
               </label>
               <div className="flex gap-2">
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full min-h-[44px] px-3 py-2 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] tabular-nums focus:outline-none focus:border-[#C87A14]"
-                />
+                <div className="flex-1">
+                  <DateInput
+                    value={endDate}
+                    onChange={(newDate) => setEndDate(newDate)}
+                    placeholder="DD/MM/AAAA"
+                  />
+                </div>
                 {hasActiveFilters && (
                   <button
                     onClick={resetFilters}
