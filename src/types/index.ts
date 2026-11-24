@@ -112,14 +112,14 @@ export type ProductCategory =
 
 export interface Product {
   id: string;
-  name: string;
-  brand: string;
-  line?: string;
-  category: ProductCategory;
-  shadeNumber?: string;
-  unit: string;
-  notes?: string;
-  imageUrl?: string;
+  name: string;               // Nome da Tinta / Marca (ex: Truss, Fest color, Igora 10, Igora, Gloss, Color touch, Outros)
+  brand?: string;             // Opcional
+  line?: string;              // Opcional
+  category?: ProductCategory; // Opcional
+  shadeNumber?: string;       // Opcional
+  unit?: string;              // Opcional
+  notes?: string;             // Observações da marca/tinta
+  imageUrl?: string;          // Foto da marca/produto
   createdAt: string;
   isDemo?: boolean;
 }

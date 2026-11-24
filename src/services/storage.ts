@@ -42,67 +42,30 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
 }
 
 export const StorageService = {
-  // Inicialização com dados demo se primeira vez
+  // Inicialização oficial de produção
   initialize(): void {
     const initialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED);
+    const demoCleaned = localStorage.getItem('essencial_demo_cleaned_v2');
+
     if (!initialized) {
-      this.restoreDemoData();
+      // Primeira inicialização em produção: inicia com cadastros limpos e as 7 marcas de tintas
+      saveToStorage(STORAGE_KEYS.CLIENTS, []);
+      saveToStorage(STORAGE_KEYS.APPOINTMENTS, []);
+      saveToStorage(STORAGE_KEYS.PRODUCTS, DEMO_PRODUCTS);
+      saveToStorage(STORAGE_KEYS.SETTINGS, INITIAL_SETTINGS);
       localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
+      localStorage.setItem('essencial_demo_cleaned_v2', 'true');
+      this.pushLocalToCloud().catch((err) => console.warn('Erro ao inicializar no D1:', err));
+    } else if (!demoCleaned) {
+      // Limpeza única para remover dados fictícios residuais e ativar base oficial de produção
+      this.clearDemoData();
+      localStorage.setItem('essencial_demo_cleaned_v2', 'true');
     } else {
-      // Atualiza clientes demo com fotos caso estejam sem avatarUrl
-      const clients = this.getAllClientsRaw();
-      let updated = false;
-      const patchedClients = clients.map((c) => {
-        if (c.isDemo && !c.avatarUrl) {
-          const demoMatch = DEMO_CLIENTS.find((d) => d.id === c.id);
-          if (demoMatch?.avatarUrl) {
-            updated = true;
-            return { ...c, avatarUrl: demoMatch.avatarUrl };
-          }
-        }
-        return c;
-      });
-      if (updated) {
-        saveToStorage(STORAGE_KEYS.CLIENTS, patchedClients);
-      }
-
-      // Atualiza produtos demo com fotos caso estejam sem imageUrl
+      // Garante que os 7 produtos oficiais estejam sempre carregados
       const products = this.getProducts();
-      let updatedProducts = false;
-      const patchedProducts = products.map((p) => {
-        if (p.isDemo && !p.imageUrl) {
-          const demoMatch = DEMO_PRODUCTS.find((d) => d.id === p.id);
-          if (demoMatch?.imageUrl) {
-            updatedProducts = true;
-            return { ...p, imageUrl: demoMatch.imageUrl };
-          }
-        }
-        return p;
-      });
-      if (updatedProducts) {
-        saveToStorage(STORAGE_KEYS.PRODUCTS, patchedProducts);
-      }
-
-      // Atualiza atendimentos demo com fotos de Antes e Depois
-      const appointments = this.getAppointments();
-      let updatedAppointments = false;
-      const patchedAppointments = appointments.map((a) => {
-        if (a.isDemo && (!a.beforePhotoUrl && !a.afterPhotoUrl)) {
-          const demoMatch = DEMO_APPOINTMENTS.find((d) => d.id === a.id);
-          if (demoMatch?.beforePhotoUrl || demoMatch?.afterPhotoUrl) {
-            updatedAppointments = true;
-            return {
-              ...a,
-              beforePhotoUrl: demoMatch.beforePhotoUrl,
-              afterPhotoUrl: demoMatch.afterPhotoUrl,
-              photoUrls: [demoMatch.beforePhotoUrl, demoMatch.afterPhotoUrl].filter(Boolean) as string[],
-            };
-          }
-        }
-        return a;
-      });
-      if (updatedAppointments) {
-        saveToStorage(STORAGE_KEYS.APPOINTMENTS, patchedAppointments);
+      const hasOldProducts = products.some((p) => p.id === 'prod-1' || p.id === 'prod-2');
+      if (hasOldProducts || products.length === 0) {
+        saveToStorage(STORAGE_KEYS.PRODUCTS, DEMO_PRODUCTS);
       }
     }
   },
@@ -465,14 +428,18 @@ export const StorageService = {
   clearDemoData(): void {
     const nonDemoClients = this.getAllClientsRaw().filter((c) => !c.isDemo);
     const nonDemoAppointments = this.getAppointments().filter((a) => !a.isDemo);
-    const nonDemoProducts = this.getProducts().filter((p) => !p.isDemo);
+    const currentProducts = this.getProducts().map((p) => ({ ...p, isDemo: false }));
+    const finalProducts = currentProducts.length > 0 ? currentProducts : DEMO_PRODUCTS;
 
     saveToStorage(STORAGE_KEYS.CLIENTS, nonDemoClients);
     saveToStorage(STORAGE_KEYS.APPOINTMENTS, nonDemoAppointments);
-    saveToStorage(STORAGE_KEYS.PRODUCTS, nonDemoProducts);
+    saveToStorage(STORAGE_KEYS.PRODUCTS, finalProducts);
 
     fetchWithTimeout('/api/demo/clear', { method: 'POST' }).catch((err) =>
       console.warn('Erro ao limpar demo no D1:', err)
+    );
+    this.pushLocalToCloud().catch((err) =>
+      console.warn('Erro ao sincronizar após limpar demo:', err)
     );
   },
 

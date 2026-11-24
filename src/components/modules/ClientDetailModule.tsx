@@ -425,10 +425,10 @@ export const ClientDetailModule: React.FC<ClientDetailModuleProps> = ({
                                     title={`${tone.name} (${prod.shadeNumber})`}
                                   />
                                 )}
-                                <span className="font-mono font-semibold text-[#1F1D1B] tabular-nums">
-                                  {prod.shadeNumber}
+                                <span className="font-semibold text-[#1F1D1B]">
+                                  {prod.brand || prod.shadeNumber}
                                 </span>
-                                {prod.shadeName && (
+                                {prod.shadeName && prod.shadeName !== prod.brand && prod.shadeName !== prod.shadeNumber && (
                                   <span className="text-[#736B65] text-[11px]">{prod.shadeName}</span>
                                 )}
                                 <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-[#FAF8F6] border border-[#EAE4DE]/60 text-[#1F1D1B] tabular-nums font-semibold">

@@ -218,9 +218,13 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
               <div className="w-10 h-10 rounded-full bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center mx-auto">
                 <Users className="w-5 h-5" />
               </div>
-              <h4 className="text-sm font-semibold text-[#1F1D1B]">Nenhuma cliente encontrada</h4>
+              <h4 className="text-sm font-semibold text-[#1F1D1B]">
+                {searchQuery ? 'Nenhuma cliente encontrada' : 'Nenhuma cliente cadastrada'}
+              </h4>
               <p className="text-xs text-[#736B65] max-w-xs mx-auto">
-                Não encontramos registros para "{searchQuery}". Deseja cadastrar agora?
+                {searchQuery
+                  ? `Não encontramos registros para "${searchQuery}". Deseja cadastrar agora?`
+                  : 'Sua base de clientes está pronta para os cadastros oficiais do salão.'}
               </p>
               <button
                 onClick={onOpenNewClientModal}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserPlus, Database, Download, Settings, Cloud } from 'lucide-react';
+import { Download, Settings, Cloud } from 'lucide-react';
 import type { NavigationTab } from './Sidebar';
 
 interface HeaderProps {
@@ -8,16 +8,14 @@ interface HeaderProps {
   onOpenNewClientModal: () => void;
   onOpenInstallModal?: () => void;
   onNavigate?: (tab: NavigationTab) => void;
-  hasDemoData: boolean;
+  hasDemoData?: boolean;
   isCloudSynced?: boolean | null;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   currentTab,
-  onOpenNewClientModal,
   onOpenInstallModal,
   onNavigate,
-  hasDemoData,
   isCloudSynced,
 }) => {
   const getPageTitle = () => {
@@ -73,14 +71,6 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Cloud className="w-3.5 h-3.5 text-[#2E7D5B]" />
               <span>Nuvem Ativa</span>
-            </span>
-          )}
-
-          {/* Badge demonstrativo no Desktop */}
-          {hasDemoData && (
-            <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#FDF3E7] text-[#8C530A] border border-[#EAE4DE]">
-              <Database className="w-3.5 h-3.5" />
-              <span>Demo</span>
             </span>
           )}
 

@@ -220,11 +220,14 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
             {/* List of dyes / color products */}
             <div>
               <p className="text-xs font-medium text-[#736B65] mb-2">
-                Tintas & Tonalidades ({appointment.colorFormula.products.length})
+                Tintas & Marcas Utilizadas ({appointment.colorFormula.products.length})
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {appointment.colorFormula.products.map((prod, idx) => {
                   const tone = getHairToneColor(prod.shadeNumber);
+                  const dyeTitle = prod.brand || prod.shadeNumber;
+                  const showShadeName = prod.shadeName && prod.shadeName !== prod.brand && prod.shadeName !== prod.shadeNumber;
+
                   return (
                     <div
                       key={prod.id || idx}
@@ -240,18 +243,20 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                                 title={tone.name}
                               />
                             )}
-                            <span className="font-mono font-semibold text-sm text-[#1F1D1B] tabular-nums">
-                              {prod.shadeNumber}
+                            <span className="font-semibold text-sm text-[#1F1D1B]">
+                              {dyeTitle}
                             </span>
-                            {prod.shadeName && (
+                            {showShadeName && (
                               <span className="text-xs text-[#736B65]">
                                 — {prod.shadeName}
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-[#736B65] mt-0.5">
-                            {prod.brand} {prod.line ? `(${prod.line})` : ''}
-                          </p>
+                          {prod.line && (
+                            <p className="text-[11px] text-[#736B65] mt-0.5">
+                              {prod.line}
+                            </p>
+                          )}
                         </div>
                         <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-[#FAF8F6] border border-[#EAE4DE] text-[#1F1D1B] tabular-nums">
                           {prod.quantity}

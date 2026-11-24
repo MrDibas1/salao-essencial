@@ -84,10 +84,6 @@ const MainApp: React.FC = () => {
     });
   }, [reloadData]);
 
-  // Checagem se base tem dados de demonstração
-  const hasDemoData =
-    clients.some((c) => c.isDemo) || appointments.some((a) => a.isDemo);
-
   // Navegação com parâmetros
   const handleNavigate = (
     tab: NavigationTab,
@@ -244,42 +240,12 @@ const MainApp: React.FC = () => {
   };
 
   // -------------------------------------------------------------
-  // CONFIGURAÇÕES & DADOS DEMO
+  // CONFIGURAÇÕES & BACKUP
   // -------------------------------------------------------------
   const handleUpdateSettings = (updates: Partial<SalonSettings>) => {
     const updated = StorageService.updateSettings(updates);
     setSettings(updated);
     success('Configurações salvas!');
-  };
-
-  const handleRestoreDemo = () => {
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Restaurar Dados Demonstrativos',
-      message:
-        'Deseja restaurar a base demonstrativa completa com exemplos de colorações, fórmulas e clientes fictícias?',
-      confirmText: 'Restaurar',
-      onConfirm: () => {
-        StorageService.restoreDemoData();
-        reloadData();
-        success('Dados demonstrativos restaurados!', 'Clientes e atendimentos prontos para apresentação.');
-      },
-    });
-  };
-
-  const handleClearDemo = () => {
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Limpar Dados Fictícios',
-      message:
-        'Deseja remover todos os registros identificados como demonstrativos? Cadastros reais criados por você serão mantidos.',
-      confirmText: 'Limpar Fictícios',
-      onConfirm: () => {
-        StorageService.clearDemoData();
-        reloadData();
-        info('Base demonstrativa limpa', 'Apenas seus registros personalizados foram mantidos.');
-      },
-    });
   };
 
   const handleExportBackup = () => {
@@ -354,7 +320,6 @@ const MainApp: React.FC = () => {
           }}
           onOpenInstallModal={() => setIsInstallModalOpen(true)}
           onNavigate={(tab) => handleNavigate(tab)}
-          hasDemoData={hasDemoData}
           isCloudSynced={isCloudSynced}
         />
 
@@ -446,12 +411,9 @@ const MainApp: React.FC = () => {
             <SettingsModule
               settings={settings}
               onUpdateSettings={handleUpdateSettings}
-              onRestoreDemo={handleRestoreDemo}
-              onClearDemo={handleClearDemo}
               onExportBackup={handleExportBackup}
               onImportBackup={handleImportBackup}
               onOpenInstallModal={() => setIsInstallModalOpen(true)}
-              hasDemoData={hasDemoData}
               currentUser={currentUser}
               onLogout={handleLogout}
             />

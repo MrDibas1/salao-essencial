@@ -111,17 +111,31 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
     return appointmentToEdit?.customProcedureName || '';
   });
 
-  // 3. Produto Utilizado do Catálogo
-  const [selectedProductId, setSelectedProductId] = useState<string>(() => {
-    if (appointmentToEdit?.colorFormula?.products?.[0]) {
-      const existingShade = appointmentToEdit.colorFormula.products[0].shadeNumber;
-      const matched = products.find((p) => p.shadeNumber === existingShade);
-      if (matched) return matched.id;
+  // 3. Tintas / Marcas Utilizadas do Catálogo
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>(() => {
+    if (appointmentToEdit?.colorFormula?.products?.length) {
+      const ids: string[] = [];
+      for (const item of appointmentToEdit.colorFormula.products) {
+        const found = products.find(
+          (p) =>
+            p.id === item.id ||
+            p.name.toLowerCase() === item.brand?.toLowerCase() ||
+            p.name.toLowerCase() === item.shadeNumber?.toLowerCase()
+        );
+        if (found && !ids.includes(found.id)) ids.push(found.id);
+      }
+      if (ids.length > 0) return ids;
     }
-    return '';
+    return [];
   });
 
   const [customProductName, setCustomProductName] = useState<string>('');
+
+  const toggleProduct = (productId: string) => {
+    setSelectedProductIds((prev) =>
+      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
+    );
+  };
 
   // 4. Campo Único de Observação (Quantidade, Volumes de OX e Proporções)
   const [formulaNotes, setFormulaNotes] = useState<string>(() => {
@@ -251,8 +265,13 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
       return;
     }
 
-    // Identificar produto selecionado
-    const chosenProduct = products.find((p) => p.id === selectedProductId);
+    // Identificar marcas/tintas selecionadas
+    const chosenProducts = products.filter((p) => selectedProductIds.includes(p.id));
+    const allDyeNames: string[] = chosenProducts.map((p) => p.name);
+    if (selectedProductIds.includes('custom') && customProductName.trim()) {
+      allDyeNames.push(customProductName.trim());
+    }
+    const dyeSummary = allDyeNames.join(' + ');
 
     const appointmentPayload: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'> = {
       clientId: selectedClientId,
@@ -261,36 +280,21 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
       professional: professional.trim() || 'Clarice Dalla Costa',
       procedureType,
       customProcedureName: procedureType === 'Outro' ? customProcedureName.trim() : undefined,
-      description: `${procedureType}${chosenProduct ? ` com ${chosenProduct.name}` : ''}`,
+      description: `${procedureType}${dyeSummary ? ` com ${dyeSummary}` : ''}`,
       generalNotes: formulaNotes.trim() || undefined,
-      hasColorInfo: Boolean(chosenProduct || formulaNotes.trim()),
-      colorFormula: (chosenProduct || formulaNotes.trim())
+      hasColorInfo: Boolean(allDyeNames.length > 0 || formulaNotes.trim()),
+      colorFormula: (allDyeNames.length > 0 || formulaNotes.trim())
         ? {
-            products: chosenProduct
-              ? [
-                  {
-                    id: chosenProduct.id,
-                    brand: chosenProduct.brand,
-                    line: chosenProduct.line,
-                    shadeNumber: chosenProduct.shadeNumber || '',
-                    shadeName: chosenProduct.name,
-                    quantity: formulaNotes.match(/\b\d+g\b/i)?.[0] || '60g',
-                    unit: chosenProduct.unit || 'g',
-                    region: 'Cabelo completo',
-                  },
-                ]
-              : customProductName.trim()
-              ? [
-                  {
-                    id: `custom-${Date.now()}`,
-                    brand: 'Personalizada',
-                    shadeNumber: customProductName.trim(),
-                    quantity: formulaNotes.match(/\b\d+g\b/i)?.[0] || '60g',
-                    unit: 'g',
-                    region: 'Cabelo completo',
-                  },
-                ]
-              : [],
+            products: allDyeNames.map((dyeName, idx) => ({
+              id: chosenProducts[idx]?.id || `dye-${Date.now()}-${idx}`,
+              brand: dyeName,
+              line: '',
+              shadeNumber: dyeName,
+              shadeName: dyeName,
+              quantity: formulaNotes.match(/\b\d+g\b/i)?.[0] || '60g',
+              unit: 'g',
+              region: 'Cabelo completo',
+            })),
             oxidant: {
               used: formulaNotes.toLowerCase().includes('vol') || formulaNotes.toLowerCase().includes('ox'),
               volume: formulaNotes.match(/\b(10|20|30|40)\s*vol\b/i)?.[0] || undefined,
@@ -545,58 +549,72 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
             )}
           </div>
 
-          {/* Seleção de Produto do Catálogo */}
+          {/* Seleção de Tintas / Marcas Utilizadas */}
           <div>
-            <label className="block text-xs font-medium text-[#736B65] mb-1.5">
-              Produto Principal
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="relative">
-                <select
-                  value={selectedProductId}
-                  onChange={(e) => setSelectedProductId(e.target.value)}
-                  className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs"
-                >
-                  <option value="">Nenhum produto selecionado</option>
-                  {products.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.brand}{p.shadeNumber ? ` • ${p.shadeNumber}` : ''})
-                    </option>
-                  ))}
-                  <option value="custom">Outro produto não listado</option>
-                </select>
-              </div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-semibold text-[#1F1D1B]">
+                Tintas Utilizadas nesta Cliente
+              </label>
+              <span className="text-[11px] text-[#736B65]">
+                {selectedProductIds.length === 0
+                  ? 'Toque para selecionar a(s) marca(s)'
+                  : `${selectedProductIds.length} selecionada(s)`}
+              </span>
+            </div>
 
-              {selectedProductId === 'custom' ? (
+            <div className="flex flex-wrap gap-2">
+              {products.map((p) => {
+                const isSelected = selectedProductIds.includes(p.id);
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => toggleProduct(p.id)}
+                    className={`min-h-[44px] py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all active:scale-[0.98] cursor-pointer flex items-center gap-2 ${
+                      isSelected
+                        ? 'bg-[#FDF3E7] text-[#8C530A] border-2 border-[#C87A14] font-semibold shadow-xs'
+                        : 'bg-white hover:bg-[#FAF8F6] text-[#1F1D1B] border border-[#EAE4DE]'
+                    }`}
+                  >
+                    {isSelected ? (
+                      <Check className="w-4 h-4 text-[#C87A14]" />
+                    ) : (
+                      <span className="w-2 h-2 rounded-full bg-[#EAE4DE]" />
+                    )}
+                    <span>{p.name}</span>
+                  </button>
+                );
+              })}
+
+              <button
+                type="button"
+                onClick={() => toggleProduct('custom')}
+                className={`min-h-[44px] py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all active:scale-[0.98] cursor-pointer flex items-center gap-2 ${
+                  selectedProductIds.includes('custom')
+                    ? 'bg-[#FDF3E7] text-[#8C530A] border-2 border-[#C87A14] font-semibold shadow-xs'
+                    : 'bg-white hover:bg-[#FAF8F6] text-[#736B65] border border-[#EAE4DE]'
+                }`}
+              >
+                {selectedProductIds.includes('custom') ? (
+                  <Check className="w-4 h-4 text-[#C87A14]" />
+                ) : (
+                  <Plus className="w-3.5 h-3.5 text-[#736B65]" />
+                )}
+                <span>Outra marca</span>
+              </button>
+            </div>
+
+            {selectedProductIds.includes('custom') && (
+              <div className="mt-2.5">
                 <input
                   type="text"
-                  placeholder="Nome da tinta ou produto..."
+                  placeholder="Nome de outra tinta ou marca..."
                   value={customProductName}
                   onChange={(e) => setCustomProductName(e.target.value)}
                   className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs"
                 />
-              ) : (
-                (() => {
-                  const prod = products.find((p) => p.id === selectedProductId);
-                  if (!prod) return null;
-                  return (
-                    <div className="p-2.5 rounded-xl bg-[#FAF8F6] border border-[#EAE4DE] flex items-center gap-2.5">
-                      {prod.imageUrl ? (
-                        <img src={prod.imageUrl} alt={prod.name} className="w-9 h-9 rounded-lg object-cover border border-[#EAE4DE] shrink-0" />
-                      ) : (
-                        <div className="w-9 h-9 rounded-lg bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center shrink-0">
-                          <Package className="w-4 h-4" />
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-[#1F1D1B] truncate">{prod.name}</p>
-                        <p className="text-[11px] text-[#736B65]">{prod.brand} • {prod.category}</p>
-                      </div>
-                    </div>
-                  );
-                })()
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
 

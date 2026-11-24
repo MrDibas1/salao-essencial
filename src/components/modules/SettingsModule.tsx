@@ -5,8 +5,6 @@ import {
   Store,
   Image,
   Database,
-  RotateCcw,
-  Trash2,
   Download,
   Upload,
   CheckCircle2,
@@ -24,12 +22,12 @@ import { ChangePasswordModal } from './ChangePasswordModal';
 interface SettingsModuleProps {
   settings: SalonSettings;
   onUpdateSettings: (updates: Partial<SalonSettings>) => void;
-  onRestoreDemo: () => void;
-  onClearDemo: () => void;
+  onRestoreDemo?: () => void;
+  onClearDemo?: () => void;
   onExportBackup: () => void;
   onImportBackup: (jsonString: string) => boolean;
   onOpenInstallModal?: () => void;
-  hasDemoData: boolean;
+  hasDemoData?: boolean;
   currentUser?: User | null;
   onLogout?: () => void;
 }
@@ -37,12 +35,9 @@ interface SettingsModuleProps {
 export const SettingsModule: React.FC<SettingsModuleProps> = ({
   settings,
   onUpdateSettings,
-  onRestoreDemo,
-  onClearDemo,
   onExportBackup,
   onImportBackup,
   onOpenInstallModal,
-  hasDemoData,
   currentUser,
   onLogout,
 }) => {
@@ -326,7 +321,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
         </div>
       </div>
 
-      {/* Gerenciamento de Dados Demonstrativos e Backup */}
+      {/* Backup e Segurança dos Dados */}
       <div className="bg-white rounded-2xl border border-[#E5E5E5] p-6 sm:p-7 shadow-2xs space-y-6">
         <div className="flex items-center justify-between border-b border-[#F3F3F3] pb-4">
           <div className="flex items-center gap-3">
@@ -335,22 +330,16 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-[#111111]">
-                Gerenciamento de Dados & Apresentação
+                Backup e Segurança dos Dados
               </h3>
               <p className="text-xs text-[#777777]">
-                Controle da base demonstrativa fictícia e exportação de segurança
+                Exportação de segurança em JSON, restauração e sincronização com banco em nuvem
               </p>
             </div>
           </div>
 
-          <span
-            className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-              hasDemoData
-                ? 'bg-neutral-100 text-[#111111] border border-[#E5E5E5]'
-                : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-            }`}
-          >
-            {hasDemoData ? 'Base Demonstrativa Ativa' : 'Base de Produção Limpa'}
+          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Backup Ativo
           </span>
         </div>
 
@@ -387,44 +376,6 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Restaurar Demonstração */}
-          <div className="p-4 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] flex flex-col justify-between space-y-3">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold text-[#111111]">
-                <RotateCcw className="w-4 h-4 text-[#777777]" />
-                <span>Restaurar Base Demonstrativa</span>
-              </div>
-              <p className="text-[11px] text-[#777777] mt-1 leading-relaxed">
-                Recarrega 7 clientes fictícias e 12 atendimentos com fórmulas completas de coloração para apresentação ao salão.
-              </p>
-            </div>
-            <button
-              onClick={onRestoreDemo}
-              className="w-full py-2 px-3 rounded-lg bg-white border border-[#E5E5E5] hover:bg-[#F3F3F3] text-xs font-semibold text-[#111111] transition-colors"
-            >
-              Restaurar Dados Demonstrativos
-            </button>
-          </div>
-
-          {/* Limpar Demonstração */}
-          <div className="p-4 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] flex flex-col justify-between space-y-3">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold text-[#111111]">
-                <Trash2 className="w-4 h-4 text-[#777777]" />
-                <span>Limpar Dados Demonstrativos</span>
-              </div>
-              <p className="text-[11px] text-[#777777] mt-1 leading-relaxed">
-                Remove com segurança todos os registros identificados como fictícios, preservando os cadastros reais que você tiver inserido.
-              </p>
-            </div>
-            <button
-              onClick={onClearDemo}
-              className="w-full py-2 px-3 rounded-lg bg-white border border-[#E5E5E5] hover:bg-rose-50 hover:text-rose-600 text-xs font-semibold text-[#777777] transition-colors"
-            >
-              Limpar Registros Fictícios
-            </button>
-          </div>
-
           {/* Backup Export */}
           <div className="p-4 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] flex flex-col justify-between space-y-3">
             <div>
@@ -433,12 +384,12 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
                 <span>Exportar Backup (JSON)</span>
               </div>
               <p className="text-[11px] text-[#777777] mt-1 leading-relaxed">
-                Baixe uma cópia completa de todas as clientes, fórmulas e atendimentos em formato JSON portátil.
+                Baixe uma cópia completa de todas as clientes, fórmulas e atendimentos em formato JSON portátil para manter guardado no seu computador.
               </p>
             </div>
             <button
               onClick={onExportBackup}
-              className="w-full py-2 px-3 rounded-lg bg-[#111111] hover:bg-black text-white text-xs font-semibold transition-colors"
+              className="w-full py-2.5 px-3 rounded-lg bg-[#111111] hover:bg-black text-white text-xs font-semibold transition-colors shadow-xs"
             >
               Baixar Backup do Sistema
             </button>
@@ -452,7 +403,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
                 <span>Importar Backup</span>
               </div>
               <p className="text-[11px] text-[#777777] mt-1 leading-relaxed">
-                Restaure os dados de um arquivo de backup previamente gerado.
+                Restaure os dados de um arquivo de backup previamente gerado em seu computador ou celular.
               </p>
             </div>
             <div>
@@ -465,7 +416,7 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full py-2 px-3 rounded-lg bg-white border border-[#E5E5E5] hover:bg-[#F3F3F3] text-xs font-semibold text-[#111111] transition-colors"
+                className="w-full py-2.5 px-3 rounded-lg bg-white border border-[#E5E5E5] hover:bg-[#F3F3F3] text-xs font-semibold text-[#111111] transition-colors"
               >
                 Selecionar Arquivo JSON
               </button>
