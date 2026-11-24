@@ -178,7 +178,9 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
             return (
               <div
                 key={prod.id}
-                className="rounded-2xl bg-white border border-[#EAE4DE] shadow-xs hover:border-[#C87A14]/60 transition-all flex flex-col justify-between group overflow-hidden"
+                onClick={() => openEditModal(prod)}
+                className="rounded-2xl bg-white border border-[#EAE4DE] shadow-xs hover:border-[#C87A14]/70 hover:shadow-md transition-all flex flex-col justify-between group overflow-hidden cursor-pointer active:scale-[0.99]"
+                title={`Toque ou clique para editar ${prod.name}`}
               >
                 <div>
                   {/* Foto de Capa da Tinta / Marca */}
@@ -204,7 +206,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
                   <div className="p-4 space-y-2">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-[#C87A14] shrink-0" />
-                      <h4 className="text-base font-semibold text-[#1F1D1B] leading-snug">
+                      <h4 className="text-base font-semibold text-[#1F1D1B] group-hover:text-[#C87A14] transition-colors leading-snug">
                         {prod.name}
                       </h4>
                     </div>
@@ -225,15 +227,23 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
 
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => openEditModal(prod)}
-                      className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-[#736B65] hover:text-[#1F1D1B] hover:bg-[#FAF8F6] transition-colors"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditModal(prod);
+                      }}
+                      className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-[#736B65] hover:text-[#1F1D1B] hover:bg-[#FAF8F6] transition-colors cursor-pointer"
                       title="Editar tinta / marca"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => onDeleteProduct(prod)}
-                      className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-[#736B65] hover:text-[#C94A4A] hover:bg-[#FCECEC] transition-colors"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteProduct(prod);
+                      }}
+                      className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-[#736B65] hover:text-[#C94A4A] hover:bg-[#FCECEC] transition-colors cursor-pointer"
                       title="Excluir tinta / marca"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
