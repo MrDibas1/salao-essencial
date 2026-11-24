@@ -15,6 +15,7 @@ import {
   X,
   ChevronRight,
   Sparkles,
+  Images,
 } from 'lucide-react';
 
 interface DashboardModuleProps {
@@ -65,6 +66,22 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
   }, [clients, searchQuery]);
 
   const recentAppointments = appointments.slice(0, 4);
+
+  // Total de fotos nos atendimentos
+  const totalPhotosCount = useMemo(() => {
+    return appointments.reduce((acc, apt) => {
+      let count = 0;
+      if (apt.beforePhotoUrl) count++;
+      if (apt.afterPhotoUrl) count++;
+      if (Array.isArray(apt.photoUrls)) {
+        const uniqueOthers = apt.photoUrls.filter(
+          (u) => u && u !== apt.beforePhotoUrl && u !== apt.afterPhotoUrl
+        );
+        count += uniqueOthers.length;
+      }
+      return acc + count;
+    }, 0);
+  }, [appointments]);
 
   // Clientes com foto para exibição no avatar stack da Hero
   const clientsWithAvatar = clients.filter((c) => Boolean(c.avatarUrl));
@@ -382,6 +399,59 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
               );
             })
           )}
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* SEÇÃO DE ATALHO RÁPIDO: GALERIA DE FOTOS                                  */}
+      {/* ========================================================================= */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#EAE4DE] shadow-xs space-y-3">
+        <div className="flex items-center justify-between pb-2.5 border-b border-[#EAE4DE]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#FDF3E7] text-[#8C530A] flex items-center justify-center font-bold">
+              <Images className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-[#1F1D1B]">Galeria de Fotos</h3>
+              <p className="text-xs text-[#736B65]">Transformações e registros visuais</p>
+            </div>
+          </div>
+          <button
+            onClick={() => onNavigate('gallery')}
+            className="text-xs text-[#C87A14] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+          >
+            <span>Ver galeria</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Card de Atalho Interativo */}
+        <div
+          onClick={() => onNavigate('gallery')}
+          className="p-3.5 sm:p-4 rounded-xl bg-[#FAF8F6] hover:bg-[#F5EFEB] border border-[#EAE4DE] transition-all cursor-pointer group flex items-center justify-between gap-3 shadow-2xs active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-[#C87A14]/10 text-[#C87A14] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="text-xs sm:text-sm font-semibold text-[#1F1D1B] group-hover:text-[#C87A14] transition-colors truncate">
+                Portfólio & Fotos de Antes e Depois
+              </h4>
+              <p className="text-[11px] text-[#736B65] mt-0.5 line-clamp-1">
+                {totalPhotosCount > 0
+                  ? `${totalPhotosCount} fotos de transformações salvas no histórico.`
+                  : 'Acompanhe fotos de antes e depois registradas em cada atendimento.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="hidden sm:inline-block text-xs font-semibold text-[#C87A14]">Acessar</span>
+            <div className="w-7 h-7 rounded-lg bg-white border border-[#EAE4DE] flex items-center justify-center text-[#736B65] group-hover:text-[#C87A14] group-hover:border-[#C87A14]/30 group-hover:translate-x-0.5 transition-all shadow-2xs">
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
