@@ -82,29 +82,42 @@ export const StorageService = {
 
       const cloudData = json.data;
       const localClients = this.getAllClientsRaw();
+      let hasUpdate = false;
 
-      // Se o banco D1 estiver vazio (primeiro acesso) e temos dados locais, envia para a nuvem
-      if ((!cloudData.clients || cloudData.clients.length === 0) && localClients.length > 0) {
-        await this.pushLocalToCloud();
-        return { success: true, updated: false };
-      }
-
-      // Se o D1 tem dados, sincroniza com o cache local
-      if (cloudData.clients && cloudData.clients.length > 0) {
-        saveToStorage(STORAGE_KEYS.CLIENTS, cloudData.clients);
-        if (Array.isArray(cloudData.appointments)) {
-          saveToStorage(STORAGE_KEYS.APPOINTMENTS, cloudData.appointments);
-        }
-        if (Array.isArray(cloudData.products)) {
+      // Sincroniza produtos oficiais do D1
+      if (Array.isArray(cloudData.products)) {
+        if (cloudData.products.length > 0) {
           saveToStorage(STORAGE_KEYS.PRODUCTS, cloudData.products);
+          hasUpdate = true;
+        } else {
+          saveToStorage(STORAGE_KEYS.PRODUCTS, DEMO_PRODUCTS);
+          hasUpdate = true;
         }
-        if (cloudData.settings) {
-          saveToStorage(STORAGE_KEYS.SETTINGS, cloudData.settings);
-        }
-        return { success: true, updated: true };
       }
 
-      return { success: true, updated: false };
+      // Sincroniza clientes
+      if (Array.isArray(cloudData.clients)) {
+        if (cloudData.clients.length > 0) {
+          saveToStorage(STORAGE_KEYS.CLIENTS, cloudData.clients);
+          hasUpdate = true;
+        } else if (localClients.length > 0) {
+          await this.pushLocalToCloud();
+        }
+      }
+
+      // Sincroniza atendimentos
+      if (Array.isArray(cloudData.appointments) && cloudData.appointments.length > 0) {
+        saveToStorage(STORAGE_KEYS.APPOINTMENTS, cloudData.appointments);
+        hasUpdate = true;
+      }
+
+      // Sincroniza configurações
+      if (cloudData.settings) {
+        saveToStorage(STORAGE_KEYS.SETTINGS, cloudData.settings);
+        hasUpdate = true;
+      }
+
+      return { success: true, updated: hasUpdate };
     } catch (err) {
       console.warn('Sincronização Cloudflare D1 em segundo plano indisponível/offline:', err);
       return { success: false, updated: false };
