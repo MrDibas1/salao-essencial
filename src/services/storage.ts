@@ -76,7 +76,7 @@ export const StorageService = {
   // -------------------------------------------------------------
   async syncWithCloud(): Promise<{ success: boolean; updated: boolean }> {
     try {
-      const res = await fetchWithTimeout('/api/sync');
+      const res = await fetchWithTimeout(`/api/sync?_t=${Date.now()}`);
       if (!res.ok) return { success: false, updated: false };
       const json: any = await res.json();
       if (!json.success || !json.data) return { success: false, updated: false };
@@ -156,7 +156,10 @@ export const StorageService = {
     return clients.find((c) => c.id === id) || null;
   },
 
-  createClient(data: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>): Client {
+  createClient(
+    data: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>,
+    onCloudSynced?: (ok: boolean) => void
+  ): Client {
     const clients = this.getAllClientsRaw();
     const now = new Date().toISOString();
     const newClient: Client = {
@@ -175,12 +178,27 @@ export const StorageService = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newClient),
-    }).catch((err) => console.warn('Erro ao salvar cliente no D1:', err));
+    })
+      .then((res) => {
+        if (res.ok) {
+          onCloudSynced?.(true);
+        } else {
+          onCloudSynced?.(false);
+        }
+      })
+      .catch((err) => {
+        console.warn('Erro ao salvar cliente no D1:', err);
+        onCloudSynced?.(false);
+      });
 
     return newClient;
   },
 
-  updateClient(id: string, updates: Partial<Client>): Client {
+  updateClient(
+    id: string,
+    updates: Partial<Client>,
+    onCloudSynced?: (ok: boolean) => void
+  ): Client {
     const clients = this.getAllClientsRaw();
     const index = clients.findIndex((c) => c.id === id);
     if (index === -1) {
@@ -216,12 +234,23 @@ export const StorageService = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updated),
-    }).catch((err) => console.warn('Erro ao atualizar cliente no D1:', err));
+    })
+      .then((res) => {
+        if (res.ok) {
+          onCloudSynced?.(true);
+        } else {
+          onCloudSynced?.(false);
+        }
+      })
+      .catch((err) => {
+        console.warn('Erro ao atualizar cliente no D1:', err);
+        onCloudSynced?.(false);
+      });
 
     return updated;
   },
 
-  deleteClient(id: string): void {
+  deleteClient(id: string, onCloudSynced?: (ok: boolean) => void): void {
     const clients = this.getAllClientsRaw().filter((c) => c.id !== id);
     saveToStorage(STORAGE_KEYS.CLIENTS, clients);
 
@@ -230,9 +259,14 @@ export const StorageService = {
     saveToStorage(STORAGE_KEYS.APPOINTMENTS, appointments);
 
     // Exclui na nuvem Cloudflare D1
-    fetchWithTimeout(`/api/clients/${id}`, { method: 'DELETE' }).catch((err) =>
-      console.warn('Erro ao excluir cliente no D1:', err)
-    );
+    fetchWithTimeout(`/api/clients/${id}`, { method: 'DELETE' })
+      .then((res) => {
+        onCloudSynced?.(res.ok);
+      })
+      .catch((err) => {
+        console.warn('Erro ao excluir cliente no D1:', err);
+        onCloudSynced?.(false);
+      });
   },
 
   archiveClient(id: string, archive = true): Client {
@@ -262,7 +296,10 @@ export const StorageService = {
     return appointments.filter((a) => a.clientId === clientId);
   },
 
-  createAppointment(data: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>): Appointment {
+  createAppointment(
+    data: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>,
+    onCloudSynced?: (ok: boolean) => void
+  ): Appointment {
     const appointments = this.getAppointments();
     const now = new Date().toISOString();
     const newAppointment: Appointment = {
@@ -280,7 +317,18 @@ export const StorageService = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newAppointment),
-    }).catch((err) => console.warn('Erro ao salvar atendimento no D1:', err));
+    })
+      .then((res) => {
+        if (res.ok) {
+          onCloudSynced?.(true);
+        } else {
+          onCloudSynced?.(false);
+        }
+      })
+      .catch((err) => {
+        console.warn('Erro ao salvar atendimento no D1:', err);
+        onCloudSynced?.(false);
+      });
 
     // Atualiza updatedAt da cliente
     try {
@@ -292,7 +340,11 @@ export const StorageService = {
     return newAppointment;
   },
 
-  updateAppointment(id: string, updates: Partial<Appointment>): Appointment {
+  updateAppointment(
+    id: string,
+    updates: Partial<Appointment>,
+    onCloudSynced?: (ok: boolean) => void
+  ): Appointment {
     const appointments = this.getAppointments();
     const index = appointments.findIndex((a) => a.id === id);
     if (index === -1) {
@@ -312,19 +364,35 @@ export const StorageService = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updated),
-    }).catch((err) => console.warn('Erro ao atualizar atendimento no D1:', err));
+    })
+      .then((res) => {
+        if (res.ok) {
+          onCloudSynced?.(true);
+        } else {
+          onCloudSynced?.(false);
+        }
+      })
+      .catch((err) => {
+        console.warn('Erro ao atualizar atendimento no D1:', err);
+        onCloudSynced?.(false);
+      });
 
     return updated;
   },
 
-  deleteAppointment(id: string): void {
+  deleteAppointment(id: string, onCloudSynced?: (ok: boolean) => void): void {
     const appointments = this.getAppointments().filter((a) => a.id !== id);
     saveToStorage(STORAGE_KEYS.APPOINTMENTS, appointments);
 
     // Exclui na nuvem Cloudflare D1
-    fetchWithTimeout(`/api/appointments/${id}`, { method: 'DELETE' }).catch((err) =>
-      console.warn('Erro ao excluir atendimento no D1:', err)
-    );
+    fetchWithTimeout(`/api/appointments/${id}`, { method: 'DELETE' })
+      .then((res) => {
+        onCloudSynced?.(res.ok);
+      })
+      .catch((err) => {
+        console.warn('Erro ao excluir atendimento no D1:', err);
+        onCloudSynced?.(false);
+      });
   },
 
   // -------------------------------------------------------------
@@ -340,7 +408,10 @@ export const StorageService = {
     return products.find((p) => p.id === id) || null;
   },
 
-  createProduct(data: Omit<Product, 'id' | 'createdAt'>): Product {
+  createProduct(
+    data: Omit<Product, 'id' | 'createdAt'>,
+    onCloudSynced?: (ok: boolean) => void
+  ): Product {
     const products = this.getProducts();
     const newProduct: Product = {
       ...data,
@@ -356,12 +427,27 @@ export const StorageService = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newProduct),
-    }).catch((err) => console.warn('Erro ao salvar produto no D1:', err));
+    })
+      .then((res) => {
+        if (res.ok) {
+          onCloudSynced?.(true);
+        } else {
+          onCloudSynced?.(false);
+        }
+      })
+      .catch((err) => {
+        console.warn('Erro ao salvar produto no D1:', err);
+        onCloudSynced?.(false);
+      });
 
     return newProduct;
   },
 
-  updateProduct(id: string, updates: Partial<Product>): Product {
+  updateProduct(
+    id: string,
+    updates: Partial<Product>,
+    onCloudSynced?: (ok: boolean) => void
+  ): Product {
     const products = this.getProducts();
     const index = products.findIndex((p) => p.id === id);
     if (index === -1) {
@@ -380,19 +466,35 @@ export const StorageService = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updated),
-    }).catch((err) => console.warn('Erro ao atualizar produto no D1:', err));
+    })
+      .then((res) => {
+        if (res.ok) {
+          onCloudSynced?.(true);
+        } else {
+          onCloudSynced?.(false);
+        }
+      })
+      .catch((err) => {
+        console.warn('Erro ao atualizar produto no D1:', err);
+        onCloudSynced?.(false);
+      });
 
     return updated;
   },
 
-  deleteProduct(id: string): void {
+  deleteProduct(id: string, onCloudSynced?: (ok: boolean) => void): void {
     const products = this.getProducts().filter((p) => p.id !== id);
     saveToStorage(STORAGE_KEYS.PRODUCTS, products);
 
     // Exclui na nuvem Cloudflare D1
-    fetchWithTimeout(`/api/products/${id}`, { method: 'DELETE' }).catch((err) =>
-      console.warn('Erro ao excluir produto no D1:', err)
-    );
+    fetchWithTimeout(`/api/products/${id}`, { method: 'DELETE' })
+      .then((res) => {
+        onCloudSynced?.(res.ok);
+      })
+      .catch((err) => {
+        console.warn('Erro ao excluir produto no D1:', err);
+        onCloudSynced?.(false);
+      });
   },
 
   // -------------------------------------------------------------

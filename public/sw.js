@@ -1,5 +1,5 @@
 // Service Worker — Salão Essencial PWA
-const CACHE_NAME = 'essencial-pwa-v1';
+const CACHE_NAME = 'essencial-pwa-v2';
 
 const PRECACHE_ASSETS = [
   '/',
@@ -42,6 +42,12 @@ self.addEventListener('activate', (event) => {
 // Fetch Event — Offline-first com fallback inteligente para SPA
 self.addEventListener('fetch', (event) => {
   const req = event.request;
+  const url = new URL(req.url);
+
+  // NUNCA interceptar requisições para a API em nuvem (sempre direto para a rede)
+  if (url.pathname.startsWith('/api/')) {
+    return;
+  }
 
   // Ignorar requisições não-GET ou extensões do navegador
   if (req.method !== 'GET' || !req.url.startsWith(self.location.origin)) {

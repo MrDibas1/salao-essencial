@@ -10,6 +10,7 @@ interface HeaderProps {
   onNavigate?: (tab: NavigationTab) => void;
   hasDemoData?: boolean;
   isCloudSynced?: boolean | null;
+  isSyncing?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -17,6 +18,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenInstallModal,
   onNavigate,
   isCloudSynced,
+  isSyncing,
 }) => {
   const getPageTitle = () => {
     switch (currentTab) {
@@ -66,11 +68,25 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Status do Banco Cloudflare D1 */}
           {isCloudSynced !== false && (
             <span
-              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#E8F4EE] text-[#2E7D5B] border border-[#2E7D5B]/20"
-              title="Cloudflare D1: Sincronização em nuvem ativa"
+              className={`inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                isSyncing
+                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                  : 'bg-[#E8F4EE] text-[#2E7D5B] border border-[#2E7D5B]/20'
+              }`}
+              title={
+                isSyncing
+                  ? 'Sincronizando com a nuvem Cloudflare D1...'
+                  : 'Cloudflare D1: Sincronização em nuvem ativa'
+              }
             >
-              <Cloud className="w-3.5 h-3.5 text-[#2E7D5B]" />
-              <span>Nuvem Ativa</span>
+              <Cloud
+                className={`w-3.5 h-3.5 ${
+                  isSyncing ? 'text-amber-600 animate-spin' : 'text-[#2E7D5B]'
+                }`}
+              />
+              <span className="hidden sm:inline">
+                {isSyncing ? 'Sincronizando...' : 'Nuvem Ativa'}
+              </span>
             </span>
           )}
 

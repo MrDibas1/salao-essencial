@@ -59,8 +59,9 @@ const MainApp: React.FC = () => {
   });
 
   const [isCloudSynced, setIsCloudSynced] = useState<boolean | null>(null);
+  const [isSyncingCloud, setIsSyncingCloud] = useState<boolean>(false);
 
-  // Carregar dados locais na inicialização e sincronizar com D1
+  // Carregar dados locais na inicialização
   const reloadData = useCallback(() => {
     StorageService.initialize();
     setClients(StorageService.getAllClientsRaw());
@@ -69,20 +70,51 @@ const MainApp: React.FC = () => {
     setSettings(StorageService.getSettings());
   }, []);
 
+  // Sincronização inteligente com a nuvem (Cloudflare D1)
+  const triggerCloudSync = useCallback(() => {
+    setIsSyncingCloud(true);
+    StorageService.syncWithCloud()
+      .then((res) => {
+        setIsCloudSynced(res.success);
+        if (res.updated) {
+          setClients(StorageService.getAllClientsRaw());
+          setAppointments(StorageService.getAppointments());
+          setProducts(StorageService.getProducts());
+          setSettings(StorageService.getSettings());
+        }
+      })
+      .finally(() => {
+        setIsSyncingCloud(false);
+      });
+  }, []);
+
   useEffect(() => {
     reloadData();
+    triggerCloudSync();
 
-    // Sincroniza com a nuvem Cloudflare D1 em segundo plano
-    StorageService.syncWithCloud().then((res) => {
-      setIsCloudSynced(res.success);
-      if (res.updated) {
-        setClients(StorageService.getAllClientsRaw());
-        setAppointments(StorageService.getAppointments());
-        setProducts(StorageService.getProducts());
-        setSettings(StorageService.getSettings());
+    // 1. Sincroniza imediatamente ao focar na janela / aba (ex: voltou do celular para o PC)
+    const handleFocusOrVisible = () => {
+      if (document.visibilityState === 'visible') {
+        triggerCloudSync();
       }
-    });
-  }, [reloadData]);
+    };
+
+    window.addEventListener('focus', handleFocusOrVisible);
+    document.addEventListener('visibilitychange', handleFocusOrVisible);
+
+    // 2. Heartbeat suave a cada 25 segundos enquanto a página estiver aberta e visível
+    const heartbeatId = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        triggerCloudSync();
+      }
+    }, 25000);
+
+    return () => {
+      window.removeEventListener('focus', handleFocusOrVisible);
+      document.removeEventListener('visibilitychange', handleFocusOrVisible);
+      clearInterval(heartbeatId);
+    };
+  }, [reloadData, triggerCloudSync]);
 
   // Navegação com parâmetros
   const handleNavigate = (
@@ -107,11 +139,18 @@ const MainApp: React.FC = () => {
     id?: string
   ) => {
     try {
+      const onCloudSynced = (ok: boolean) => {
+        if (ok) {
+          setIsCloudSynced(true);
+          info('Nuvem Sincronizada', 'Cadastro confirmado no banco de dados.');
+        }
+      };
+
       if (id) {
-        const updated = StorageService.updateClient(id, clientData);
+        const updated = StorageService.updateClient(id, clientData, onCloudSynced);
         success('Cadastro atualizado!', `As alterações em "${updated.name}" foram salvas.`);
       } else {
-        const created = StorageService.createClient(clientData);
+        const created = StorageService.createClient(clientData, onCloudSynced);
         success('Cliente cadastrada!', `"${created.name}" foi adicionada com sucesso.`);
         // Redireciona para o perfil da nova cliente
         setSelectedClientId(created.id);
@@ -163,11 +202,18 @@ const MainApp: React.FC = () => {
     id?: string
   ) => {
     try {
+      const onCloudSynced = (ok: boolean) => {
+        if (ok) {
+          setIsCloudSynced(true);
+          info('Nuvem Sincronizada', 'Ficha técnica e fotos gravadas na nuvem.');
+        }
+      };
+
       if (id) {
-        StorageService.updateAppointment(id, appointmentData);
+        StorageService.updateAppointment(id, appointmentData, onCloudSynced);
         success('Atendimento atualizado!', 'A ficha técnica e fórmulas foram salvas.');
       } else {
-        StorageService.createAppointment(appointmentData);
+        StorageService.createAppointment(appointmentData, onCloudSynced);
         success(
           'Atendimento registrado!',
           `Procedimento salvo para "${appointmentData.clientName}".`
@@ -321,6 +367,7 @@ const MainApp: React.FC = () => {
           onOpenInstallModal={() => setIsInstallModalOpen(true)}
           onNavigate={(tab) => handleNavigate(tab)}
           isCloudSynced={isCloudSynced}
+          isSyncing={isSyncingCloud}
         />
 
         {/* Content view area */}
