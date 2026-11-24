@@ -45,21 +45,22 @@ export const StorageService = {
   // Inicialização oficial de produção
   initialize(): void {
     const initialized = localStorage.getItem(STORAGE_KEYS.INITIALIZED);
-    const demoCleaned = localStorage.getItem('essencial_demo_cleaned_v2');
+    const cleanDelivery = localStorage.getItem('essencial_clean_delivery_v1');
 
-    if (!initialized) {
-      // Primeira inicialização em produção: inicia com cadastros limpos e as 7 marcas de tintas
+    // Limpeza forçada de entrega: garante que clientes e atendimentos residuais de teste sejam zerados
+    if (!cleanDelivery) {
+      saveToStorage(STORAGE_KEYS.CLIENTS, []);
+      saveToStorage(STORAGE_KEYS.APPOINTMENTS, []);
+      saveToStorage(STORAGE_KEYS.PRODUCTS, DEMO_PRODUCTS);
+      saveToStorage(STORAGE_KEYS.SETTINGS, INITIAL_SETTINGS);
+      localStorage.setItem('essencial_clean_delivery_v1', 'true');
+      localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
+    } else if (!initialized) {
       saveToStorage(STORAGE_KEYS.CLIENTS, []);
       saveToStorage(STORAGE_KEYS.APPOINTMENTS, []);
       saveToStorage(STORAGE_KEYS.PRODUCTS, DEMO_PRODUCTS);
       saveToStorage(STORAGE_KEYS.SETTINGS, INITIAL_SETTINGS);
       localStorage.setItem(STORAGE_KEYS.INITIALIZED, 'true');
-      localStorage.setItem('essencial_demo_cleaned_v2', 'true');
-      this.pushLocalToCloud().catch((err) => console.warn('Erro ao inicializar no D1:', err));
-    } else if (!demoCleaned) {
-      // Limpeza única para remover dados fictícios residuais e ativar base oficial de produção
-      this.clearDemoData();
-      localStorage.setItem('essencial_demo_cleaned_v2', 'true');
     } else {
       // Garante que os 7 produtos oficiais estejam sempre carregados
       const products = this.getProducts();
@@ -81,7 +82,6 @@ export const StorageService = {
       if (!json.success || !json.data) return { success: false, updated: false };
 
       const cloudData = json.data;
-      const localClients = this.getAllClientsRaw();
       let hasUpdate = false;
 
       // Sincroniza produtos oficiais do D1
@@ -95,18 +95,14 @@ export const StorageService = {
         }
       }
 
-      // Sincroniza clientes
+      // Sincroniza clientes (reflete estado real do D1)
       if (Array.isArray(cloudData.clients)) {
-        if (cloudData.clients.length > 0) {
-          saveToStorage(STORAGE_KEYS.CLIENTS, cloudData.clients);
-          hasUpdate = true;
-        } else if (localClients.length > 0) {
-          await this.pushLocalToCloud();
-        }
+        saveToStorage(STORAGE_KEYS.CLIENTS, cloudData.clients);
+        hasUpdate = true;
       }
 
-      // Sincroniza atendimentos
-      if (Array.isArray(cloudData.appointments) && cloudData.appointments.length > 0) {
+      // Sincroniza atendimentos (reflete estado real do D1)
+      if (Array.isArray(cloudData.appointments)) {
         saveToStorage(STORAGE_KEYS.APPOINTMENTS, cloudData.appointments);
         hasUpdate = true;
       }
