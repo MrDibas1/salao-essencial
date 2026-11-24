@@ -69,7 +69,11 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
         a.procedureType === 'Outro' && a.customProcedureName
           ? a.customProcedureName
           : a.procedureType;
-      set.add(name);
+      if (name) {
+        name.split(/\s*\+\s*/).forEach((p) => {
+          if (p.trim()) set.add(p.trim());
+        });
+      }
     });
     return Array.from(set).sort();
   }, [appointments]);
@@ -95,7 +99,7 @@ export const HistoryModule: React.FC<HistoryModuleProps> = ({
           apt.procedureType === 'Outro' && apt.customProcedureName
             ? apt.customProcedureName
             : apt.procedureType;
-        if (procName !== selectedProcedure) return false;
+        if (!procName.toLowerCase().includes(selectedProcedure.toLowerCase())) return false;
       }
 
       if (selectedProfessional !== 'all' && apt.professional !== selectedProfessional) {

@@ -103,13 +103,33 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
     return appointmentToEdit?.professional || 'Clarice Dalla Costa';
   });
 
-  const [procedureType, setProcedureType] = useState<string>(() => {
-    return appointmentToEdit?.procedureType || 'Coloração';
+  const [selectedProcedures, setSelectedProcedures] = useState<string[]>(() => {
+    if (appointmentToEdit) {
+      if (
+        (appointmentToEdit as any).procedureTypes &&
+        Array.isArray((appointmentToEdit as any).procedureTypes) &&
+        (appointmentToEdit as any).procedureTypes.length > 0
+      ) {
+        return (appointmentToEdit as any).procedureTypes;
+      }
+      if (appointmentToEdit.procedureType) {
+        const split = appointmentToEdit.procedureType.split(/\s*(?:\+|\,)\s*/).filter(Boolean);
+        if (split.length > 0) return split;
+        return [appointmentToEdit.procedureType];
+      }
+    }
+    return ['Coloração'];
   });
 
   const [customProcedureName, setCustomProcedureName] = useState<string>(() => {
     return appointmentToEdit?.customProcedureName || '';
   });
+
+  const toggleProcedure = (proc: string) => {
+    setSelectedProcedures((prev) =>
+      prev.includes(proc) ? prev.filter((p) => p !== proc) : [...prev, proc]
+    );
+  };
 
   // 3. Tintas / Marcas Utilizadas do Catálogo
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>(() => {
@@ -260,8 +280,8 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
       setFormError('Informe a data do atendimento.');
       return;
     }
-    if (!procedureType) {
-      setFormError('Selecione o tipo de serviço realizado.');
+    if (selectedProcedures.length === 0) {
+      setFormError('Selecione pelo menos um tipo de procedimento realizado.');
       return;
     }
 
@@ -273,14 +293,24 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
     }
     const dyeSummary = allDyeNames.join(' + ');
 
+    // Identificar procedimentos selecionados
+    const procedureList = selectedProcedures.map((p) => {
+      if (p === 'Outro' && customProcedureName.trim()) {
+        return customProcedureName.trim();
+      }
+      return p;
+    });
+    const procedureSummary = procedureList.join(' + ');
+
     const appointmentPayload: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'> = {
       clientId: selectedClientId,
       clientName: selectedClient.name,
       date,
       professional: professional.trim() || 'Clarice Dalla Costa',
-      procedureType,
-      customProcedureName: procedureType === 'Outro' ? customProcedureName.trim() : undefined,
-      description: `${procedureType}${dyeSummary ? ` com ${dyeSummary}` : ''}`,
+      procedureType: procedureSummary,
+      procedureTypes: procedureList,
+      customProcedureName: selectedProcedures.includes('Outro') ? customProcedureName.trim() : undefined,
+      description: `${procedureSummary}${dyeSummary ? ` com ${dyeSummary}` : ''}`,
       generalNotes: formulaNotes.trim() || undefined,
       hasColorInfo: Boolean(allDyeNames.length > 0 || formulaNotes.trim()),
       colorFormula: (allDyeNames.length > 0 || formulaNotes.trim())
@@ -511,36 +541,49 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
             </span>
           </div>
 
-          {/* Seleção de Serviço por Chips de 1 Toque */}
+          {/* Seleção de Procedimentos por Multi-Seleção (igual às Tintas) */}
           <div>
-            <label className="block text-xs font-medium text-[#736B65] mb-2">
-              Tipo de Procedimento
-            </label>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-semibold text-[#1F1D1B]">
+                Tipo de Procedimento
+              </label>
+              <span className="text-[11px] text-[#736B65]">
+                {selectedProcedures.length === 0
+                  ? 'Toque para selecionar o(s) procedimento(s)'
+                  : `${selectedProcedures.length} selecionado(s)`}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
               {PROCEDURES.map((proc) => {
-                const isSelected = procedureType === proc;
+                const isSelected = selectedProcedures.includes(proc);
                 return (
                   <button
                     key={proc}
                     type="button"
-                    onClick={() => setProcedureType(proc)}
-                    className={`min-h-[40px] py-2 px-3.5 rounded-xl text-xs transition-all active:scale-[0.98] ${
+                    onClick={() => toggleProcedure(proc)}
+                    className={`min-h-[44px] py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all active:scale-[0.98] cursor-pointer flex items-center gap-2 ${
                       isSelected
-                        ? 'bg-[#FDF3E7] text-[#8C530A] border border-[#C87A14] font-semibold shadow-xs'
-                        : 'bg-white hover:bg-[#FAF8F6] text-[#736B65] border border-[#EAE4DE]'
+                        ? 'bg-[#FDF3E7] text-[#8C530A] border-2 border-[#C87A14] font-semibold shadow-xs'
+                        : 'bg-white hover:bg-[#FAF8F6] text-[#1F1D1B] border border-[#EAE4DE]'
                     }`}
                   >
-                    {proc}
+                    {isSelected ? (
+                      <Check className="w-4 h-4 text-[#C87A14]" />
+                    ) : (
+                      <span className="w-2 h-2 rounded-full bg-[#EAE4DE]" />
+                    )}
+                    <span>{proc}</span>
                   </button>
                 );
               })}
             </div>
 
-            {procedureType === 'Outro' && (
+            {selectedProcedures.includes('Outro') && (
               <div className="mt-2.5">
                 <input
                   type="text"
-                  placeholder="Nome do procedimento (ex: Botox capilar...)"
+                  placeholder="Nome do procedimento adicional (ex: Botox capilar...)"
                   value={customProcedureName}
                   onChange={(e) => setCustomProcedureName(e.target.value)}
                   className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[#EAE4DE] bg-white text-[16px] text-[#1F1D1B] focus:outline-none focus:border-[#C87A14] shadow-xs"

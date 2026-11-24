@@ -54,7 +54,11 @@ export const GalleryModule: React.FC<GalleryModuleProps> = ({
   const availableProcedures = useMemo(() => {
     const set = new Set<string>();
     appointmentsWithPhotos.forEach((a) => {
-      if (a.procedureType) set.add(a.procedureType);
+      if (a.procedureType) {
+        a.procedureType.split(/\s*\+\s*/).forEach((p) => {
+          if (p.trim()) set.add(p.trim());
+        });
+      }
     });
     return ['Todos', ...Array.from(set)];
   }, [appointmentsWithPhotos]);
@@ -64,7 +68,7 @@ export const GalleryModule: React.FC<GalleryModuleProps> = ({
     let result = appointmentsWithPhotos;
 
     if (selectedProcedure !== 'Todos') {
-      result = result.filter((a) => a.procedureType === selectedProcedure);
+      result = result.filter((a) => a.procedureType && a.procedureType.includes(selectedProcedure));
     }
 
     if (searchQuery.trim()) {

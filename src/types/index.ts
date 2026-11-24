@@ -86,7 +86,8 @@ export interface Appointment {
   date: string;                 // YYYY-MM-DD
   professional: string;         // Profissional responsável
   procedureType: ProcedureType | string;
-  customProcedureName?: string; // Se procedureType === 'Outro'
+  procedureTypes?: (ProcedureType | string)[]; // Múltiplos procedimentos selecionados
+  customProcedureName?: string; // Se procedureType === 'Outro' ou inclui 'Outro'
   description?: string;         // Descrição do serviço
   generalNotes?: string;        // Observações gerais
   hasColorInfo: boolean;        // Se inclui dados técnicos de coloração
