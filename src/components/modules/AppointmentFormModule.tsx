@@ -613,18 +613,35 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
                     key={p.id}
                     type="button"
                     onClick={() => toggleProduct(p.id)}
-                    className={`min-h-[44px] py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all active:scale-[0.98] cursor-pointer flex items-center gap-2 ${
+                    className={`min-h-[48px] py-1.5 px-3 sm:px-3.5 rounded-xl text-xs sm:text-sm transition-all active:scale-[0.98] cursor-pointer flex items-center gap-2.5 ${
                       isSelected
                         ? 'bg-[#FDF3E7] text-[#8C530A] border-2 border-[#C87A14] font-semibold shadow-xs'
                         : 'bg-white hover:bg-[#FAF8F6] text-[#1F1D1B] border border-[#EAE4DE]'
                     }`}
                   >
+                    {/* Miniatura da foto do produto */}
+                    <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-[#FAF8F6] border border-[#EAE4DE] flex items-center justify-center">
+                      {p.imageUrl ? (
+                        <img
+                          src={p.imageUrl}
+                          alt={p.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <Package className="w-4 h-4 text-[#736B65]" />
+                      )}
+                    </div>
+
+                    {/* Indicador de Seleção (Check ou Ponto) */}
                     {isSelected ? (
-                      <Check className="w-4 h-4 text-[#C87A14]" />
+                      <Check className="w-4 h-4 text-[#C87A14] shrink-0" />
                     ) : (
-                      <span className="w-2 h-2 rounded-full bg-[#EAE4DE]" />
+                      <span className="w-2 h-2 rounded-full bg-[#EAE4DE] shrink-0" />
                     )}
-                    <span>{p.name}</span>
+
+                    {/* Nome do Produto / Tinta */}
+                    <span className="truncate">{p.name}</span>
                   </button>
                 );
               })}
@@ -632,17 +649,22 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
               <button
                 type="button"
                 onClick={() => toggleProduct('custom')}
-                className={`min-h-[44px] py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all active:scale-[0.98] cursor-pointer flex items-center gap-2 ${
+                className={`min-h-[48px] py-1.5 px-3 sm:px-3.5 rounded-xl text-xs sm:text-sm transition-all active:scale-[0.98] cursor-pointer flex items-center gap-2.5 ${
                   selectedProductIds.includes('custom')
                     ? 'bg-[#FDF3E7] text-[#8C530A] border-2 border-[#C87A14] font-semibold shadow-xs'
                     : 'bg-white hover:bg-[#FAF8F6] text-[#736B65] border border-[#EAE4DE]'
                 }`}
               >
+                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-[#FAF8F6] border border-[#EAE4DE] flex items-center justify-center">
+                  <Plus className="w-4 h-4 text-[#736B65]" />
+                </div>
+
                 {selectedProductIds.includes('custom') ? (
-                  <Check className="w-4 h-4 text-[#C87A14]" />
+                  <Check className="w-4 h-4 text-[#C87A14] shrink-0" />
                 ) : (
-                  <Plus className="w-3.5 h-3.5 text-[#736B65]" />
+                  <span className="w-2 h-2 rounded-full bg-[#EAE4DE] shrink-0" />
                 )}
+
                 <span>Outra marca</span>
               </button>
             </div>
