@@ -4,6 +4,7 @@ import { DateInput } from '../ui/DateInput';
 import type { Client } from '../../types';
 import { ClientAvatar } from '../common/ClientAvatar';
 import { Camera, Trash2 } from 'lucide-react';
+import { compressImageFile } from '../../utils/imageOptimizer';
 
 interface ClientModalProps {
   isOpen: boolean;
@@ -70,24 +71,31 @@ export const ClientModal: React.FC<ClientModalProps> = ({
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert('A imagem é muito grande. Escolha uma foto de até 5MB.');
-      return;
+    try {
+      // Comprime a foto de perfil automaticamente (max 400x400, qualidade 0.82 -> ~20-35KB)
+      const compressedDataUrl = await compressImageFile(file, {
+        maxDimension: 400,
+        quality: 0.82,
+      });
+      setAvatarUrl(compressedDataUrl);
+    } catch (err) {
+      console.error('Erro ao comprimir foto da cliente:', err);
+      // Fallback em caso de erro no canvas
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        if (result) {
+          setAvatarUrl(result);
+        }
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      e.target.value = '';
     }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      if (result) {
-        setAvatarUrl(result);
-      }
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
   };
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -12,6 +12,7 @@ import {
   X,
   Sparkles,
 } from 'lucide-react';
+import { compressImageFile } from '../../utils/imageOptimizer';
 
 interface ProductsModuleProps {
   products: Product[];
@@ -54,7 +55,7 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
     setIsModalOpen(true);
   };
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -63,18 +64,35 @@ export const ProductsModule: React.FC<ProductsModuleProps> = ({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setImageUrl(reader.result);
-        setErrors((prev) => {
-          const copy = { ...prev };
-          delete copy.image;
-          return copy;
-        });
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Comprime a foto do produto/tinta automaticamente (max 500x500, qualidade 0.82 -> ~25-45KB)
+      const compressedDataUrl = await compressImageFile(file, {
+        maxDimension: 500,
+        quality: 0.82,
+      });
+      setImageUrl(compressedDataUrl);
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy.image;
+        return copy;
+      });
+    } catch (err) {
+      console.error('Erro ao comprimir imagem da tinta:', err);
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setImageUrl(reader.result);
+          setErrors((prev) => {
+            const copy = { ...prev };
+            delete copy.image;
+            return copy;
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      e.target.value = '';
+    }
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
