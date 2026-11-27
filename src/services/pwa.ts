@@ -9,19 +9,34 @@ let deferredPrompt: InstallPromptEvent | null = null;
 const listeners = new Set<(canInstall: boolean) => void>();
 
 export const PWAService = {
-  // Registra o Service Worker
+  // Registra o Service Worker apenas em produção; em desenvolvimento limpa caches/SW antigos
   register(): void {
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/sw.js')
-          .then((reg) => {
-            console.log('[PWA] Service Worker registrado com sucesso:', reg.scope);
-          })
-          .catch((err) => {
-            console.warn('[PWA] Falha ao registrar Service Worker:', err);
+      if (import.meta.env.DEV) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const reg of registrations) {
+            reg.unregister();
+          }
+        });
+        if ('caches' in window) {
+          caches.keys().then((names) => {
+            for (const name of names) {
+              caches.delete(name);
+            }
           });
-      });
+        }
+      } else {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('/sw.js')
+            .then((reg) => {
+              console.log('[PWA] Service Worker registrado com sucesso:', reg.scope);
+            })
+            .catch((err) => {
+              console.warn('[PWA] Falha ao registrar Service Worker:', err);
+            });
+        });
+      }
     }
 
     // Escuta evento de disponibilidade de instalação no Android/Chrome/Edge

@@ -258,9 +258,11 @@ export const AppointmentDetailModal: React.FC<AppointmentDetailModalProps> = ({
                             </p>
                           )}
                         </div>
-                        <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-[#FAF8F6] border border-[#EAE4DE] text-[#1F1D1B] tabular-nums">
-                          {prod.quantity}
-                        </span>
+                        {prod.quantity && (
+                          <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-[#FAF8F6] border border-[#EAE4DE] text-[#1F1D1B] tabular-nums">
+                            {prod.quantity}
+                          </span>
+                        )}
                       </div>
 
                       {prod.region && (

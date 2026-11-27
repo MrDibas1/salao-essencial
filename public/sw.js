@@ -1,5 +1,5 @@
 // Service Worker — Salão Essencial PWA
-const CACHE_NAME = 'essencial-pwa-v3';
+const CACHE_NAME = 'essencial-pwa-v4';
 
 const PRECACHE_ASSETS = [
   '/',
@@ -44,8 +44,14 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // NUNCA interceptar requisições para a API em nuvem (sempre direto para a rede)
-  if (url.pathname.startsWith('/api/')) {
+  // NUNCA interceptar requisições para a API em nuvem ou rotas do servidor de desenvolvimento Vite
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/src/') ||
+    url.pathname.startsWith('/@vite/') ||
+    url.pathname.startsWith('/@react-refresh') ||
+    url.pathname.startsWith('/node_modules/')
+  ) {
     return;
   }
 

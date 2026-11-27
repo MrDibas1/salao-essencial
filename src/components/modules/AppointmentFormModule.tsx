@@ -159,22 +159,26 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
 
   // 4. Campo Único de Observação (Quantidade, Volumes de OX e Proporções)
   const [formulaNotes, setFormulaNotes] = useState<string>(() => {
-    if (appointmentToEdit?.colorFormula) {
+    if (!appointmentToEdit) return '';
+    if (typeof appointmentToEdit.generalNotes === 'string') {
+      return appointmentToEdit.generalNotes;
+    }
+    if (typeof appointmentToEdit.colorFormula?.technicalNotes === 'string') {
+      return appointmentToEdit.colorFormula.technicalNotes;
+    }
+    if (appointmentToEdit.colorFormula) {
       const parts: string[] = [];
       const prod = appointmentToEdit.colorFormula.products?.[0];
       if (prod) {
-        parts.push(`${prod.quantity || '60g'} de tinta ${prod.shadeNumber || ''}`);
+        parts.push([prod.quantity, prod.shadeNumber].filter(Boolean).join(' '));
       }
       if (appointmentToEdit.colorFormula.oxidant?.used) {
         const ox = appointmentToEdit.colorFormula.oxidant;
-        parts.push(`OX ${ox.volume || '20 vol'} (${ox.quantityOrRatio || '1:1'})`);
+        parts.push(`OX ${ox.volume || ''}`.trim());
       }
-      if (appointmentToEdit.colorFormula.technicalNotes) {
-        parts.push(appointmentToEdit.colorFormula.technicalNotes);
-      }
-      return parts.join(' + ') || appointmentToEdit.generalNotes || '';
+      return parts.filter(Boolean).join(' + ');
     }
-    return appointmentToEdit?.generalNotes || '';
+    return '';
   });
 
   const [formError, setFormError] = useState<string>('');
@@ -321,7 +325,7 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
               line: '',
               shadeNumber: dyeName,
               shadeName: dyeName,
-              quantity: formulaNotes.match(/\b\d+g\b/i)?.[0] || '60g',
+              quantity: formulaNotes.match(/\b\d+g\b/i)?.[0] || '',
               unit: 'g',
               region: 'Cabelo completo',
             })),

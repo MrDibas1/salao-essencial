@@ -431,9 +431,11 @@ export const ClientDetailModule: React.FC<ClientDetailModuleProps> = ({
                                 {prod.shadeName && prod.shadeName !== prod.brand && prod.shadeName !== prod.shadeNumber && (
                                   <span className="text-[#736B65] text-[11px]">{prod.shadeName}</span>
                                 )}
-                                <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-[#FAF8F6] border border-[#EAE4DE]/60 text-[#1F1D1B] tabular-nums font-semibold">
-                                  {prod.quantity}
-                                </span>
+                                {prod.quantity && (
+                                  <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-[#FAF8F6] border border-[#EAE4DE]/60 text-[#1F1D1B] tabular-nums font-semibold">
+                                    {prod.quantity}
+                                  </span>
+                                )}
                                 {prod.region && (
                                   <span className="text-[10px] text-[#736B65] border-l border-[#EAE4DE] pl-1.5">
                                     {prod.region}
