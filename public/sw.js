@@ -1,5 +1,5 @@
 // Service Worker — Salão Essencial PWA
-const CACHE_NAME = 'essencial-pwa-v4';
+const CACHE_NAME = 'essencial-pwa-v5';
 
 const PRECACHE_ASSETS = [
   '/',

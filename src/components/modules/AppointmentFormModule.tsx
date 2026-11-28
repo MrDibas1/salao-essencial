@@ -51,17 +51,19 @@ const PROCEDURES = [
   'Outro',
 ];
 
-const OX_SHORTCUTS = [
-  '10 Vol',
-  '20 Vol',
-  '30 Vol',
-  '40 Vol',
-  'Proporção 1:1',
-  'Proporção 1:1.5',
-  'Proporção 1:2',
-  '60g',
-  '45g',
-  '30g',
+const OX_SHORTCUTS: Array<{ label: string; value: string }> = [
+  { label: '+50% 6vol', value: '+50% 6vol' },
+  { label: '-50% 13vol', value: '-50% 13vol' },
+  { label: '+10 Vol', value: '10 Vol' },
+  { label: '+20 Vol', value: '20 Vol' },
+  { label: '+30 Vol', value: '30 Vol' },
+  { label: '+40 Vol', value: '40 Vol' },
+  { label: '+Proporção 1:1', value: 'Proporção 1:1' },
+  { label: '+Proporção 1:1.5', value: 'Proporção 1:1.5' },
+  { label: '+Proporção 1:2', value: 'Proporção 1:2' },
+  { label: '+60g', value: '60g' },
+  { label: '+45g', value: '45g' },
+  { label: '+30g', value: '30g' },
 ];
 
 export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
@@ -260,7 +262,7 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
     setFormulaNotes((prev) => {
       const trimmed = prev.trim();
       if (!trimmed) return textToAdd;
-      if (trimmed.endsWith('+') || trimmed.endsWith(',')) {
+      if (trimmed.endsWith('+') || trimmed.endsWith(',') || /^[+-]/.test(textToAdd)) {
         return `${trimmed} ${textToAdd}`;
       }
       return `${trimmed} + ${textToAdd}`;
@@ -715,12 +717,12 @@ export const AppointmentFormModule: React.FC<AppointmentFormModuleProps> = ({
             <div className="flex flex-wrap gap-1.5">
               {OX_SHORTCUTS.map((item) => (
                 <button
-                  key={item}
+                  key={item.label}
                   type="button"
-                  onClick={() => handleAddShortcut(item)}
+                  onClick={() => handleAddShortcut(item.value)}
                   className="min-h-[36px] py-1.5 px-3 rounded-xl bg-[#FAF8F6] hover:bg-[#F5EFEB] text-[#1F1D1B] text-xs font-medium border border-[#EAE4DE] transition-all active:scale-[0.98] shadow-xs tabular-nums"
                 >
-                  +{item}
+                  {item.label}
                 </button>
               ))}
             </div>
